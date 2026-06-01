@@ -1,0 +1,68 @@
+{
+  "target_asset": "BTC/USDT",
+  "target_daily_return": 0.002,
+  "max_daily_drawdown": 0.01,
+  "min_sharpe_ratio": 2.0,
+  "reflection_cadence": 3,
+  "current_strategy": {
+    "indicator_threshold": 63.0,
+    "stop_loss_pct": 0.016,
+    "position_size_pct": 0.037
+  },
+  "trade_history": [
+    {
+      "timestamp": "2026-06-01T00:03:37.041622",
+      "entry": 73543.4,
+      "exit": 74100.0,
+      "pnl_pct": 0.007568320202764706,
+      "symbol": "BTC/USDT",
+      "pnl_usd": 0.28002784750229415,
+      "gross_pnl_usd": 0.280028,
+      "fee_usd": 0.1924,
+      "net_pnl_usd": 0.087628
+    },
+    {
+      "timestamp": "2026-06-01T08:48:31.979205",
+      "entry": 74032.1,
+      "exit": 72767.3,
+      "pnl_pct": -0.017084480921113986,
+      "symbol": "BTC/USDT",
+      "pnl_usd": -0.6213685524174049,
+      "gross_pnl_usd": -0.621369,
+      "fee_usd": 0.192413,
+      "net_pnl_usd": -0.813782,
+      "stop_loss_triggered": true
+    },
+    {
+      "timestamp": "2026-06-01T23:51:32.173249",
+      "entry": 72767.3,
+      "exit": 71361.2,
+      "pnl_pct": -0.0193232399718006,
+      "symbol": "BTC/USDT",
+      "pnl_usd": -0.7006346648782046,
+      "gross_pnl_usd": -0.700635,
+      "fee_usd": 0.19226,
+      "net_pnl_usd": -0.892895,
+      "stop_loss_triggered": true
+    }
+  ],
+  "hypothesis_ledger": [],
+  "version": 1,
+  "previous_strategies": [
+    {
+      "timestamp": "2026-05-29T20:35:07.906910",
+      "version": 1,
+      "strategy": {
+        "indicator_threshold": 63.0,
+        "stop_loss_pct": 0.016,
+        "position_size_pct": 0.037
+      }
+    }
+  ],
+  "open_position": {
+    "timestamp": "2026-06-02T00:02:26.059786",
+    "symbol": "BTC/USDT",
+    "entry_price": 71412.8,
+    "amount_btc": 0.0005171568122585297
+  }
+}
