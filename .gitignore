@@ -1,0 +1,30 @@
+.env
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+*.egg-info/
+.env
+.venv/
+venv/
+ENV/
+env/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Logs
+*.log
+trader.log
+
+# Runtime data
+trader.pid
+
+# Backups (if you don't want them versioned)
+backups/
+docs/backups/
+
+# OS / editor
+.DS_Store
+Thumbs.db
