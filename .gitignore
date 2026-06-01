@@ -28,3 +28,5 @@ docs/backups/
 # OS / editor
 .DS_Store
 Thumbs.db
+# Ignore markdown backup files in docs
+docs/*.md.*
