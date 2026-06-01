@@ -22,3 +22,7 @@ Monitor for SELL signal (RSI > 83.0 AND net PnL after fees > 0) → complete tra
 ---
 **See PROJECT_STATE.md for verification status, tasks, and deferred items.**
 **Last Updated:** 2026-05-31 22:51 | Engineer: J.A.R.V.I.S.
+
+## Git Repository Usage
+
+This project uses a Git repository for version control, backup, and restore. Commit changes regularly; use branches for experimentation; and push to remote for backup. See .gitignore for files excluded from version control.

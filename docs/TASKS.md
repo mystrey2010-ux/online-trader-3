@@ -51,3 +51,7 @@ T-003                      → T-019 (dashboard shows hypothesis_ledger)
 ---
 **See PROJECT_STATE.md for verification status, deferred items, and documentation gaps.**
 **Last Updated:** 2026-05-31 23:15 | Engineer: J.A.R.V.I.S.
+
+## Git Repository Usage
+
+This project uses a Git repository for version control, backup, and restore. Commit changes regularly; use branches for experimentation; and push to remote for backup. See .gitignore for files excluded from version control.

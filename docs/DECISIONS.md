@@ -34,3 +34,7 @@ Key design decisions, one line each. Code location noted for traceability.
 | D-042 | B-008 fix: emergency_stop_trader.py uses del cfg["open_position"] instead of = None (D-009/D-020 compliance) | emergency_stop_trader.py | v2.14 |
 |---
 **Last Updated:** 2026-05-31 23:10 | Engineer: J.A.R.V.I.S.
+
+## Git Repository Usage
+
+This project uses a Git repository for version control, backup, and restore. Commit changes regularly; use branches for experimentation; and push to remote for backup. See .gitignore for files excluded from version control.
