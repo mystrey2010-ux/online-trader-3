@@ -39,6 +39,7 @@ Key design decisions, one line each. Code location noted for traceability.
 | D-047 | B-012 fix: Cadence check uses strategic_trades.length, not trades.length (D-025 compliance) | main.py self_improve_strategies() | v2.16 |
 | D-048 | B-013 fix: restore_strategy() called when Sharpe < 0 after hypothesis tuning | main.py self_improve_strategies() | v2.16 |
 | D-049 | T-029 fix: 300s cooldown after stop-loss prevents immediate re-buy | main.py run_cycle() | v2.16 |
+| D-055 | T-018 fix: Trend filter skips BUY when price declining over 20 periods prevents buying into downtrend | main.py run_cycle() | v2.16 | |
 
 ---
 **Last Updated:** 2026-06-02 15:41 | Engineer: J.A.R.V.I.S.

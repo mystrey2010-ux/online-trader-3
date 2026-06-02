@@ -5,9 +5,9 @@
 ## Open Tasks
 | ID | Description | Priority | Dependencies | Status |
 |----|-------------|----------|--------------|--------|
-| T-003 | Confirm hypothesis_ledger populated after first reflection post-B-017 fix | Medium | Requires restart + 3 strategic trades | READY |
+| T-003 | Confirm hypothesis_ledger populated after first reflection post-B-017 fix | Medium | Requires restart + 3 strategic trades | DONE |
 | T-016 | Add git version control (git init + baseline commit) | High | None | DONE |
-| T-018 | Position timeout: warn if open >24h (L-004) | Medium | None | PENDING |
+| T-018 | Position timeout: warn if open >24h (L-004) | Medium | None | DONE |
 | T-019 | Verify hypothesis_ledger dashboard display works with new key schema (D-044) | Medium | T-003 | PENDING |
 | T-020 | Consolidate stop-loss into helper function | Low | None | PENDING |
 | T-021 | Add sell_threshold to cycle log output | Low | None | PENDING |
@@ -15,6 +15,7 @@
 | T-024 | Fix B-012: Cadence check on strategic_trades count not all trades | Medium | main.py 376 | DONE |
 | T-025 | Fix B-013: Wire restore_strategy() into brain loop or CLI | Medium | main.py 478 | DONE |
 | T-029 | Post-SL cooldown period to prevent immediate re-buy after stop-loss (L-010) | Medium | main.py | DONE |
+| T-TREND | Trend filter to prevent buying in sustained downtrend | Medium | main.py | DONE |
 
 ## Bug Status
 ### Active (v2.15)

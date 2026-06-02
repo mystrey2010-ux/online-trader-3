@@ -721,6 +721,25 @@ class OnlineTrader:
         logging.info(f"🛠️ APPLYING HYPOTHESIS ({current_regime}): {best_hyp['description']} (confidence: {best_hyp['confidence_reasoning']})")
         save_config(self.config)
 
+    def _is_uptrend(self, prices, lookback=20):
+        """Check if price is in uptrend (simple moving average comparison)."""
+        if len(prices) < lookback:
+            return True  # Assume uptrend if insufficient data
+        current = prices[-1]
+        past = prices[-lookback]
+        return current > past  # Uptrend if current price > price 'lookback' periods ago
+
+    def _position_age_hours(self):
+        """Return hours since position was opened, or 0 if no position."""
+        pos = self.config.get("open_position")
+        if not pos or not pos.get("timestamp"):
+            return 0
+        try:
+            opened = datetime.fromisoformat(pos["timestamp"])
+            return (datetime.now() - opened).total_seconds() / 3600
+        except Exception:
+            return 0
+
     def run_cycle(self):
         # Reload config from disk each cycle to pick up external writes
         # (e.g. EMERGENCY_STOP set by emergency_stop_trader.py, manual edits) — B-007 fix.
@@ -829,7 +848,19 @@ class OnlineTrader:
                     # ===============================
             # ===============================
 
+            # ===== TREND FILTER CHECK (T-018 / L-004) =====
+            # Don't buy if price is in sustained downtrend - reduces consecutive stop-loss risk
             if rsi_val < buy_threshold and self.current_position is None:
+                if not self._is_uptrend(prices):
+                    logging.info(f"📉 Skipping BUY - trend filter signals DOWNTREND (price declining over 20m)")
+                    return
+                
+            # ===== POSITION TIMEOUT CHECK (T-018 / L-004) =====
+            # Warn if position open >24h without close signal
+            if self.current_position == 'long':
+                pos_age = self._position_age_hours()
+                if pos_age > 24:
+                    logging.warning(f"⚠️ POSITION TIMEOUT: Open for {pos_age:.1f}h - consider manual review")
                 # T-029: Check stop-loss cooldown before allowing BUY
                 if self.sl_cooldown_until and time.time() < self.sl_cooldown_until:
                     remaining = int(self.sl_cooldown_until - time.time())
