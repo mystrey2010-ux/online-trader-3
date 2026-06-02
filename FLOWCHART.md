@@ -1,71 +1,89 @@
-# FLOWCHART — Online Trader-3 run_cycle()
+# How the Trading Bot Works (Simple Flow)
+
+This flowchart shows what happens every minute when the bot runs.
+
+## Main Trading Loop (Every Minute)
 
 ```mermaid
 flowchart TD
-    A[Start run_cycle] --> B{EMERGENCY_STOP?}
-    B -->|yes| B1[log warning → return]
-    B -->|no| C[sl_cooldown expired?]
-    C -->|yes| D[clear cooldown from config]
-    C -->|no| E[fetch ticker price]
-    E --> F[fetch OHLCV 50×1m]
-    F --> G[calculate RSI-14]
-    G --> H{price < entry × (1-stop_loss%)?}
-    H -->|yes| I[STOP-LOSS: emergency sell<br/>record trade<br/>set sl_cooldown→return]
-    H -->|no| J{sl_cooldown active?}
-    J -->|yes| J1[log cooldown active → return]
-    J -->|no| K{RSI < buy_threshold<br/>AND no position?}
-    K -->|yes| L{uptrend over 20 periods?}
-    L -->|no| L1[log downtrend skip → return]
-    L -->|yes| M[BUY: market order<br/>accumulate position<br/>save open_position<br/>record entry_rsi]
-    K -->|no| N{RSI > sell_threshold<br/>AND position open?}
-    N -->|yes| O{net PnL after fees > 0?}
-    O -->|no| O1[log fee trap hold → return]
-    O -->|yes| P[SELL: market order<br/>record trade<br/>clear open_position<br/>self_improve_strategies]
-    N -->|no| Q[log waiting for signal]
-    M --> R{position open > 24h?}
-    P --> R
-    Q --> R
-    R -->|yes| S[log timeout warning]
-    R -->|no| T[End cycle]
+    Start([Start - One Cycle]) --> Stop{Is trading stopped?}
+    Stop -->|Yes| StopLog[Log: trading is stopped]
+    Stop -->|No| Cooldown{Just had a stop-loss?}
+    Cooldown -->|Yes - 5 min wait| WaitLog[Log: waiting 5 minutes<br/>Then stop cycle]
+    Cooldown -->|No| Price[Get current BTC price]
+    Price --> RSI[Calculate RSI from price history]
+    
+    RSI --> BuyCheck{Looking for buy?<br/>RSI is LOW now?}
+    BuyCheck -->|Yes - RSI low| TrendCheck{Price going UP lately?}
+    TrendCheck -->|No - falling| SkipBuy[Log: price falling,<br/>skip buying]
+    TrendCheck -->|Yes - rising| Buy[BUY BTC with 3.7% of USD]
+    
+    BuyCheck -->|No - RSI not low| SellCheck{Looking for sell?<br/>RSI is HIGH now?}
+    SellCheck -->|Yes - RSI high| ProfitCheck{Will I make money after fees?}
+    ProfitCheck -->|No| Hold[Log: keep holding]
+    ProfitCheck -->|Yes| Sell[SELL all BTC]
+    
+    SellCheck -->|No - RSI not high| Waiting[Log: waiting for right moment]
+    
+    Buy --> End[Cycle finished]
+    Sell --> End
+    Waiting --> End
+    Hold --> End
+    SkipBuy --> End
+    WaitLog --> End
+    StopLog --> End
 ```
 
-## Decision Points Explained
+## What Does "RSI" Mean?
 
-| Node | Condition | Source |
-|------|-----------|--------|
-| EMERGENCY_STOP | `system_status == "EMERGENCY_STOP"` | config.json field set by emergency_stop_trader.py |
-| sl_cooldown | `time.time() < self.sl_cooldown_until` | 300s lock after stop-loss (D-049) |
-| STOP-LOSS | `current_price < entry_price × (1 - stop_loss_pct)` | Priority #1 risk management (D-045) |
-| BUY | `rsi_val < indicator_threshold AND current_position is None` | RSI oversold entry signal |
-| uptrend | `prices[-1] > prices[-20]` | T-018 trend filter |
-| SELL | `rsi_val > sell_threshold AND current_position == 'long'` | RSI overbought exit signal |
-| fee trap | `potential_net_pnl_usd <= 0` | D-031 prevents unprofitable exits |
+- **RSI = Relative Strength Index** (0 to 100)
+- **LOW RSI (< 66)** means price is "oversold" → **BUY signal**
+- **HIGH RSI (> 76)** means price is "overbought" → **SELL signal**
 
-## Self-Improvement Brain (self_improve_strategies)
+The bot uses a **dynamic sell threshold** that changes based on:
+- What RSI was when you bought
+- The fees you will pay
+
+## Self-Improvement Brain (After Every 3 Successful Trades)
+
+When you complete 3 winning or losing trades, the bot asks itself:
 
 ```mermaid
 flowchart TD
-    A[Start self_improve] --> B[Load last 25 trades]
-    B --> C[Filter emergency trades<br/>(stop_loss_triggered, note)]
-    C --> D{strategic_trades<br/>>= reflection_cadence?}
-    D -->|no| D1[log skip → return]
-    D -->|yes| E[Calculate fee-aware<br/>avg_return, max_dd, sharpe]
-    E --> F[Fetch OHLCV 1h×60<br/>Tag market regime]
-    F --> G{performance OK?}
-    G -->|yes| G1[log OK → return]
-    G -->|no| H[backup current_strategy to previous_strategies]
-    H --> I[Generate regime-aware hypotheses<br/>for each param]
-    I --> J[Select best (improve dir → max confidence)]
-    J --> K[Apply hypothesis<br/>update indicator_threshold/<br/>stop_loss_pct/position_size_pct]
-    K --> L[Increment version]
-    L --> M[Save config]
+    BrainStart([Start Brain Check]) --> LoadTrades[Look at last 25 trades]
+    LoadTrades --> Filter[Remove stop-loss trades<br/>Keep only normal trades]
+    Filter --> Enough{At least 3 normal trades?}
+    Enough -->|No| TooFew[Wait for more trades]
+    Enough -->|Yes| Calculate[Calculate profit,<br/>drawdown, sharpe]
+    Calculate --> Regime[Check: bull/sideways/bear market]
+    
+    Regime --> Good{Performance good?}
+    Good -->|Yes| AllGood[Keep current settings]
+    Good -->|No| Change[Change ONE setting:<br/>• Buy threshold<br/>• Stop-loss %<br/>• Position size]
+    
+    Change --> Save[Save old settings for undo option]
+    Save --> Apply[Apply the change]
+    Apply --> NewVersion[Update version number]
 ```
 
-## Key Implementation Details
+## Key Rules
 
-- **Exchange**: `KrakenCliPaperExchange` (paper mode) or CCXT (live)  
-- **Config persistence**: Written after every order (BUY/SELL/SL) + rollback snapshots  
-- **Fee-aware**: All PnL calculations use `kraken_fee_pct × 2` (round-trip)  
-- **Dynamic sell threshold**: `entry_rsi + fee_hurdle_rsi + 5`, minimum `threshold + 10` (D-032)  
-- **Position accumulation**: Value-weighted average entry price across multiple BUYs  
-- **Cooldown**: 300s after stop-loss prevents re-buy into continuing downtrend (T-029/D-049)
+| Rule | What It Does |
+|------|--------------|
+| **Stop-loss** | If price drops 1.6% below buy price → sell immediately to limit loss |
+| **5-minute cooldown** | After stop-loss, wait before buying again |
+| **Trend filter** | Don't buy if price has been falling for 20 minutes |
+| **24-hour warning** | Alert if holding a position for more than 1 day |
+| **Fee protection** | Don't sell if you'd lose money to trading fees |
+
+## Config Settings (in config.json)
+
+```json
+{
+  "indicator_threshold": 66.15,   // RSI level to buy at
+  "stop_loss_pct": 0.016,         // 1.6% stop-loss
+  "position_size_pct": 0.037,     // 3.7% of balance per trade
+  "reflection_cadence": 3,        // Think after every 3 trades
+  "target_asset": "BTC/USDT"      // Trading pair
+}
+```
