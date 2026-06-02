@@ -2,14 +2,9 @@
 
 ## v2.16 (2026-06-02)
 - B-011: Fixed `entry_rsi` not persisted in config — now saved to `open_position` on BUY and restored on startup (D-046), enabling D-032 dynamic threshold to survive restarts
-- B-012: Fixed reflection cadence firing on emergency trades — now uses `len(strategic_trades)` count (D-047), ensuring D-025 intent compliance
-- B-013: Fixed `restore_strategy()` dead code — wired into brain loop with Sharpe < 0 trigger (D-048), enabling PRIMARY GOAL rollback capability
-- T-029: Added 300-second cooldown after stop-loss prevents immediate re-buy into continuing downtrend (D-049)
-
-
-## v2.16 (2026-06-02)
 - B-012: Fixed reflection cadence firing on emergency trades — now enforces `len(strategic_trades) >= reflection_cadence` check BEFORE any fallback to all trades (D-050)
 - B-013: Fixed rollback logic — Sharpe < 0 now sets `needs_rollback` flag; rollback verified after next trade completes (D-051)
+- T-029: Added 300-second cooldown after stop-loss prevents immediate re-buy into continuing downtrend (D-049)
 - B-014: Fixed manage_trader.sh pgrep patterns — now uses `pgrep -f "main.py"` throughout for venv compatibility (D-052)
 - B-015: Fixed manage_trader.sh version string — updated to "Version 2.16" (D-053)
 - B-016: Fixed clean command — uses `d.pop("open_position", None)` instead of `= {}` for D-009/D-020 compliance (D-054)

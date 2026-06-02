@@ -8,7 +8,8 @@
 - **Completed Trades:** 10 total (3 strategic wins, 7 emergency stop-losses)
 - **hypothesis_ledger:** Empty — blocked by B-017 (`target_ret` NameError) until today's fix
 - **Recent Fixes (2026-06-02):** ALL BUGS RESOLVED
-- B-011: entry_rsi persisted in open_position (D-046)
+- `entry_rsi` persisted in open_position, restore on restart verified
+- **Last entry_rsi added to config.json:** 67.0 for current open position
 - B-012: Strategic trades cadence gate enforced (D-050)
 - B-013: needs_rollback flag + post-trade verification (D-051)
 - B-014: pgrep -f pattern in manage_trader.sh (D-052)

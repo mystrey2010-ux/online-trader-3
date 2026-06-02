@@ -144,6 +144,7 @@
     "timestamp": "2026-06-02T15:27:46.688240",
     "symbol": "BTC/USDT",
     "entry_price": 67752.4,
+    "entry_rsi": 67.0,
     "amount_btc": 0.000543350178772024
   }
 }

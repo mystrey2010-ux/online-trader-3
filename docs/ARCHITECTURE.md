@@ -46,7 +46,7 @@ Action:
 ## Position Management
 - Multi-buy accumulation, value-weighted average entry price
 - `open_position` persists in config.json until close; restored on startup (D-020)
-- `entry_rsi` is NOT persisted — dynamic sell threshold falls back after restart (B-011, T-023)
+- `entry_rsi` persisted in open_position config + restored on startup (B-011, D-046)
 - Single symbol: BTC/USDT (Q-003 deferred: multi-symbol support)
 
 ## Trade Record Schema (v2.15)

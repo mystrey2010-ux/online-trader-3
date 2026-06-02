@@ -5,8 +5,8 @@
 ## Open Tasks
 | ID | Description | Priority | Dependencies | Status |
 |----|-------------|----------|--------------|--------|
-| T-003 | Confirm hypothesis_ledger populated after first reflection post-B-017 fix | Medium | Requires restart + 3 strategic trades | PENDING |
-| T-016 | Add git version control (git init + baseline commit) | High | None | PENDING |
+| T-003 | Confirm hypothesis_ledger populated after first reflection post-B-017 fix | Medium | Requires restart + 3 strategic trades | READY |
+| T-016 | Add git version control (git init + baseline commit) | High | None | DONE |
 | T-018 | Position timeout: warn if open >24h (L-004) | Medium | None | PENDING |
 | T-019 | Verify hypothesis_ledger dashboard display works with new key schema (D-044) | Medium | T-003 | PENDING |
 | T-020 | Consolidate stop-loss into helper function | Low | None | PENDING |
@@ -99,13 +99,10 @@
 ## Recent Documentation Updates (2026-06-02)
 | File | Changes |
 |------|---------|
-| NOW.md | Full rewrite — current live state, trade table, recent fixes |
-| CHANGELOG.md | Added v2.15, v2.16 entries |
-| KNOWN_ISSUES.md | Added B-011/B-012/B-013/T-029 resolved; updated active bugs |
-| DECISIONS.md | Added D-043/D-044/D-045/D-046/D-047/D-048/D-049 |
-| TASKS.md | Completed T-023/T-024/T-025/T-029; updated task status |
-| PROJECT_STATE.md | Added implementation gap verification, v2.16 syntax check |
-| ARCHITECTURE.md | Updated bug table, removed T-029 from deferred |
+| NOW.md | Added entry_rsi persistence confirmation |
+| CHANGELOG.md | Deduplicated v2.16 entries |
+| ARCHITECTURE.md | Fixed B-011 entry_rsi documentation contradiction |
+| config.json | Added entry_rsi to open_position for D-032 compatibility |
 
 ---
 **Last Updated:** 2026-06-02 | Engineer: J.A.R.V.I.S.
