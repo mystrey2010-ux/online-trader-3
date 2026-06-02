@@ -1,4 +1,4 @@
-# TASKS — Online Trader-3 v2.15
+# TASKS — Online Trader-3 v2.16
 
 ## Open Tasks
 | ID | Description | Priority | Dependencies | Status |
@@ -45,4 +45,4 @@ T-029                      → reduce stop-loss chain loss events (L-010)
 
 ---
 **See PROJECT_STATE.md for verification status, deferred items, and documentation gaps.**
-**Last Updated:** 2026-06-02 15:41 | Engineer: J.A.R.V.I.S.
+**Last Updated:** 2026-06-02 | Engineer: J.A.R.V.I.S.

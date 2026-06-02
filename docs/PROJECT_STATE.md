@@ -99,18 +99,12 @@
 | File | Changes |
 |------|---------|
 | NOW.md | Full rewrite — current live state, trade table, recent fixes |
-| CHANGELOG.md | Added v2.15 entry |
-| KNOWN_ISSUES.md | Added B-017/B-018/B-019 resolved; added L-010; updated active bugs |
-| DECISIONS.md | Added D-043/D-044/D-045 |
-| TASKS.md | Added T-029; completed T-029b/T-030/T-031; updated T-019/T-027 |
-| PROJECT_STATE.md | Full update — trade count, performance obs, v2.15 bug status |
-| ARCHITECTURE.md | Updated bug table, sell threshold description, version |
-
-## Backup Reference
-- Docs backups: `/docs/backups/`
-- Latest code backup: `*.310526-230101`
-- Latest docs backup batch: `*.310526-230915`
-- Convention: `*.ddmmyy-hhmmss` prefix
+| CHANGELOG.md | Added v2.15, v2.16 entries |
+| KNOWN_ISSUES.md | Added B-011/B-012/B-013/T-029 resolved; updated active bugs |
+| DECISIONS.md | Added D-043/D-044/D-045/D-046/D-047/D-048/D-049 |
+| TASKS.md | Completed T-023/T-024/T-025/T-029; updated task status |
+| PROJECT_STATE.md | v2.16 resolved bugs section |
+| ARCHITECTURE.md | Updated bug table, removed T-029 from deferred |
 
 ---
-**Last Updated:** 2026-06-02 15:41 | Engineer: J.A.R.V.I.S.
+**Last Updated:** 2026-06-02 | Engineer: J.A.R.V.I.S.
