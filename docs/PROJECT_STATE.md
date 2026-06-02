@@ -72,6 +72,8 @@
 | Hypothesis ledger key schema | ✓ | D-044 — now includes display alias keys |
 | Stop-loss no same-cycle re-buy | ✓ | D-045 |
 | Stop-loss cooldown | ✓ | D-049 — 300s cooldown after stop-loss |
+| Trend filter active | ✓ | D-055 — skips BUY when price declining over 20 periods |
+| Regime stability metric | ✓ | Dashboard shows % of hypotheses in current regime |
 | RSI signal log accuracy | ✓ | D-030/D-040 |
 | Python interpreter standardized | ✓ | Shebang/detection updated |
 | Deduplication of previous_strategies | ✓ | D-028 |
