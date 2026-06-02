@@ -1,4 +1,4 @@
-# TASKS — Online Trader-3 v2.16
+# TASKS — Online Trader-3 v2.16 (ALL FIXES COMPLETE)
 
 ## Open Tasks
 | ID | Description | Priority | Dependencies | Status |
@@ -17,9 +17,9 @@
 | T-023 | Fix B-011: Save `entry_rsi` into `open_position` in config on BUY and restore it in `__init__` alongside `entry_price`. Enables D-032 dynamic threshold to survive restarts. | Medium | main.py | 232, 820–841 | DONE |
 | T-024 | Fix B-012: Change cadence check to use `len(strategic_trades)` not `len(trades)`. Filter emergency trades BEFORE the cadence gate so 3 emergency trades cannot trigger reflection. | Medium | main.py | 374–376 | DONE |
 | T-025 | Fix B-013: Wire `restore_strategy()` into `self_improve_strategies()` — call it when strategy performs worse after 2+ consecutive reflection cycles. Or expose via manage_trader.sh `rollback` command. | Medium | main.py | 478 | DONE |
-| T-026 | Fix B-014: Replace `pgrep -a "python" \| grep "/.*main\.py"` with `pgrep -f "main.py"` throughout manage_trader.sh (start, stop, restart, status, clean blocks). | Low | manage_trader.sh | 23, 50, 62, 85, 160 | PENDING |
-| T-027 | Fix B-015: Update hardcoded version string in manage_trader.sh status output to `"Version 2.15"`. | Low | manage_trader.sh | 106 | PENDING |
-| T-028 | Fix B-016: Change `clean` command to `del d["open_position"]` (with existence check) instead of `d["open_position"]={}`. D-009/D-020 compliance. | Low | manage_trader.sh | 210–212 | PENDING |
+| T-026 | Fix B-014: Replace pgrep patterns with pgrep -f "main.py" (venv compatible) | Low | manage_trader.sh | DONE |
+| T-027 | Fix B-015: Update hardcoded version string in manage_trader.sh status output to "Version 2.16" | Low | manage_trader.sh | DONE |
+| T-028 | Fix B-016: Change clean command to delete open_position key vs empty dict | Low | manage_trader.sh | DONE |
 
 ## Completed Tasks
 | ID | Description | Bug/Decision | Status |

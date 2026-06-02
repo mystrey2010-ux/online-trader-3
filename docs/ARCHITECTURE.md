@@ -1,4 +1,4 @@
-# ARCHITECTURE — Online Trader-3 v2.15
+# ARCHITECTURE — Online Trader-3 v2.16
 
 ## System Overview
 - **Engine:** Single-process Python (main.py), 60s cycle, paper trading via Kraken CLI
@@ -141,9 +141,7 @@ Key invariants:
 ## Known Bugs & Architectural Risks
 | ID | File | Lines | Description | Severity |
 |----|------|-------|-------------|----------|
-| B-014 | manage_trader.sh | 23, 50, 62, 85 | `pgrep -a "python" \| grep "/.*main\.py"` fragile in venvs — should be `pgrep -f "main.py"` | Low |
-| B-015 | manage_trader.sh | 106 | Hardcoded version string stale (needs updating to 2.15) | Low |
-| B-016 | manage_trader.sh | 210 | `clean` sets `open_position={}` not deletes key (D-009/D-020 violation) | Low |
+All bugs resolved in v2.16 — see KNOWN_ISSUES.md
 
 **Full details and fix tasks: see KNOWN_ISSUES.md and TASKS.md.**
 

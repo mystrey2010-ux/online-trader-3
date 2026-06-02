@@ -12,7 +12,7 @@ cd "$TRADER_DIR" || exit 1
 case "$1" in
     start)
         # Check if any python main.py process is already running (D-016 convention)
-        RUNNING_PIDS=$(pgrep -a "python" 2>/dev/null | grep "/.*main\.py" | cut -d' ' -f1 | tr '\n' ',' | sed 's/,$//')
+        RUNNING_PIDS=$(pgrep -f "main.py" | cut -d' ' -f1 | tr '\n' ',' | sed 's/,$//')
         
         if [ -n "$RUNNING_PIDS" ]; then
             FIRST_PID=$(echo "$RUNNING_PIDS" | head -1)
@@ -43,7 +43,7 @@ case "$1" in
     
     stop)
         # Kill all trading processes first (D-016 convention: match any python main.py)
-        TRADER_PIDS=$(pgrep -a "python" 2>/dev/null | grep "/.*main\.py" | cut -d' ' -f1 | tr '\n' ',' | sed 's/,$//')
+        TRADER_PIDS=$(pgrep -f "main.py" | cut -d' ' -f1 | tr '\n' ',' | sed 's/,$//')
         
         if [ -n "$TRADER_PIDS" ]; then
             echo ""
@@ -67,7 +67,7 @@ case "$1" in
 
     restart)
         # Kill all trading processes first (D-016 convention: match any python main.py)
-        TRADER_PIDS=$(pgrep -a "python" 2>/dev/null | grep "/.*main\.py" | cut -d' ' -f1 | tr '\n' ',' | sed 's/,$//')
+        TRADER_PIDS=$(pgrep -f "main.py" | cut -d' ' -f1 | tr '\n' ',' | sed 's/,$//')
         
         if [ -n "$TRADER_PIDS" ]; then
             echo ""
@@ -97,13 +97,13 @@ case "$1" in
 
     status)
         # Check if our trader is running by looking for "main.py" in command line (D-016 convention)
-        TRADER_PIDS=$(pgrep -a "python" 2>/dev/null | grep "/.*main\.py" | cut -d' ' -f1 | tr '\n' ',' | sed 's/,$//')
+        TRADER_PIDS=$(pgrep -f "main.py" | cut -d' ' -f1 | tr '\n' ',' | sed 's/,$//')
 
         if [ -n "$TRADER_PIDS" ]; then
             # Count processes
             PROCESS_COUNT=$(echo "$TRADER_PIDS" | tr ',' '\n' | grep -c .)
             echo ""
-            echo "🟢 Online Trader-3 (Version 2.13 ⚙️) is RUNNING:"
+            echo "🟢 Online Trader-3 (Version 2.16 ⚙️) is RUNNING:"
 
             # Resource Monitoring - show resource usage for each process
             echo ""
@@ -176,7 +176,7 @@ case "$1" in
 
     clean)
         # Check if trader is running - clean can ONLY work if stopped
-        RUNNING_PIDS=$(pgrep -a "python" 2>/dev/null | grep "/.*main\\.py" | cut -d' ' -f1)
+        RUNNING_PIDS=$(pgrep -f "main.py" | cut -d' ' -f1)
 
         if [ -n "$RUNNING_PIDS" ]; then
             FIRST_PID=$(echo "$RUNNING_PIDS" | head -1)
@@ -207,9 +207,9 @@ case "$1" in
         
         # Reset config: trade_history, hypothesis_ledger, open_position (direct exchange balance pattern)
         if [ -f "$TRADER_DIR/config.json" ]; then
-            "$PYTHON_ENV/bin/python" -c "import json; p='$TRADER_DIR/config.json'; d=json.load(open(p)); d['trade_history']=[]; d['hypothesis_ledger']=[]; d['open_position']={}; json.dump(d, open(p, 'w'), indent=2)" && \
+            "$PYTHON_ENV/bin/python" -c "import json; p='$TRADER_DIR/config.json'; d=json.load(open(p)); d['trade_history']=[]; d['hypothesis_ledger']=[]; d.pop('open_position', None); json.dump(d, open(p, 'w'), indent=2)" && \
             echo "✅ Config reset: trade_history, hypothesis_ledger, open_position cleared." || \
-            (echo "❌ Failed to reset config.json" && "$PYTHON_ENV/bin/python" -c "import json; p='$TRADER_DIR/config.json'; d=json.load(open(p)); d['trade_history']=[]; d['hypothesis_ledger']=[]; d['open_position']={}; json.dump(d, open(p, 'w'), indent=2)")
+            (echo "❌ Failed to reset config.json" && "$PYTHON_ENV/bin/python" -c "import json; p='$TRADER_DIR/config.json'; d=json.load(open(p)); d['trade_history']=[]; d['hypothesis_ledger']=[]; d.pop('open_position', None); json.dump(d, open(p, 'w'), indent=2)")
         else
             echo "⚠️  config.json not found. Skipping reset."
         fi

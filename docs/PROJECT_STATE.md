@@ -1,4 +1,4 @@
-# PROJECT STATE — Online Trader-3 v2.15
+# PROJECT STATE — Online Trader-3 v2.16
 
 **Status:** PAPER/SANDBOX | EMERGENCY_STOP: CLEARED | Engine: RUNNING | Trade Progress: 10 completed (4 RSI wins, 6 stop-losses) | 1 open position
 
@@ -11,7 +11,7 @@
 | T-019 | Verify hypothesis_ledger dashboard display works with new key schema (D-044) | Medium | T-003 | PENDING |
 | T-020 | Consolidate stop-loss into helper function | Low | None | PENDING |
 | T-021 | Add sell_threshold to cycle log output | Low | None | PENDING |
-| T-023 | Fix B-011: Save/restore entry_rsi in open_position config | Medium | main.py 232, 841 | DONE |
+| T-023 | Fix B-011: Save/restore entry_rsi in open_position config | Medium | main.py | DONE |
 | T-024 | Fix B-012: Cadence check on strategic_trades count not all trades | Medium | main.py 376 | DONE |
 | T-025 | Fix B-013: Wire restore_strategy() into brain loop or CLI | Medium | main.py 478 | DONE |
 | T-029 | Post-SL cooldown period to prevent immediate re-buy after stop-loss (L-010) | Medium | main.py | DONE |

@@ -207,6 +207,8 @@ class OnlineTrader:
             self.config["version"] = 1
         if "previous_strategies" not in self.config:
             self.config["previous_strategies"] = []
+        if "needs_rollback" not in self.config:
+            self.config["needs_rollback"] = False
         
         # Cleanup any stale position entries from config
         cleanup_stale_positions()
@@ -399,7 +401,14 @@ class OnlineTrader:
         
         logging.info(f"📊 Filtered trades for reflection: {len(strategic_trades)} strategic / {emergency_count} emergency excluded (D-025)")
         
-        recent_trades = strategic_trades if len(strategic_trades) >= 3 else trades[-3:] if len(trades) >= 3 else trades[:]
+        # D-025/Cadence gate: Only proceed if we have enough STRATEGIC trades
+        # Reflection should NEVER fire based on emergency trades alone
+        reflection_cadence = self.config.get("reflection_cadence", 3)
+        if len(strategic_trades) < reflection_cadence:
+            logging.info(f"⏳ Not enough strategic trades ({len(strategic_trades)}/{reflection_cadence}) - skipping reflection")
+            return
+        
+        recent_trades = strategic_trades[-reflection_cadence:]
         
         # CRITICAL: Use net PnL for fee-aware evaluation (v2.5+ upgrade)
         # Trade is profitable only if net_pnl_usd > 0 (after fees are deducted)
@@ -469,10 +478,13 @@ class OnlineTrader:
             # Generate hypotheses with regime-aware reasoning (PRIMARY GOAL spec)
             self._generate_and_apply_hypotheses(current_regime=current_regime, avg_ret=avg_return, max_dd=max_drawdown, sharpe=sharpe)
 
-            # B-013 fix: Check for rollback condition - Sharpe negative after tuning = strategy still failing
-            if sharpe < 0 and previous_strategies:
-                logging.warning(f"⚠️ Performance still failing after tuning (Sharpe: {sharpe:.2f}) - triggering rollback")
-                self.restore_strategy()
+            # B-013/D-048 fix: Track rollback condition for verification after next trade
+            # Cannot assess tuned strategy effectiveness until next SELL completes
+            if sharpe < 0:
+                self.config["needs_rollback"] = True
+                logging.info(f"⚠️ Performance failing (Sharpe: {sharpe:.2f}) - will verify after next trade")
+            else:
+                self.config["needs_rollback"] = False
 
             # Increment version AFTER successful hypothesis application (PRIMARY GOAL: rollback capability)
             version += 1

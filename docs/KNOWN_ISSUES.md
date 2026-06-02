@@ -3,18 +3,13 @@
 ## ACTIVE (Resolving)
 | ID | Issue | Severity | Resolution Status |
 |----|-------|----------|-------------------|
-| L-003 | hypothesis_ledger empty until 3 strategic trades complete after B-017 fix | Low | Expected — requires 3 strategic trades post-restart to trigger first reflection |
+| L-003 | hypothesis_ledger empty until 3 strategic trades complete after B-017 fix | Low | Requires restart + 3 strategic trades to trigger first reflection |
 | L-004 | No position timeout mechanism | Low (deferred) | Re-evaluate if open >24h without SELL/SL signal (T-018) |
 
 ## BUGS — Confirmed, Pending Fix
 | ID | File | Line(s) | Description | Severity |
 |----|------|---------|-------------|----------|
-| B-011 | main.py | 232, 726 | `self.entry_rsi` never saved to `open_position` in config, never restored on startup. On restart with open position, dynamic sell threshold never activates — always falls back to `threshold+20` (D-032 silently bypassed). | Medium |
-| B-012 | main.py | 376 | `self_improve_strategies()` cadence check uses `len(trades)` (all trades) not `len(strategic_trades)`. 3 emergency stop-losses alone can trigger reflection with zero strategic trades (violates D-025 intent). | Medium |
-| B-013 | main.py | 478 | `restore_strategy()` is dead code — defined but never called. Brain can never roll back a bad hypothesis. Rollback capability (PRIMARY GOAL) is non-functional. | Medium |
-| B-014 | manage_trader.sh | 23, 50, 62, 85 | Uses `pgrep -a "python" \| grep "/.*main\.py"` — fragile pattern that fails in virtualenvs where interpreter is just `python`. Should use `pgrep -f "main.py"` (same fix already applied to summarize_performance.py per D-016). | Low |
-| B-015 | manage_trader.sh | 106 | Hardcoded version string stale — needs updating to 2.15. | Low |
-| B-016 | manage_trader.sh | 210–212 | `clean` command sets `open_position={}` (empty dict) instead of deleting the key. Violates D-009/D-020 — cleanup_stale_positions() on next startup handles it but creates a stale null entry. | Low |
+| None | — | — | All known bugs resolved in v2.16 | — |
 
 ## WATCH (Monitor)
 | ID | Issue | Severity | Mitigation/Notes |
@@ -46,6 +41,9 @@
 | B-008 [RESOLVED] | emergency_stop_trader set open_position=None | Medium | D-042 |
 | B-009 [RESOLVED] | Dead-code init guard in self_improve_strategies() | Low | D-041 |
 | B-010 [RESOLVED] | SELL PnL uses self.entry_price (individual buy) not weighted avg | High | T-022 |
+| B-014 [RESOLVED] | manage_trader.sh fragile pgrep pattern | Low | Fixed in v2.16 - all patterns use pgrep -f "main.py" |
+| B-015 [RESOLVED] | manage_trader.sh stale version string | Low | Fixed in v2.16 - updated to Version 2.16 |
+| B-016 [RESOLVED] | clean command sets open_position={} not deletes key | Low | Fixed in v2.16 - uses d.pop('open_position', None) |
 | B-EMERGENCY [RESOLVED] | EMERGENCY_STOP flag blocked trading logic | High | D-024/D-026 |
 | DASHBOARD-ENGINE-DETECTION [RESOLVED] | pgrep -a python3 missed venv process | Low | pgrep -f "main.py" |
 
