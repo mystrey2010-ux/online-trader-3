@@ -113,6 +113,32 @@ def engine_running():
     except Exception:
         return False
 
+def calculate_rolling_sharpe(trades, window=25):
+    """Calculate rolling Sharpe ratio over last N trades. Higher = better risk-adjusted returns."""
+    if not trades or len(trades) < 2:
+        return "N/A"
+    recent = trades[-window:]
+    returns = [t.get("pnl_pct", 0) for t in recent]
+    avg_ret = sum(returns) / len(returns)
+    if avg_ret == 0:
+        return "N/A"
+    std_ret = (sum((r - avg_ret) ** 2 for r in returns) / len(returns)) ** 0.5
+    if std_ret == 0:
+        return "N/A"
+    return f"{avg_ret / std_ret:.2f}"
+
+def calculate_time_weighted_return(trades):
+    """Calculate time-weighted return (accounts for compounding)."""
+    if not trades:
+        return "N/A"
+    twr = 1.0
+    for t in trades:
+        pnl = t.get("pnl_pct", 0)
+        twr *= (1 + pnl)
+    twr = (twr - 1) * 100
+    sign = "+" if twr >= 0 else ""
+    return f"{sign}{twr:.2f}%"
+
 def get_regime_stability(config, current_regime):
     """Calculate regime stability metric from hypothesis ledger.
     Returns percentage of recent hypotheses in same regime.
@@ -471,6 +497,23 @@ def print_trade_history(config):
     print(f"  Win Rate         : {win_rate:.1f}%")
     print(f"  Total Net PnL    : {fmt_pnl(total_net)}")
     print(f"  Total Fees Paid  : ${total_fees:.5f}  (config estimates)")
+    
+    # Trade-level analytics
+    sharpe = calculate_rolling_sharpe(trades)
+    twr = calculate_time_weighted_return(trades)
+    consec_sl = 0
+    max_consec = 0
+    for t in trades:
+        if t.get("stop_loss_triggered", False):
+            consec_sl += 1
+            max_consec = max(max_consec, consec_sl)
+        else:
+            consec_sl = 0
+    
+    print(f"  Rolling Sharpe(25) : {sharpe}")
+    print(f"  Time-Weighted Ret  : {twr}")
+    print(f"  Consecutive SL Count: {max_consec}")
+    
     print(SEPARATOR_MID)
 
 
