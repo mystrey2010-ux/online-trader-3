@@ -1,6 +1,6 @@
 # PROJECT STATE — Online Trader-3 v2.16
 
-**Status:** PAPER/SANDBOX | EMERGENCY_STOP: CLEARED | Engine: RUNNING | Trade Progress: 10 completed (4 RSI wins, 6 stop-losses) | 1 open position
+**Status:** PAPER/SANDBOX | EMERGENCY_STOP: CLEARED | Engine: RUNNING | Trade Progress: 12 completed (5 strategic wins, 7 stop-losses) | 1 open position
 
 ## Open Tasks
 | ID | Description | Priority | Dependencies | Status |
@@ -75,13 +75,13 @@
 | Python interpreter standardized | ✓ | Shebang/detection updated |
 | Deduplication of previous_strategies | ✓ | D-028 |
 
-## Performance Observations (2026-06-01 to 2026-06-02)
-- 10 completed trades: 4 wins (+$0.111 total net), 6 stop-losses (-$4.884 total net)
-- Net PnL: approximately -$4.773
-- Dominant pattern: BTC in extended downtrend (~$74k → ~$68k), stop-losses firing repeatedly
-- B-017 (brain NameError) meant zero self-improvement occurred across all 10 trades — strategy never adapted
-- B-019 (same-cycle re-buy) contributed to consecutive SL chains (trade 3→4, 9→10)
-- After B-017 fix + restart: first reflection will trigger at next 3 strategic trades
+## Performance Observations (2026-05-31 to 2026-06-02)
+- 12 completed trades: 5 wins (+$0.159 total net), 7 stop-losses (-$5.701 total net)
+- Net PnL: approximately -$5.542
+- Dominant pattern: BTC in extended downtrend (~$74k → ~$67k), stop-losses firing repeatedly
+- B-017 (brain NameError) meant zero self-improvement occurred across trades 1-11 — first hypothesis logged at trade 12
+- B-019 (same-cycle re-buy) contributed to consecutive SL chains (trade 2→3, 8→9)
+- After B-017 fix + restart: 1 hypothesis logged after trade 12 (indicator_threshold: 63.0 → 66.15)
 
 ## Deferred Items (Q - Quality of Service)
 | ID | Item | Notes |

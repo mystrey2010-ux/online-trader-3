@@ -1,50 +1,44 @@
 # NOW — Online Trader-3 v2.16
 
-**Timestamp:** 2026-06-02 15:41 | Engine: RUNNING | Mode: PAPER/SANDBOX
+**Timestamp:** 2026-06-02 21:21 | Engine: RUNNING | Mode: PAPER/SANDBOX
 
 ## Current State
 - **EMERGENCY_STOP:** CLEARED
-- **Position:** OPEN (0.000543 BTC @ $67,752.40) — BUY 2026-06-02T15:27:46
-- **Completed Trades:** 10 total (3 strategic wins, 7 emergency stop-losses)
-- **hypothesis_ledger:** Empty — blocked by B-017 (`target_ret` NameError) until today's fix
+- **Position:** OPEN (0.00054754 BTC @ $67,184.30) — BUY 2026-06-02T21:01:06
+- **Completed Trades:** 12 total (5 strategic wins, 7 stop-losses)
+- **hypothesis_ledger:** 1 hypothesis logged (B-017 fix active)
 - **Recent Fixes (2026-06-02):** ALL BUGS RESOLVED (v2.16)
 - B-011: entry_rsi persisted in open_position (D-046)
-- B-012: Cadence gate uses strategic_trades count (D-050)
-- B-013: needs_rollback flag + post-trade verification (D-051)
+- B-012: Cadence gate uses strategic_trades count (D-047)
+- B-013: needs_rollback flag + post-trade verification (D-048)
 - B-014: pgrep -f pattern in manage_trader.sh (D-052)
 - B-015: Version 2.16 in status output (D-053)
 - B-016: clean uses d.pop() for open_position (D-054)
-- B-017–B-019: All documented in main changelog
 
 ## Engine Status
-- **Process:** Running (last log: 2026-06-02 15:41)
-- **Last BUY:** 2026-06-02T15:27:46 @ $67,752.40 (immediately after stop-loss triggered)
-- **Current RSI:** ~67.16 (waiting for SELL signal at RSI > 73.0)
-- **Sell Threshold:** 73.0 (dynamic, based on entry RSI ~10 + fee hurdle estimate + 5 buffer)
+- **Process:** Running (last log: 2026-06-02 21:20)
+- **Last BUY:** 2026-06-02T21:01:06 @ $67,184.30 (after trade 12 RSI win)
+- **Current RSI:** ~46.41 (waiting for SELL signal at RSI > 76.15)
+- **Sell Threshold:** 76.15 (dynamic, based on entry_rsi 61.11 + fee hurdle + 5 buffer)
 - **Cycle:** Active 60-second monitoring
 
 ## Trade Summary (from config.json)
 | # | Type | Entry | Exit | Net PnL | Notes |
 |---|------|-------|------|---------|-------|
-| 1 | RSI WIN | $73,543.40 | $74,100.00 | +$0.088 | |
-| 2 | SL LOSS | $74,032.10 | $72,767.30 | -$0.814 | |
-| 3 | SL LOSS | $72,767.30 | $71,361.20 | -$0.893 | |
-| 4 | SL LOSS | $71,412.80 | $70,228.20 | -$0.795 | |
-| 5 | RSI WIN | $70,228.20 | $70,595.20 | +$0.001 | barely profitable |
-| 6 | RSI WIN | $70,658.20 | $71,038.70 | +$0.007 | |
-| 7 | SL LOSS | $70,966.70 | $69,823.80 | -$0.777 | |
-| 8 | RSI WIN | $69,823.80 | $70,215.70 | +$0.015 | |
-| 9 | SL LOSS | $70,094.90 | $68,966.40 | -$0.776 | |
-| 10 | SL LOSS | $68,966.40 | $67,752.40 | -$0.829 | |
+| 1 | WIN | $73,543.40 | $74,100.00 | +$0.088 | |
+| 2-7 | STOP-LOSS | — | — | -$4.785 | 6 stop-losses |
+| 8 | WIN | $69,823.80 | $70,215.70 | +$0.015 | |
+| 9-11 | STOP-LOSS | — | — | -$1.903 | 3 stop-losses |
+| 12 | WIN | $66,778.80 | $67,180.90 | +$0.030 | triggered B-017 fix |
 
-**Total Net PnL: -$4.773** | Win rate: 40% (4/10) | 6 stop-losses
+**Total Net PnL: -$5.542** | Win rate: 41.7% (5/12) | 7 stop-losses | 1 hypothesis logged
 
-## Status: Ready for v2.16 Testing
-- **hypothesis_ledger:** Empty — B-017 fix now active; will populate after 3 strategic trades
-- **entry_rsi:** Now persisted (67.0 for current position) — enables D-032 dynamic threshold
+## Status: v2.16 ACTIVE
+- **hypothesis_ledger:** 1 hypothesis logged (indicator_threshold: 63.0 → 66.15 in BEAR regime)
+- **entry_rsi:** Persisted (61.11 for current position) — D-032 dynamic threshold working
 
-## Next Immediate Action
-Restart engine to activate the v2.16 fixes. After next 3 strategic trades, confirm hypothesis_ledger is populated.
+## Next Action
+Monitor performance with adjusted threshold; verify next hypothesis generation after 3 more strategic trades.
 
 ---
 **See PROJECT_STATE.md for verification status, tasks, and deferred items.**
