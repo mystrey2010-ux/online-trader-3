@@ -27,7 +27,6 @@ LOG_FILE = "trader.log"
 CONFIG_PATH = "config.json"
 LIVE_TRADING_ENABLED = os.getenv("LIVE_TRADING_ENABLED", "false").lower() == "true"
 SL_COOLDOWN_SECONDS = 300  # T-029: 5-minute cooldown after stop-loss prevents immediate re-buy
-SL_COOLDOWN_SECONDS = 300  # T-029: 5-minute cooldown after stop-loss prevents immediate re-buy
 
 
 # Redirect STDOUT and STDERR to trader.log
@@ -218,18 +217,14 @@ class OnlineTrader:
             self.current_position = 'long'
             self.entry_price = pos["entry_price"]
             self.entry_rsi = pos.get("entry_rsi")  # B-011 fix: restore entry_rsi for D-032 dynamic threshold
-            self.entry_rsi = pos.get("entry_rsi")  # B-011 fix: restore entry_rsi for D-032 dynamic threshold
             logging.info(f"🔄 Restored open position from config: {pos.get('amount_btc', 0)} BTC @ ${pos['entry_price']:.2f}")
         else:
             self.current_position = None
             self.entry_price = None
             self.entry_rsi = None  # B-011 fix: ensure None when no position
-            self.entry_rsi = None  # B-011 fix: ensure None when no position
 
         # T-029 fix: Track stop-loss cooldown to prevent immediate re-buy
         self.sl_cooldown_until = None
-        
-        # Restore last_trade_usd_amount from open_position so SELL PnL/fee calc is correct
         # after restart (B-003 fix). If no open_position, defaults to 0.0.
         if pos and pos.get("entry_price") and pos.get("amount_btc"):
             self.last_trade_usd_amount = pos["amount_btc"] * pos["entry_price"]
@@ -807,16 +802,19 @@ class OnlineTrader:
                             save_config(self.config)
                             self.current_position = None
                             self.entry_price = None
-                            self.entry_rsi = None  # B-002 fix: clear entry_rsi after stop-loss to avoid corrupting next trade's dynamic sell threshold
-                            return  # Do NOT re-enter the buy branch in the same cycle after a stop-loss
+                            self.entry_rsi = None
+                            self.sl_cooldown_until = time.time() + SL_COOLDOWN_SECONDS
+                            logging.info(f"⏳ Stop-loss cooldown activated for {SL_COOLDOWN_SECONDS}s")
+                            return
                         else:
                             logging.warning("⚠️ No BTC available to close on stop-loss.")
                     except Exception as e:
                         logging.error(f"❌ Stop-Loss Sell Order Failed: {e}")
                         self.current_position = None
                         self.entry_price = None
-                        self.entry_rsi = None  # B-002 fix: clear on failure path too
-                        return  # Skip remainder of cycle on stop-loss failure too
+                        self.entry_rsi = None
+                        return
+                    # ===============================
             # ===============================
 
             if rsi_val < buy_threshold and self.current_position is None:
@@ -863,7 +861,8 @@ class OnlineTrader:
                         self.config["open_position"] = {
                             "timestamp": datetime.now().isoformat(),
                             "symbol": symbol,
-                            "entry_price": avg_price,  # Weighted average by BTC value (see ARCHITECTURE.md D-001)
+                            "entry_price": avg_price,
+                            "entry_rsi": self.entry_rsi,
                             "amount_btc": accumulated_btc
                         }
 
