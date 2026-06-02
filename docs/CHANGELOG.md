@@ -1,5 +1,11 @@
 # CHANGELOG — Online Trader-3
 
+## v2.16 (2026-06-02)
+- B-011: Fixed `entry_rsi` not persisted in config — now saved to `open_position` on BUY and restored on startup (D-046), enabling D-032 dynamic threshold to survive restarts
+- B-012: Fixed reflection cadence firing on emergency trades — now uses `len(strategic_trades)` count (D-047), ensuring D-025 intent compliance
+- B-013: Fixed `restore_strategy()` dead code — wired into brain loop with Sharpe < 0 trigger (D-048), enabling PRIMARY GOAL rollback capability
+- T-029: Added 300-second cooldown after stop-loss prevents immediate re-buy into continuing downtrend (D-049)
+
 ## v2.15 (2026-06-02)
 - B-017: Fixed `NameError: target_ret not defined` in `_generate_and_apply_hypotheses()` — self-improvement brain was completely broken; hypotheses could never be generated or logged (D-043)
 - B-018: Fixed hypothesis ledger entries storing wrong key names — `summarize_performance.py` reads `parameter/old_value/new_value/regime/direction` but engine wrote `regime_tag/expected_score_direction` only; all fields showed `?` in dashboard (D-044)
