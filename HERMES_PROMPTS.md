@@ -152,3 +152,308 @@ maximize durable project intelligence per token.
 ```
 
 
+
+
+
+
+
+
+
+
+
+
+# ONLINE-TRADER-3 COMPREHENSIVE SYSTEM REVIEW
+
+You are acting as a Senior Quantitative Trading Engineer, Python Architect, Production Reliability Engineer, and Trading Risk Auditor.
+
+Your task is NOT to modify code.
+
+Your task is to perform a comprehensive review of the project and produce an actionable assessment report.
+
+## Files To Review
+
+Review ALL available information including:
+
+* docs/*.md
+* README files
+* Python source code (*.py)
+* Configuration files
+* Latest Summarize Performance Report
+* Latest trader.log
+* Reflection reports
+* Strategy reports
+* Trade history outputs
+* Any generated metrics or analytics files
+
+Treat the Summarize Performance Report as the primary source of trading behaviour.
+
+Treat trader.log as the primary source of runtime behaviour.
+
+Treat source code as the primary source of implementation behaviour.
+
+---
+
+# Review Objectives
+
+Provide findings in the following sections.
+
+## SECTION 1 - Executive Summary
+
+Provide:
+
+* Overall system health score (0-100)
+* Trading strategy maturity score (0-100)
+* Production readiness score (0-100)
+* Risk management score (0-100)
+* Data quality score (0-100)
+
+Explain each score.
+
+---
+
+## SECTION 2 - Critical Problems
+
+Identify issues that could:
+
+* Cause financial loss
+* Cause runaway trading
+* Cause excessive drawdown
+* Cause strategy degradation
+* Cause reflection loops
+* Cause incorrect position sizing
+* Cause risk control failures
+* Cause data corruption
+* Cause incorrect performance reporting
+
+For each issue provide:
+
+Severity:
+
+* Critical
+* High
+* Medium
+* Low
+
+Include:
+
+* Description
+* Why it matters
+* Evidence
+* Recommended action
+
+---
+
+## SECTION 3 - Trading Performance Review
+
+Review actual performance.
+
+Analyse:
+
+* Win rate
+* Loss rate
+* Profit factor
+* Expectancy
+* Drawdown
+* Average winner
+* Average loser
+* Risk/reward ratio
+* Trade frequency
+* Capital growth
+* Capital decline
+
+Determine:
+
+* Is the strategy profitable?
+* Is profitability statistically meaningful?
+* Is there sufficient trade volume?
+* Are results likely due to luck?
+* Are results stable?
+
+---
+
+## SECTION 4 - Strategy Quality Assessment
+
+Evaluate:
+
+* Entry logic
+* Exit logic
+* Position sizing
+* Reflection system
+* Self-improvement process
+* Trade selection quality
+* Overfitting risk
+* Underfitting risk
+* Market adaptability
+
+Identify any signs of:
+
+* Curve fitting
+* Strategy drift
+* Excessive optimisation
+* Reflection bias
+* Feedback loop failures
+
+---
+
+## SECTION 5 - Runtime & Operational Review
+
+Review trader.log and runtime behaviour.
+
+Identify:
+
+* Errors
+* Exceptions
+* API failures
+* Data quality issues
+* Missing data
+* Slow execution
+* Retry loops
+* Stability concerns
+* Resource issues
+
+Provide evidence from logs.
+
+---
+
+## SECTION 6 - Risk Management Review
+
+Assess:
+
+* Maximum trade sizing
+* Position exposure
+* Consecutive losses
+* Drawdown controls
+* Capital preservation
+* Trade limits
+* Daily limits
+* Emergency stop mechanisms
+
+State whether risk controls appear adequate.
+
+---
+
+## SECTION 7 - Missing Metrics & Missing Information
+
+This is a high priority section.
+
+Review the latest Summarize Performance Report and determine:
+
+1. What information is currently missing?
+2. What information would significantly improve future recommendations?
+3. What metrics should be added?
+4. What diagnostics should be added?
+5. What reflection metrics should be added?
+
+For each missing item provide:
+
+* Metric name
+* Why it matters
+* Example output
+* Priority (High/Medium/Low)
+
+Focus on metrics that improve decision making.
+
+Avoid vanity metrics.
+
+---
+
+## SECTION 8 - Potential Upgrades
+
+Do NOT implement.
+
+Do NOT generate code.
+
+Provide potential upgrades only.
+
+Categorise as:
+
+### High Impact
+
+Likely to materially improve profitability, safety, or reliability.
+
+### Medium Impact
+
+Useful improvements.
+
+### Low Impact
+
+Nice-to-have improvements.
+
+For each upgrade provide:
+
+* Expected benefit
+* Complexity
+* Risk
+* Recommendation
+
+---
+
+## SECTION 9 - Next Actions
+
+Provide:
+
+### Immediate Actions (Next Session)
+
+Top 5 actions.
+
+### Short-Term Actions
+
+Next 1-2 weeks.
+
+### Long-Term Actions
+
+Future roadmap.
+
+Prioritise by expected value.
+
+---
+
+## SECTION 10 - Questions For The Owner
+
+List any missing information that prevents stronger recommendations.
+
+Ask specific questions only.
+
+Do not ask questions that can be answered from the project files.
+
+---
+
+# Additional Analysis Required
+
+Specifically determine whether the Summarize Performance Report includes enough information to answer:
+
+* Why trades win
+* Why trades lose
+* Whether the strategy is improving
+* Whether reflection is helping
+* Whether risk is improving
+* Whether profitability is improving
+* Whether capital efficiency is improving
+
+If any answer cannot be confidently determined, explain exactly what additional data should be included in future reports.
+
+---
+
+# Output Format
+
+Use the following structure:
+
+1. Executive Summary
+2. Critical Problems
+3. Trading Performance Review
+4. Strategy Quality Assessment
+5. Runtime & Operational Review
+6. Risk Management Review
+7. Missing Metrics & Missing Information
+8. Potential Upgrades
+9. Next Actions
+10. Questions For The Owner
+
+Be evidence-based.
+
+Avoid cosmetic suggestions.
+
+Prioritise issues that affect profitability, safety, reliability, risk management, and learning quality.
+
+Do not generate code unless explicitly requested.
+
