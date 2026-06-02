@@ -36,10 +36,11 @@
 ## Status: v2.16 ACTIVE
 - **hypothesis_ledger:** 1 hypothesis logged (indicator_threshold: 63.0 → 66.15 in BEAR regime)
 - **entry_rsi:** Persisted (61.11 for current position) — D-032 dynamic threshold working
+- **trend_filter:** ACTIVE - skips BUY when price declining over 20 periods (T-018)
 
 ## Next Action
 Monitor performance with adjusted threshold; verify next hypothesis generation after 3 more strategic trades.
 
 ---
 **See PROJECT_STATE.md for verification status, tasks, and deferred items.**
-**Last Updated:** 2026-06-02 16:00 | Engineer: J.A.R.V.I.S.
+**Last Updated:** 2026-06-02 21:45 | Engineer: J.A.R.V.I.S.
