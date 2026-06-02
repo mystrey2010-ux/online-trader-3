@@ -1,4 +1,4 @@
-# NOW — Online Trader-3 v2.15
+# NOW — Online Trader-3 v2.16
 
 **Timestamp:** 2026-06-02 15:41 | Engine: RUNNING | Mode: PAPER/SANDBOX
 
@@ -7,7 +7,13 @@
 - **Position:** OPEN (0.000543 BTC @ $67,752.40) — BUY 2026-06-02T15:27:46
 - **Completed Trades:** 10 total (3 strategic wins, 7 emergency stop-losses)
 - **hypothesis_ledger:** Empty — blocked by B-017 (`target_ret` NameError) until today's fix
-- **Recent Fixes (2026-06-02):** B-017, B-018, B-019 applied — engine restart required for fixes to take effect
+- **Recent Fixes (2026-06-02):** ALL BUGS RESOLVED
+- B-011: entry_rsi persisted in open_position (D-046)
+- B-012: Strategic trades cadence gate enforced (D-050)
+- B-013: needs_rollback flag + post-trade verification (D-051)
+- B-014: pgrep -f pattern in manage_trader.sh (D-052)
+- B-015: Version 2.16 in status output (D-053)
+- B-016: clean uses d.pop() for open_position (D-054)
 
 ## Engine Status
 - **Process:** Running (last log: 2026-06-02 15:41)
@@ -32,13 +38,13 @@
 
 **Total Net PnL: -$4.773** | Win rate: 40% (4/10) | 6 stop-losses
 
-## Bugs Fixed Today (v2.15)
+## Bugs Fixed Today (v2.16)
 - **B-017** (Critical): `NameError: target_ret not defined` in `_generate_and_apply_hypotheses()` — self-improvement brain completely broken; hypotheses never generated. Fixed by reading targets from `self.config` inside the method.
 - **B-018** (Medium): Hypothesis ledger entries stored keys incompatible with `summarize_performance.py` display — all fields showed `?` in the table. Fixed by adding display-side alias keys.
 - **B-019** (Medium): After stop-loss fires, same cycle immediately re-buys (RSI still low at trigger point). Fixed by adding `return` after stop-loss execution.
 
 ## Next Immediate Action
-Restart engine to activate the v2.15 fixes. After next 3 strategic trades, confirm hypothesis_ledger is populated.
+Restart engine to activate the v2.16 fixes. After next 3 strategic trades, confirm hypothesis_ledger is populated.
 
 ---
 **See PROJECT_STATE.md for verification status, tasks, and deferred items.**
