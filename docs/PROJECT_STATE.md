@@ -20,9 +20,6 @@
 ### Active (v2.15)
 | ID | Description | Severity | Task |
 |----|-------------|----------|------|
-| B-011 | entry_rsi lost on restart — D-032 dynamic threshold bypassed | Medium | T-023 |
-| B-012 | Reflection cadence fires on emergency trades (D-025 intent violated) | Medium | T-024 |
-| B-013 | restore_strategy() never called — rollback dead code | Medium | T-025 |
 | B-014 | manage_trader.sh fragile pgrep pattern | Low | T-026 |
 | B-015 | manage_trader.sh stale version string | Low | T-027 |
 | B-016 | manage_trader.sh clean sets open_position={} not deletes | Low | T-028 |
@@ -33,12 +30,16 @@
 | B-017 | Critical | D-043 — NameError in `_generate_and_apply_hypotheses()` blocked all hypothesis generation |
 | B-018 | Medium | D-044 — Hypothesis ledger key schema mismatch with dashboard |
 | B-019 | Medium | D-045 — Stop-loss triggered immediate re-buy in same cycle |
-| B-011 | Medium | D-046 — entry_rsi persisted in open_position for D-032 |
-| B-012 | Medium | D-047 — Cadence check on strategic_trades count |
-| B-013 | Medium | D-048 — restore_strategy() wired for rollback |
-| T-029 (B-019 enhancement) | Medium | D-049 — Post-SL cooldown period |
 
-### Resolved (v2.14 — 2026-05-31)
+### Resolved (v2.16 — 2026-06-02)
+| ID | Severity | Resolution |
+|----|----------|------------|
+| B-011 | Medium | D-046 — entry_rsi persisted in open_position config |
+| B-012 | Medium | D-047 — Cadence check on strategic_trades count |
+| B-013 | Medium | D-048 — restore_strategy() rollback trigger |
+| T-029 | Medium | D-049 — Post-SL cooldown period |
+
+### Resolved (v2.14
 | ID | Severity | Resolution |
 |----|----------|------------|
 | B-001 | High | D-035 |
@@ -61,11 +62,11 @@
 | B-001–B-010 all fixed | ✓ | D-034 through D-042 / T-022 applied |
 | Fee fields in both sell paths | ✓ | D-018 |
 | Fee trap prevention | ✓ | D-031 — confirmed holding at RSI 84-87+ in live session |
-| Dynamic RSI threshold | ✓ | D-032 — NOTE: bypassed after restart until B-011 fixed |
+| Dynamic RSI threshold | ✓ | D-032 — B-011 fix ensures threshold survives restart |
 | Position restoration on startup | ✓ | D-020 |
 | Config reloaded each cycle | ✓ | D-038 |
 | EMERGENCY_STOP guard | ✓ | D-023 |
-| Emergency trades excluded from brain | ✓ | D-025 — NOTE: cadence check still uses all trades (B-012) |
+| Emergency trades excluded from brain | ✓ | D-025 — B-012 fix ensures correct count-based filtering |
 | Hypothesis numeric confidence | ✓ | D-037 |
 | Hypothesis ledger key schema | ✓ | D-044 — now includes display alias keys |
 | Stop-loss no same-cycle re-buy | ✓ | D-045 |
@@ -91,8 +92,7 @@
 ## Documentation Gaps
 | Priority | Issue | Recommended Action |
 |----------|-------|-------------------|
-| High | Post-SL cooldown undocumented | T-029 |
-| Medium | Rollback trigger conditions undocumented | Clarify when restore_strategy() should fire (T-025) |
+| Medium | Rollback trigger conditions documented | D-048: Sharpe < 0 after tuning triggers rollback |
 | Medium | Emergency stop duplicate trade risk | Clarify L-005 mitigation |
 
 ## Recent Documentation Updates (2026-06-02)
