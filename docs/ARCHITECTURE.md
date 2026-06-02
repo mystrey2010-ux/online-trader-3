@@ -158,4 +158,4 @@ All bugs resolved in v2.16 — see KNOWN_ISSUES.md
 - Docs backups: `/docs/backups/`
 
 ---
-**Last Updated:** 2026-06-02 15:41 | Engineer: J.A.R.V.I.S.
+**Last Updated:** 2026-06-02 16:00 | Engineer: J.A.R.V.I.S.

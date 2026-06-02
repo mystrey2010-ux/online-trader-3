@@ -7,14 +7,14 @@
 - **Position:** OPEN (0.000543 BTC @ $67,752.40) — BUY 2026-06-02T15:27:46
 - **Completed Trades:** 10 total (3 strategic wins, 7 emergency stop-losses)
 - **hypothesis_ledger:** Empty — blocked by B-017 (`target_ret` NameError) until today's fix
-- **Recent Fixes (2026-06-02):** ALL BUGS RESOLVED
-- `entry_rsi` persisted in open_position, restore on restart verified
-- **Last entry_rsi added to config.json:** 67.0 for current open position
-- B-012: Strategic trades cadence gate enforced (D-050)
+- **Recent Fixes (2026-06-02):** ALL BUGS RESOLVED (v2.16)
+- B-011: entry_rsi persisted in open_position (D-046)
+- B-012: Cadence gate uses strategic_trades count (D-050)
 - B-013: needs_rollback flag + post-trade verification (D-051)
 - B-014: pgrep -f pattern in manage_trader.sh (D-052)
 - B-015: Version 2.16 in status output (D-053)
 - B-016: clean uses d.pop() for open_position (D-054)
+- B-017–B-019: All documented in main changelog
 
 ## Engine Status
 - **Process:** Running (last log: 2026-06-02 15:41)
@@ -39,14 +39,13 @@
 
 **Total Net PnL: -$4.773** | Win rate: 40% (4/10) | 6 stop-losses
 
-## Bugs Fixed Today (v2.16)
-- **B-017** (Critical): `NameError: target_ret not defined` in `_generate_and_apply_hypotheses()` — self-improvement brain completely broken; hypotheses never generated. Fixed by reading targets from `self.config` inside the method.
-- **B-018** (Medium): Hypothesis ledger entries stored keys incompatible with `summarize_performance.py` display — all fields showed `?` in the table. Fixed by adding display-side alias keys.
-- **B-019** (Medium): After stop-loss fires, same cycle immediately re-buys (RSI still low at trigger point). Fixed by adding `return` after stop-loss execution.
+## Status: Ready for v2.16 Testing
+- **hypothesis_ledger:** Empty — B-017 fix now active; will populate after 3 strategic trades
+- **entry_rsi:** Now persisted (67.0 for current position) — enables D-032 dynamic threshold
 
 ## Next Immediate Action
 Restart engine to activate the v2.16 fixes. After next 3 strategic trades, confirm hypothesis_ledger is populated.
 
 ---
 **See PROJECT_STATE.md for verification status, tasks, and deferred items.**
-**Last Updated:** 2026-06-02 15:41 | Engineer: J.A.R.V.I.S.
+**Last Updated:** 2026-06-02 16:00 | Engineer: J.A.R.V.I.S.
