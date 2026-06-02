@@ -13,15 +13,17 @@
 | GenericCCXTExchange | Any CCXT exchange (inactive) | Future multi-symbol support |
 
 ## Trading Loop (run_cycle, 60s)
-```
-0. EMERGENCY_STOP? → log "EMERGENCY STOP ACTIVE", return (D-023 guard)
-1. Fetch ticker (for real-time stop-loss price check)
-2. Fetch OHLCV (50 x 1m bars)
-3. Calculate RSI-14
-4. STOP-LOSS: price < entry × (1-stop_loss_pct) → emergency sell → return (D-045)
-5. BUY:  RSI < indicator_threshold (63.0), no position → buy position_size_pct of balance
-6. SELL: RSI > sell_threshold AND net PnL after fees > 0 → sell all BTC
-```
+ ```
+ 0. EMERGENCY_STOP? → log "EMERGENCY STOP ACTIVE", return (D-023 guard)
+ 1. Fetch ticker (for real-time stop-loss price check)
+ 2. Fetch OHLCV (50 x 1m bars)
+ 3. Calculate RSI-14
+ 4. STOP-LOSS: price < entry × (1-stop_loss_pct) → emergency sell → return (D-045)
+ 5. TREND CHECK: skip BUY if price declining over 20 periods (T-018)
+ 6. POSITION TIMEOUT: warn if open >24h without close signal (T-018)
+ 7. BUY:  RSI < indicator_threshold and uptrend, no position → buy position_size_pct of balance
+ 8. SELL: RSI > sell_threshold AND net PnL after fees > 0 → sell all BTC
+ ```
 
 **Sell threshold** = dynamic, based on `entry_rsi + estimated_rsi_change_for_fee_hurdle + 5` buffer, minimum `indicator_threshold + 10`. Falls back to `indicator_threshold + 20` when no entry RSI is available (D-032).
 
@@ -33,12 +35,12 @@ Trigger: Every 3 completed STRATEGIC trades (excluding emergency)
 Strategic trade = RSI buy signal (RSI<63.0) → RSI sell signal (RSI>sell_threshold)
 Emergency trades excluded if: stop_loss_triggered=true OR note contains "Emergency"
 Action:
-  1. Load last 25 trades, filter out emergency trades
-  2. Calculate fee-aware metrics (net_pnl_usd)
-  3. Tag market regime via 20-period rolling return on 1h OHLCV
-  4. If underperforming: backup strategy → generate regime-aware hypotheses → apply best
-  5. Tunes ONE of: indicator_threshold, stop_loss_pct, position_size_pct
-  6. Rollback: previous_strategies[] → restore_strategy() — NOTE: restore_strategy() not yet wired (B-013)
+   1. Load last 25 trades, filter out emergency trades
+   2. Calculate fee-aware metrics (net_pnl_usd)
+   3. Tag market regime via 20-period rolling return on 1h OHLCV
+   4. If underperforming: backup strategy → generate regime-aware hypotheses → apply best
+   5. Tunes ONE of: indicator_threshold, stop_loss_pct, position_size_pct
+   6. Rollback: previous_strategies[] → restore_strategy() — Sharpe < 0 triggers rollback (D-048)
 ```
 
 **hypothesis_ledger** populated only after reflection fires. Was broken by B-017 (NameError) until v2.15. Each ledger entry includes: `parameter`, `old_value`, `new_value`, `regime`, `direction`, `regime_tag`, `expected_score_direction`, `metrics_at_failure`, `confidence_reasoning`.
@@ -137,6 +139,7 @@ Key invariants:
 - D-032: Dynamic sell threshold based on entry RSI + fee hurdle
 - D-044: Hypothesis ledger entries include display alias keys for dashboard
 - D-045: Stop-loss exits with `return` — no same-cycle re-buy
+- D-055: Trend filter skips BUY when price declining over 20 periods (T-018)
 
 ## Known Bugs & Architectural Risks
 | ID | File | Lines | Description | Severity |
@@ -158,4 +161,4 @@ All bugs resolved in v2.16 — see KNOWN_ISSUES.md
 - Docs backups: `/docs/backups/`
 
 ---
-**Last Updated:** 2026-06-02 16:00 | Engineer: J.A.R.V.I.S.
+**Last Updated:** 2026-06-02 21:45 | Engineer: J.A.R.V.I.S.
