@@ -119,10 +119,11 @@ def get_regime_stability(config, current_regime):
     """
     ledger = config.get("hypothesis_ledger", [])
     if not ledger:
-        return None
+        return "N/A"
     recent = ledger[-10:]  # Last 10 hypotheses
     matches = sum(1 for h in recent if h.get("regime") == current_regime)
-    return f"{matches * 10:.1f}%" if len(recent) > 0 else "N/A"
+    pct = (matches / len(recent)) * 100
+    return f"{pct:.0f}%"
 
 
 def btc_spot_price():
