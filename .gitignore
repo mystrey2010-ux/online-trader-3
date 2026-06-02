@@ -13,6 +13,8 @@ ENV/
 env/
 pip-log.txt
 pip-delete-this-directory.txt
+ENV_BACKUP/
+docs/*.md.*
 
 # Logs
 *.log
