@@ -41,9 +41,10 @@ Key design decisions, one line each. Code location noted for traceability.
 | D-049 | T-029 fix: 300s cooldown after stop-loss prevents immediate re-buy | main.py run_cycle() | v2.16 |
 | D-055 | T-018 fix: Trend filter skips BUY when price declining over 20 periods prevents buying into downtrend | main.py run_cycle() | v2.16 |
 | D-060 | Trade-level analytics: Rolling Sharpe, TWR, Consecutive SL Count added to dashboard | summarize_performance.py | v2.16 |
+| D-061 | position_size_pct default: 3.7% of balance per trade — conservative risk exposure for paper trading; tunable via brain | config.json | v2.5 |
 
 ---
-**Last Updated:** 2026-06-02 15:41 | Engineer: J.A.R.V.I.S.
+**Last Updated:** 2026-06-02 23:15 | Engineer: J.A.R.V.I.S.
 
 ## Git Repository Usage
 
