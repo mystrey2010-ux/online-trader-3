@@ -11,7 +11,7 @@
 | T-019 | hypothesis_ledger dashboard display (D-HYP-003) | Medium | T-003 | PENDING |
 | T-020 | Consolidate stop-loss into helper function | Low | None | PENDING |
 | T-021 | Add sell_threshold to cycle log output | Low | None | PENDING |
-| T-022 | Fix B-010: self.entry_price = avg_price on BUY (not individual price) | High | main.py 820 | PENDING |
+| T-022 | Fix B-010: self.entry_price = avg_price on BUY (not individual price) | High | main.py 820 | COMPLETED |
 | T-023 | Fix B-011: save/restore entry_rsi in open_position config | Medium | main.py 232, 841 | PENDING |
 | T-024 | Fix B-012: cadence check on strategic_trades count not all trades | Medium | main.py 376 | PENDING |
 | T-025 | Fix B-013: wire restore_strategy() into brain loop or CLI | Medium | main.py 478 | PENDING |
@@ -22,7 +22,6 @@
 ## Bug Status (second structural analysis 2026-05-31)
 | ID | Description | Severity | Task |
 |----|-------------|----------|------|
-| B-010 | SELL PnL uses self.entry_price (individual buy) not weighted avg | High | T-022 |
 | B-011 | entry_rsi lost on restart — D-032 dynamic threshold bypassed | Medium | T-023 |
 | B-012 | Reflection cadence fires on emergency trades (D-025 intent violated) | Medium | T-024 |
 | B-013 | restore_strategy() never called — rollback dead code | Medium | T-025 |
@@ -42,6 +41,7 @@
 | B-007 | Low | D-038 |
 | B-008 | Medium | D-042 |
 | B-009 | Low | D-041 |
+| B-010 | High | T-022 (self.entry_price = avg_price on BUY) |
 
 ## Verification Status
 | Item | Verified | Notes |
@@ -90,7 +90,7 @@
 - Convention: `*.ddmmyy-hhmmss` prefix
 
 ---
-**Last Updated:** 2026-05-31 23:15 | Engineer: J.A.R.V.I.S.
+**Last Updated:** 2026-06-02 04:05 | Engineer: J.A.R.V.I.S.
 
 ## Git Repository Usage
 

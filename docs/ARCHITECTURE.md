@@ -128,7 +128,7 @@ Key invariants:
 ## Known Bugs & Architectural Risks
 | ID | File | Lines | Risk | Severity |
 |----|------|-------|------|----------|
-| B-010 | main.py | 820, 857 | SELL PnL uses `self.entry_price` (individual buy) not weighted avg — wrong PnL on multi-buy | High |
+| B-010 | main.py | 820, 857 | FIXED: SELL PnL now uses weighted average entry price from open_position (T-022) | High |
 | B-011 | main.py | 232, 726 | `entry_rsi` never saved to config / restored on startup — D-032 dynamic threshold silently bypassed after restart | Medium |
 | B-012 | main.py | 376 | Cadence check uses all trades including emergency ones — 3 stop-losses can trigger reflection (D-025 violation) | Medium |
 | B-013 | main.py | 478 | `restore_strategy()` never called — brain rollback (PRIMARY GOAL) is dead code | Medium |

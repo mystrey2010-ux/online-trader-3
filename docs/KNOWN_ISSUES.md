@@ -9,7 +9,6 @@
 ## BUGS — Confirmed, Pending Fix (v2.14 analysis — 2026-05-31)
 | ID | File | Line(s) | Description | Severity |
 |----|------|---------|-------------|----------|
-| B-010 | main.py | 820, 857 | Multi-buy `self.entry_price` stores individual buy price, not weighted avg. `config["open_position"]["entry_price"]` correctly stores avg_price but SELL PnL calc at L857 uses `self.entry_price` → wrong PnL on any 2nd+ buy. | High |
 | B-011 | main.py | 232, 726 | `self.entry_rsi` never saved to `open_position` in config, never restored on startup. On restart with open position, dynamic sell threshold never activates — always falls back to `threshold+20` (D-032 silently bypassed). | Medium |
 | B-012 | main.py | 376 | `self_improve_strategies()` cadence check uses `len(trades)` (all trades) not `len(strategic_trades)`. 3 emergency stop-losses alone can trigger reflection with zero strategic trades (violates D-025 intent). | Medium |
 | B-013 | main.py | 478 | `restore_strategy()` is dead code — defined but never called. Brain can never roll back a bad hypothesis. Rollback capability (PRIMARY GOAL) is non-functional. | Medium |
@@ -38,11 +37,12 @@
 | B-007 [RESOLVED] | config not reloaded each cycle | Low | D-038 |
 | B-008 [RESOLVED] | emergency_stop_trader set open_position=None | Medium | D-042 |
 | B-009 [RESOLVED] | Dead-code init guard in self_improve_strategies() | Low | D-041 |
+| B-010 [RESOLVED] | SELL PnL uses self.entry_price (individual buy) not weighted avg | High | D-032 fix (T-022) |
 | B-EMERGENCY [RESOLVED] | EMERGENCY_STOP flag blocked trading logic | High | D-024/D-026 |
 | DASHBOARD-ENGINE-DETECTION [RESOLVED] | pgrep -a python3 missed venv process | Low | pgrep -f "main.py" |
 
 ---
-**Last Updated:** 2026-05-31 23:15 | Engineer: J.A.R.V.I.S.
+**Last Updated:** 2026-06-02 04:05 | Engineer: J.A.R.V.I.S.
 
 ## Git Repository Usage
 

@@ -13,7 +13,6 @@
 ## Bug Fix Tasks (from structural analysis 2026-05-31 v2.14)
 | ID | Description | Priority | File | Lines | Status |
 |----|-------------|----------|------|-------|--------|
-| T-022 | Fix B-010: `self.entry_price` should track weighted avg price, not individual buy price. On BUY, set `self.entry_price = avg_price` (L836) not `current_price` (L820). SELL PnL calc then uses correct base. | High | main.py | 820, 857 | PENDING |
 | T-023 | Fix B-011: Save `entry_rsi` into `open_position` in config on BUY and restore it in `__init__` alongside `entry_price`. Enables D-032 dynamic threshold to survive restarts. | Medium | main.py | 232, 820–841 | PENDING |
 | T-024 | Fix B-012: Change cadence check to use `len(strategic_trades)` not `len(trades)`. Filter emergency trades BEFORE the cadence gate so 3 emergency trades cannot trigger reflection. | Medium | main.py | 374–376 | PENDING |
 | T-025 | Fix B-013: Wire `restore_strategy()` into `self_improve_strategies()` — call it when strategy performs worse after 2+ consecutive reflection cycles. Or expose via manage_trader.sh `rollback` command. | Medium | main.py | 478 | PENDING |
@@ -35,6 +34,7 @@
 | T-014 | Remove locals() in restore_strategy() | B-005/D-039 | COMPLETED |
 | T-015 | Remove dead-code init guard | B-009/D-041 | COMPLETED |
 | T-017 | Reload config from disk each run_cycle() | B-007/D-038 | COMPLETED |
+| T-022 | Fix B-010: `self.entry_price` should track weighted avg price, not individual buy price. On BUY, set `self.entry_price = avg_price` (L836) not `current_price` (L820). SELL PnL calc then uses correct base. | B-010 | COMPLETED |
 
 ## Task Dependencies
 ```
@@ -50,7 +50,7 @@ T-003                      → T-019 (dashboard shows hypothesis_ledger)
 
 ---
 **See PROJECT_STATE.md for verification status, deferred items, and documentation gaps.**
-**Last Updated:** 2026-05-31 23:15 | Engineer: J.A.R.V.I.S.
+**Last Updated:** 2026-06-02 04:05 | Engineer: J.A.R.V.I.S.
 
 ## Git Repository Usage
 

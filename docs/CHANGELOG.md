@@ -10,6 +10,7 @@
 - B-006: RSI sell log label corrected from "(Stop-Loss)" to "(RSI Signal)" (D-040)
 - B-009: Removed dead-code init guard in self_improve_strategies() else branch (D-041)
 - B-008: emergency_stop_trader.py — del open_position instead of set to None (D-042)
+- B-010: Fixed SELL PnL calculation to use weighted average entry price from open_position instead of individual buy price (T-022)
 
 ## v2.13 (2026-05-29 / 2026-05-31)
 - Emergency stop interface redesigned (emergency_only, emergency_sell, off)
@@ -58,7 +59,7 @@
 - Full trade history display
 
 ---
-**Last Updated:** 2026-05-31 23:10 | Engineer: J.A.R.V.I.S.
+**Last Updated:** 2026-06-02 04:05 | Engineer: J.A.R.V.I.S.
 
 ## Git Repository Usage
 

@@ -817,7 +817,6 @@ class OnlineTrader:
                         
                         self.last_trade_usd_amount = amount_to_spend
                         self.current_position = 'long'
-                        self.entry_price = current_price
                         self.entry_rsi = rsi_val  # Track RSI at entry for dynamic sell threshold
                         
                         # Removed: No longer tracking virtual sub-account balance for shadow accounting
@@ -841,6 +840,9 @@ class OnlineTrader:
                             "entry_price": avg_price,  # Weighted average by BTC value (see ARCHITECTURE.md D-001)
                             "amount_btc": accumulated_btc
                         }
+
+                        # Update instance variable with weighted average entry price for PnL calculations
+                        self.entry_price = avg_price
                         
                         # Persist immediately after position open
                         save_config(self.config)
