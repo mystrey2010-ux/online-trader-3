@@ -74,6 +74,9 @@
 | Stop-loss cooldown | ✓ | D-049 — 300s cooldown after stop-loss |
 | Trend filter active | ✓ | D-055 — skips BUY when price declining over 20 periods |
 | Regime stability metric | ✓ | Dashboard shows % of hypotheses in current regime |
+| Rolling Sharpe metric | ✓ | Dashboard shows risk-adjusted returns
+| Time-Weighted Return | ✓ | Dashboard shows compounding-adjusted percentage
+| Consecutive SL Count | ✓ | Dashboard shows max cascade risk |
 | RSI signal log accuracy | ✓ | D-030/D-040 |
 | Python interpreter standardized | ✓ | Shebang/detection updated |
 | Deduplication of previous_strategies | ✓ | D-028 |

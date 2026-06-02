@@ -10,6 +10,7 @@
 - B-016: Fixed clean command — uses `d.pop("open_position", None)` instead of `= {}` for D-009/D-020 compliance (D-054)
 - T-018: Added trend filter — skips BUY when price declining over 20 periods (prevents buying into downtrend)
 - T-018: Added position timeout warning — logs warning if position open >24h without close signal
+- D-060: Added trade-level analytics — Rolling Sharpe(25), Time-Weighted Return, Consecutive SL Count
 ## v2.15 (2026-06-02)
 - B-017: Fixed `NameError: target_ret not defined` in `_generate_and_apply_hypotheses()` — self-improvement brain was completely broken; hypotheses could never be generated or logged (D-043)
 - B-018: Fixed hypothesis ledger entries storing wrong key names — `summarize_performance.py` reads `parameter/old_value/new_value/regime/direction` but engine wrote `regime_tag/expected_score_direction` only; all fields showed `?` in dashboard (D-044)

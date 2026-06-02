@@ -9,8 +9,10 @@
 | T-019 | Verify hypothesis_ledger dashboard display works with new key schema (D-044) | Medium | T-003, B-018 fix | DONE |
 | T-020 | Consolidate stop-loss into helper function | Low | None | PENDING |
 | T-021 | Add sell_threshold to cycle log output | Low | None | PENDING |
+| T-029 | Post-SL cooldown: prevent re-buy for N minutes after a stop-loss fires (L-010) | Medium | None | DONE |
 | T-TREND | Trend filter to prevent buying in sustained downtrend | Medium | None | DONE |
 | T-STABILITY | Regime stability metric in dashboard | Medium | T-019 | DONE |
+| T-ANALYTICS | Trade-level analytics (Sharpe, TWR, consecutive SL) | Medium | None | DONE |
 
 ## Bug Fix Tasks (from structural analysis 2026-05-31 v2.14)
 | ID | Description | Priority | File | Lines | Status |
@@ -31,6 +33,7 @@
 | T-029 | Post-SL cooldown after stop-loss | T-029/D-049 | COMPLETED |
 | T-029b | Fix B-017: `target_ret` NameError in `_generate_and_apply_hypotheses()` | B-017/D-043 | COMPLETED |
 | T-019 | Regime stability metric in dashboard | D-044 | COMPLETED |
+| T-ANALYTICS | Trade-level analytics (Sharpe, TWR, consecutive SL) | New | COMPLETED |
 
 ## Task Dependencies
 ```
