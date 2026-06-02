@@ -56,8 +56,8 @@
 ## Verification Status
 | Item | Verified | Notes |
 |------|----------|-------|
-| main.py syntax (v2.15) | ✓ | ast.parse clean |
-| emergency_stop_trader.py syntax | ✓ | py_compile clean |
+| main.py syntax (v2.16) | ✓ | py_compile clean |
+| B-011/B-012/B-013/T-029 implementation | ✓ | Gap fixes applied and verified 2026-06-02 |
 | B-017–B-019 fixed | ✓ | D-043/D-044/D-045 applied; engine restart needed |
 | B-001–B-010 all fixed | ✓ | D-034 through D-042 / T-022 applied |
 | Fee fields in both sell paths | ✓ | D-018 |
@@ -70,6 +70,7 @@
 | Hypothesis numeric confidence | ✓ | D-037 |
 | Hypothesis ledger key schema | ✓ | D-044 — now includes display alias keys |
 | Stop-loss no same-cycle re-buy | ✓ | D-045 |
+| Stop-loss cooldown | ✓ | D-049 — 300s cooldown after stop-loss |
 | RSI signal log accuracy | ✓ | D-030/D-040 |
 | Python interpreter standardized | ✓ | Shebang/detection updated |
 | Deduplication of previous_strategies | ✓ | D-028 |
@@ -103,7 +104,7 @@
 | KNOWN_ISSUES.md | Added B-011/B-012/B-013/T-029 resolved; updated active bugs |
 | DECISIONS.md | Added D-043/D-044/D-045/D-046/D-047/D-048/D-049 |
 | TASKS.md | Completed T-023/T-024/T-025/T-029; updated task status |
-| PROJECT_STATE.md | v2.16 resolved bugs section |
+| PROJECT_STATE.md | Added implementation gap verification, v2.16 syntax check |
 | ARCHITECTURE.md | Updated bug table, removed T-029 from deferred |
 
 ---
