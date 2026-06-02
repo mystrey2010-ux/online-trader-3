@@ -237,10 +237,8 @@ class OnlineTrader:
         else:
             self.last_trade_usd_amount = 0.0
 
-        # T-029 fix: Track stop-loss cooldown to prevent immediate re-buy
+# T-029 fix: Track stop-loss cooldown to prevent immediate re-buy
         self.sl_cooldown_until = None
-
-        exchange_name
         
         exchange_name = self.config.get("exchange", {}).get("type", "kraken").lower()
         # Kraken has no sandbox - always use CLI paper trading for Kraken (unless live trading)
