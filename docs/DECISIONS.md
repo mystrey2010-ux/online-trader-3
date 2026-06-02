@@ -32,8 +32,12 @@ Key design decisions, one line each. Code location noted for traceability.
 | D-040 | B-006 fix: RSI sell log corrected to "TRADE CLOSED (RSI Signal)" | main.py run_cycle() | v2.14 |
 | D-041 | B-009 fix: removed dead-code version/previous_strategies init guard inside self_improve_strategies() else branch | main.py self_improve_strategies() | v2.14 |
 | D-042 | B-008 fix: emergency_stop_trader.py uses del cfg["open_position"] instead of = None (D-009/D-020 compliance) | emergency_stop_trader.py | v2.14 |
-|---
-**Last Updated:** 2026-05-31 23:10 | Engineer: J.A.R.V.I.S.
+| D-043 | B-017 fix: `_generate_and_apply_hypotheses()` reads `target_daily_return`/`max_daily_drawdown` from `self.config` directly — they are not in scope from `self_improve_strategies()` | main.py _generate_and_apply_hypotheses() | v2.15 |
+| D-044 | B-018 fix: hypothesis ledger record now includes `parameter`, `old_value`, `new_value`, `regime`, `direction` alias keys alongside existing keys for `summarize_performance.py` display compatibility | main.py _generate_and_apply_hypotheses() | v2.15 |
+| D-045 | B-019 fix: `return` added after stop-loss sell execution so buy branch cannot fire in same cycle immediately after stop-loss clears `current_position` | main.py run_cycle() | v2.15 |
+
+---
+**Last Updated:** 2026-06-02 15:41 | Engineer: J.A.R.V.I.S.
 
 ## Git Repository Usage
 

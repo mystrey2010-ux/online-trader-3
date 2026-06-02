@@ -1,25 +1,26 @@
-# PROJECT STATE — Online Trader-3 v2.14
+# PROJECT STATE — Online Trader-3 v2.15
 
-**Status:** PAPER/SANDBOX | EMERGENCY_STOP: CLEARED | Engine: STOPPED (restart required) | Trade Progress: 0/3 strategic trades (0 completed, 1 open position)
+**Status:** PAPER/SANDBOX | EMERGENCY_STOP: CLEARED | Engine: RUNNING | Trade Progress: 10 completed (4 RSI wins, 6 stop-losses) | 1 open position
 
 ## Open Tasks
 | ID | Description | Priority | Dependencies | Status |
 |----|-------------|----------|--------------|--------|
-| T-003 | Confirm hypothesis_ledger populated at trade #3 | Medium | Requires 3 strategic trades (0/3 completed) | PENDING |
+| T-003 | Confirm hypothesis_ledger populated after first reflection post-B-017 fix | Medium | Requires restart + 3 strategic trades | PENDING |
 | T-016 | Add git version control (git init + baseline commit) | High | None | PENDING |
 | T-018 | Position timeout: warn if open >24h (L-004) | Medium | None | PENDING |
-| T-019 | hypothesis_ledger dashboard display (D-HYP-003) | Medium | T-003 | PENDING |
+| T-019 | Verify hypothesis_ledger dashboard display works with new key schema (D-044) | Medium | T-003 | PENDING |
 | T-020 | Consolidate stop-loss into helper function | Low | None | PENDING |
 | T-021 | Add sell_threshold to cycle log output | Low | None | PENDING |
-| T-022 | Fix B-010: self.entry_price = avg_price on BUY (not individual price) | High | main.py 820 | COMPLETED |
-| T-023 | Fix B-011: save/restore entry_rsi in open_position config | Medium | main.py 232, 841 | PENDING |
-| T-024 | Fix B-012: cadence check on strategic_trades count not all trades | Medium | main.py 376 | PENDING |
-| T-025 | Fix B-013: wire restore_strategy() into brain loop or CLI | Medium | main.py 478 | PENDING |
+| T-023 | Fix B-011: Save/restore entry_rsi in open_position config | Medium | main.py 232, 841 | PENDING |
+| T-024 | Fix B-012: Cadence check on strategic_trades count not all trades | Medium | main.py 376 | PENDING |
+| T-025 | Fix B-013: Wire restore_strategy() into brain loop or CLI | Medium | main.py 478 | PENDING |
 | T-026 | Fix B-014: pgrep -f "main.py" in manage_trader.sh | Low | manage_trader.sh | PENDING |
-| T-027 | Fix B-015: update version string in manage_trader.sh to 2.14 | Low | manage_trader.sh 106 | PENDING |
+| T-027 | Fix B-015: Update version string in manage_trader.sh to 2.15 | Low | manage_trader.sh 106 | PENDING |
 | T-028 | Fix B-016: del open_position in clean command | Low | manage_trader.sh 210 | PENDING |
+| T-029 | Post-SL cooldown period to prevent immediate re-buy after stop-loss (L-010) | Medium | main.py | PENDING |
 
-## Bug Status (second structural analysis 2026-05-31)
+## Bug Status
+### Active (v2.15)
 | ID | Description | Severity | Task |
 |----|-------------|----------|------|
 | B-011 | entry_rsi lost on restart — D-032 dynamic threshold bypassed | Medium | T-023 |
@@ -29,7 +30,14 @@
 | B-015 | manage_trader.sh stale version string | Low | T-027 |
 | B-016 | manage_trader.sh clean sets open_position={} not deletes | Low | T-028 |
 
-## Resolved Bug Status (v2.14)
+### Resolved (v2.15 — 2026-06-02)
+| ID | Severity | Resolution |
+|----|----------|------------|
+| B-017 | Critical | D-043 — NameError in `_generate_and_apply_hypotheses()` blocked all hypothesis generation |
+| B-018 | Medium | D-044 — Hypothesis ledger key schema mismatch with dashboard |
+| B-019 | Medium | D-045 — Stop-loss triggered immediate re-buy in same cycle |
+
+### Resolved (v2.14 — 2026-05-31)
 | ID | Severity | Resolution |
 |----|----------|------------|
 | B-001 | High | D-035 |
@@ -46,42 +54,56 @@
 ## Verification Status
 | Item | Verified | Notes |
 |------|----------|-------|
-| main.py syntax (v2.14) | ✓ | py_compile clean |
-| emergency_stop_trader.py syntax (v2.14) | ✓ | py_compile clean |
-| B-001–B-009 all fixed | ✓ | D-034 through D-042 applied |
+| main.py syntax (v2.15) | ✓ | ast.parse clean |
+| emergency_stop_trader.py syntax | ✓ | py_compile clean |
+| B-017–B-019 fixed | ✓ | D-043/D-044/D-045 applied; engine restart needed |
+| B-001–B-010 all fixed | ✓ | D-034 through D-042 / T-022 applied |
 | Fee fields in both sell paths | ✓ | D-018 |
-| Fee trap prevention | ✓ | D-031 — confirmed holding at RSI 84-87 in live session |
+| Fee trap prevention | ✓ | D-031 — confirmed holding at RSI 84-87+ in live session |
 | Dynamic RSI threshold | ✓ | D-032 — NOTE: bypassed after restart until B-011 fixed |
 | Position restoration on startup | ✓ | D-020 |
 | Config reloaded each cycle | ✓ | D-038 |
 | EMERGENCY_STOP guard | ✓ | D-023 |
 | Emergency trades excluded from brain | ✓ | D-025 — NOTE: cadence check still uses all trades (B-012) |
 | Hypothesis numeric confidence | ✓ | D-037 |
+| Hypothesis ledger key schema | ✓ | D-044 — now includes display alias keys |
+| Stop-loss no same-cycle re-buy | ✓ | D-045 |
 | RSI signal log accuracy | ✓ | D-030/D-040 |
 | Python interpreter standardized | ✓ | Shebang/detection updated |
 | Deduplication of previous_strategies | ✓ | D-028 |
+
+## Performance Observations (2026-06-01 to 2026-06-02)
+- 10 completed trades: 4 wins (+$0.111 total net), 6 stop-losses (-$4.884 total net)
+- Net PnL: approximately -$4.773
+- Dominant pattern: BTC in extended downtrend (~$74k → ~$68k), stop-losses firing repeatedly
+- B-017 (brain NameError) meant zero self-improvement occurred across all 10 trades — strategy never adapted
+- B-019 (same-cycle re-buy) contributed to consecutive SL chains (trade 3→4, 9→10)
+- After B-017 fix + restart: first reflection will trigger at next 3 strategic trades
 
 ## Deferred Items (Q - Quality of Service)
 | ID | Item | Notes |
 |----|------|-------|
 | Q-003 | Multi-symbol support | Architecture supports, not implemented |
 | Q-004 | Native stop-loss orders (Kraken API) | Currently price-check based |
-| D-HYP-003 | hypothesis_ledger display on dashboard | T-019 |
+| D-HYP-003 | hypothesis_ledger display on dashboard | Verify via T-019 post-B-018 fix |
 
 ## Documentation Gaps
 | Priority | Issue | Recommended Action |
 |----------|-------|-------------------|
-| High | Position timeout undocumented | T-018 |
+| High | Post-SL cooldown undocumented | T-029 |
 | Medium | Rollback trigger conditions undocumented | Clarify when restore_strategy() should fire (T-025) |
 | Medium | Emergency stop duplicate trade risk | Clarify L-005 mitigation |
 
-## Recent Documentation Updates
-| File | Status | Backup |
-|------|--------|--------|
-| KNOWN_ISSUES.md | Added B-010 through B-016 | *.310526-230915 |
-| TASKS.md | Added T-022 through T-028 + completed tasks table | *.310526-230915 |
-| PROJECT_STATE.md | Updated to second analysis pass, all bugs tracked | *.310526-230915 |
-| ARCHITECTURE.md | Bug table updated to B-010–B-016 | *.310526-230915 |
+## Recent Documentation Updates (2026-06-02)
+| File | Changes |
+|------|---------|
+| NOW.md | Full rewrite — current live state, trade table, recent fixes |
+| CHANGELOG.md | Added v2.15 entry |
+| KNOWN_ISSUES.md | Added B-017/B-018/B-019 resolved; added L-010; updated active bugs |
+| DECISIONS.md | Added D-043/D-044/D-045 |
+| TASKS.md | Added T-029; completed T-029b/T-030/T-031; updated T-019/T-027 |
+| PROJECT_STATE.md | Full update — trade count, performance obs, v2.15 bug status |
+| ARCHITECTURE.md | Updated bug table, sell threshold description, version |
 
 ## Backup Reference
 - Docs backups: `/docs/backups/`
@@ -90,8 +112,4 @@
 - Convention: `*.ddmmyy-hhmmss` prefix
 
 ---
-**Last Updated:** 2026-06-02 04:05 | Engineer: J.A.R.V.I.S.
-
-## Git Repository Usage
-
-This project uses a Git repository for version control, backup, and restore. Commit changes regularly; use branches for experimentation; and push to remote for backup. See .gitignore for files excluded from version control.
+**Last Updated:** 2026-06-02 15:41 | Engineer: J.A.R.V.I.S.

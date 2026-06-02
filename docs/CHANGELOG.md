@@ -1,5 +1,10 @@
 # CHANGELOG — Online Trader-3
 
+## v2.15 (2026-06-02)
+- B-017: Fixed `NameError: target_ret not defined` in `_generate_and_apply_hypotheses()` — self-improvement brain was completely broken; hypotheses could never be generated or logged (D-043)
+- B-018: Fixed hypothesis ledger entries storing wrong key names — `summarize_performance.py` reads `parameter/old_value/new_value/regime/direction` but engine wrote `regime_tag/expected_score_direction` only; all fields showed `?` in dashboard (D-044)
+- B-019: Fixed stop-loss triggering immediate re-buy in same cycle — after stop-loss sell, `current_position` cleared to None so buy branch fired immediately (RSI still low at trigger point); added `return` after stop-loss execution (D-045)
+
 ## v2.14 (2026-05-31)
 - B-003: Restored last_trade_usd_amount from config on startup — PnL/fees now correct after restart (D-034)
 - B-001: Removed unbound ticker['last'] re-fetch in stop-loss path — uses resolved current_price (D-035)
@@ -59,7 +64,7 @@
 - Full trade history display
 
 ---
-**Last Updated:** 2026-06-02 04:05 | Engineer: J.A.R.V.I.S.
+**Last Updated:** 2026-06-02 15:41 | Engineer: J.A.R.V.I.S.
 
 ## Git Repository Usage
 

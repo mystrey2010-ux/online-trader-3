@@ -1,4 +1,4 @@
-# ARCHITECTURE — Online Trader-3 v2.13
+# ARCHITECTURE — Online Trader-3 v2.15
 
 ## System Overview
 - **Engine:** Single-process Python (main.py), 60s cycle, paper trading via Kraken CLI
@@ -8,67 +8,69 @@
 ## Exchange Adapters
 | Adapter | When Active | Location |
 |---------|-------------|----------|
-| KrakenCliPaperExchange | exchange=kraken, sandbox_mode=true (**active**) | main.py + ~/.cargo/bin/kraken |
-| RealKrakenExchange | CCXT with live API keys (inactive) | emergency_stop_trader.py only |
+| KrakenCliPaperExchange | exchange=kraken, LIVE_TRADING_ENABLED=false (**active**) | main.py + ~/.cargo/bin/kraken |
+| RealKrakenExchange | CCXT with live API keys (inactive) | main.py (live mode only) |
 | GenericCCXTExchange | Any CCXT exchange (inactive) | Future multi-symbol support |
 
 ## Trading Loop (run_cycle, 60s)
 ```
 0. EMERGENCY_STOP? → log "EMERGENCY STOP ACTIVE", return (D-023 guard)
-1. Fetch ticker (for stop-loss price check)
+1. Fetch ticker (for real-time stop-loss price check)
 2. Fetch OHLCV (50 x 1m bars)
 3. Calculate RSI-14
-4. STOP-LOSS: price < entry × (1-stop_loss_pct) → emergency sell
-5. BUY: RSI < indicator_threshold (63.0), no position → buy position_size_pct of balance
-6. SELL: RSI > dynamic_threshold (based on entry RSI + fee requirements), position open → sell all BTC
+4. STOP-LOSS: price < entry × (1-stop_loss_pct) → emergency sell → return (D-045)
+5. BUY:  RSI < indicator_threshold (63.0), no position → buy position_size_pct of balance
+6. SELL: RSI > sell_threshold AND net PnL after fees > 0 → sell all BTC
 ```
 
-**Sell threshold = dynamic threshold based on entry RSI and fee requirements (D-032). NOT a fixed offset.**
+**Sell threshold** = dynamic, based on `entry_rsi + estimated_rsi_change_for_fee_hurdle + 5` buffer, minimum `indicator_threshold + 10`. Falls back to `indicator_threshold + 20` when no entry RSI is available (D-032).
+
+**Stop-loss exits with `return`** — buy branch cannot fire in same cycle after a stop-loss (D-045).
 
 ## Self-Improvement Brain (D-006 / D-025)
 ```
 Trigger: Every 3 completed STRATEGIC trades (excluding emergency)
-Strategic trade = RSI buy signal (RSI<63.0) → RSI sell signal (RSI>83.0)
+Strategic trade = RSI buy signal (RSI<63.0) → RSI sell signal (RSI>sell_threshold)
 Emergency trades excluded if: stop_loss_triggered=true OR note contains "Emergency"
 Action:
   1. Load last 25 trades, filter out emergency trades
   2. Calculate fee-aware metrics (net_pnl_usd)
-  3. Tag market regime via 20-period rolling return
+  3. Tag market regime via 20-period rolling return on 1h OHLCV
   4. If underperforming: backup strategy → generate regime-aware hypotheses → apply best
-  5. Tunes: indicator_threshold, stop_loss_pct, position_size_pct
-  6. Rollback: previous_strategies[] → restore_strategy() if needed
+  5. Tunes ONE of: indicator_threshold, stop_loss_pct, position_size_pct
+  6. Rollback: previous_strategies[] → restore_strategy() — NOTE: restore_strategy() not yet wired (B-013)
 ```
 
-**hypothesis_ledger populated only after trade #3 triggers reflection (D-006).**
+**hypothesis_ledger** populated only after reflection fires. Was broken by B-017 (NameError) until v2.15. Each ledger entry includes: `parameter`, `old_value`, `new_value`, `regime`, `direction`, `regime_tag`, `expected_score_direction`, `metrics_at_failure`, `confidence_reasoning`.
 
 ## Position Management
 - Multi-buy accumulation, value-weighted average entry price
-- open_position persists in config.json until close; restored on startup (D-020)
+- `open_position` persists in config.json until close; restored on startup (D-020)
+- `entry_rsi` is NOT persisted — dynamic sell threshold falls back after restart (B-011, T-023)
 - Single symbol: BTC/USDT (Q-003 deferred: multi-symbol support)
 
-## Trade Record Schema (v2.12)
+## Trade Record Schema (v2.15)
 ```json
 {
   "timestamp": "ISO8601",
-  "entry": 73671.60,
-  "exit": 73850.30,
-  "pnl_pct": 0.00243,
+  "entry": 70228.20,
+  "exit": 70595.20,
+  "pnl_pct": 0.00523,
   "symbol": "BTC/USDT",
-  "pnl_usd": 0.08975,
-  "gross_pnl_usd": 0.089748,
-  "fee_usd": 0.192,
-  "net_pnl_usd": -0.102,
-  "stop_loss_triggered": true/false,
+  "pnl_usd": 0.19284,
+  "gross_pnl_usd": 0.192845,
+  "fee_usd": 0.191892,
+  "net_pnl_usd": 0.000953,
+  "stop_loss_triggered": false,
   "note": null
 }
 ```
 
 **Fee:** `trade_value × kraken_fee_pct × 2` (both legs). Default 0.26% per leg (0.52% round-trip).
 
-## Config Schema (v2.13)
+## Config Schema (v2.15)
 ```json
 {
-  "exchange": {"type":"kraken","apiKey":"...","secret":"..."},
   "target_asset": "BTC/USDT",
   "target_daily_return": 0.002,
   "max_daily_drawdown": 0.01,
@@ -84,27 +86,34 @@ Action:
   "hypothesis_ledger": [],
   "version": 1,
   "previous_strategies": [],
-  "open_position": {},
+  "open_position": {
+    "timestamp": "ISO8601",
+    "symbol": "BTC/USDT",
+    "entry_price": 67752.40,
+    "amount_btc": 0.000543
+  },
   "system_status": null
 }
 ```
 
 ## Dashboard (summarize_performance.py)
-7 sections: Account → Position → Strategy → Orders → Trades → Brain → System  
+7 sections: Account → Position → Strategy → Orders → Trades → Brain → System
 Read-only; uses Kraken CLI for real-time data.
+
+Hypothesis log table reads keys: `parameter`, `old_value`, `new_value`, `regime`, `direction` (set by D-044 fix).
 
 ## Operations
 ### Engine Management (manage_trader.sh)
 - `start` → python main.py
 - `stop` → pkill -9 -f main.py (quiet kill)
 - `restart` → stop + start
-- `status` → pgrep -a "python" | grep "/.*main\\.py"
+- `status` → pgrep output (NOTE: fragile pattern — B-014/T-026 pending fix)
 - `clean` → DESTRUCTIVE: engine stopped + SANDBOX cleared
 
 ### Emergency Stop (emergency_stop_trader.py)
 - `emergency_only` → sets EMERGENCY_STOP flag (D-023)
 - `emergency_sell` → flag + market-sell position (⚠ only when position exists, L-005)
-- `off` → clears EMERGENCY_STOP, resumes trading (D-024/D-025)
+- `off` → clears EMERGENCY_STOP, resumes trading (D-024/D-026)
 - Help: run without arguments
 
 ### Data Preservation
@@ -115,44 +124,44 @@ Read-only; uses Kraken CLI for real-time data.
 ## Logging
 - **Format:** `[YYYY-MM-DD HH:MM:SS,ms] [LEVEL] msg`
 - **File:** trader.log (append mode)
-- **Engine Detection:** `pgrep -a "python" | grep "/.*main\\.py"` (no PID file)
+- **Engine Detection:** `pgrep -f "main.py"` (summarize_performance.py; manage_trader.sh still uses fragile pattern — B-014)
 
 ## Design Decisions (See DECISIONS.md for full list)
 Key invariants:
-- D-013: format_dollar() / f"${val:.2f}" exclusively; NEVER comma specifier
+- D-013: f"${val:.2f}" exclusively; NEVER comma specifier
 - D-016: PAPER/SANDBOX mode detected from CLI output, not config key
 - D-018: Both sell paths write gross_pnl_usd/fee_usd/net_pnl_usd at close
 - D-023: EMERGENCY_STOP guard at top of run_cycle()
 - D-025: Emergency trades excluded from self-improvement brain reflection pool
+- D-031: Sell only if net PnL after fees > 0 (fee trap prevention)
+- D-032: Dynamic sell threshold based on entry RSI + fee hurdle
+- D-044: Hypothesis ledger entries include display alias keys for dashboard
+- D-045: Stop-loss exits with `return` — no same-cycle re-buy
 
 ## Known Bugs & Architectural Risks
-| ID | File | Lines | Risk | Severity |
-|----|------|-------|------|----------|
-| B-010 | main.py | 820, 857 | FIXED: SELL PnL now uses weighted average entry price from open_position (T-022) | High |
-| B-011 | main.py | 232, 726 | `entry_rsi` never saved to config / restored on startup — D-032 dynamic threshold silently bypassed after restart | Medium |
+| ID | File | Lines | Description | Severity |
+|----|------|-------|-------------|----------|
+| B-011 | main.py | 232, 726 | `entry_rsi` not saved to config / restored on startup — D-032 dynamic threshold silently bypassed after restart | Medium |
 | B-012 | main.py | 376 | Cadence check uses all trades including emergency ones — 3 stop-losses can trigger reflection (D-025 violation) | Medium |
 | B-013 | main.py | 478 | `restore_strategy()` never called — brain rollback (PRIMARY GOAL) is dead code | Medium |
-| B-014 | manage_trader.sh | 23, 50, 62, 85 | `pgrep -a "python" \| grep main.py` fragile in venvs — should be `pgrep -f "main.py"` (D-016) | Low |
-| B-015 | manage_trader.sh | 106 | Hardcoded `"Version 2.13"` stale (now v2.14) | Low |
+| B-014 | manage_trader.sh | 23, 50, 62, 85 | `pgrep -a "python" \| grep main.py` fragile in venvs — should be `pgrep -f "main.py"` | Low |
+| B-015 | manage_trader.sh | 106 | Hardcoded version string stale (needs updating to 2.15) | Low |
 | B-016 | manage_trader.sh | 210 | `clean` sets `open_position={}` not deletes key (D-009/D-020 violation) | Low |
-**Full details and fix tasks: see KNOWN_ISSUES.md (B-010–B-016) and TASKS.md (T-022–T-028).**
+
+**Full details and fix tasks: see KNOWN_ISSUES.md and TASKS.md (T-023–T-029).**
 
 ## Deferred Items
 | ID | Item | Notes |
 |----|------|-------|
 | Q-003 | Multi-symbol support | Architecture supports, not implemented |
 | Q-004 | Native stop-loss orders (Kraken API) | Currently price-check based |
-| D-HYP-003 | hypothesis_ledger display on dashboard | Dashboard needs view implementation (T-019) |
+| T-029 | Post-SL cooldown period | Prevents immediate re-buy after stop-loss into continuing downtrend (L-010) |
 
 ## Backup Convention
-- No git version control yet — T-016 priority task
+- Git repository in use for version control
 - Local backups: `*.ddmmyy-hhmmss` prefix before major changes
 - Project backups: `/backups/`
 - Docs backups: `/docs/backups/`
 
 ---
-**Last Updated:** 2026-05-31 23:15 | Engineer: J.A.R.V.I.S.
-
-## Git Repository Usage
-
-This project uses a Git repository for version control, backup, and restore. Commit changes regularly; use branches for experimentation; and push to remote for backup. See .gitignore for files excluded from version control.
+**Last Updated:** 2026-06-02 15:41 | Engineer: J.A.R.V.I.S.

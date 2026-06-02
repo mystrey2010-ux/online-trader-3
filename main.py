@@ -630,6 +630,8 @@ class OnlineTrader:
             else:
                 regime_confidence_boost = 0.0
             
+            target_ret = self.config["target_daily_return"]
+            target_dd = self.config["max_daily_drawdown"]
             performance_urgency = max(0, (avg_ret - target_ret) ** 2 + (target_dd - max_dd) ** 2) / 0.001
             urgency_factor = min(0.3, performance_urgency)
             
@@ -688,7 +690,12 @@ class OnlineTrader:
             "description": best_hyp["description"],
             "metrics_at_failure": best_hyp.get("metrics_at_failure", {}),
             "regime_tag": current_regime,
+            "regime": current_regime,  # summarize_performance.py compatibility alias
+            "parameter": param_name,   # summarize_performance.py reads this key
+            "old_value": old_val,      # summarize_performance.py reads this key
+            "new_value": strat[param_name],  # summarize_performance.py reads this key
             "expected_score_direction": best_hyp.get("expected_score_direction"),
+            "direction": best_hyp.get("expected_score_direction"),  # summarize_performance.py alias
             "confidence_reasoning": best_hyp.get("confidence_reasoning")
         }
         self.config["hypothesis_ledger"].append(hypothesis_record)
@@ -790,6 +797,7 @@ class OnlineTrader:
                             self.current_position = None
                             self.entry_price = None
                             self.entry_rsi = None  # B-002 fix: clear entry_rsi after stop-loss to avoid corrupting next trade's dynamic sell threshold
+                            return  # Do NOT re-enter the buy branch in the same cycle after a stop-loss
                         else:
                             logging.warning("⚠️ No BTC available to close on stop-loss.")
                     except Exception as e:
@@ -797,6 +805,7 @@ class OnlineTrader:
                         self.current_position = None
                         self.entry_price = None
                         self.entry_rsi = None  # B-002 fix: clear on failure path too
+                        return  # Skip remainder of cycle on stop-loss failure too
             # ===============================
 
             if rsi_val < buy_threshold and self.current_position is None:
