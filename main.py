@@ -26,6 +26,7 @@ import ccxt
 LOG_FILE = "trader.log"
 CONFIG_PATH = "config.json"
 LIVE_TRADING_ENABLED = os.getenv("LIVE_TRADING_ENABLED", "false").lower() == "true"
+SL_COOLDOWN_SECONDS = 300  # T-029: 5-minute cooldown after stop-loss prevents immediate re-buy
 
 
 # Redirect STDOUT and STDERR to trader.log
@@ -215,11 +216,16 @@ class OnlineTrader:
         if pos and pos.get("entry_price"):
             self.current_position = 'long'
             self.entry_price = pos["entry_price"]
+            self.entry_rsi = pos.get("entry_rsi")  # B-011 fix: restore entry_rsi for D-032 dynamic threshold
             logging.info(f"🔄 Restored open position from config: {pos.get('amount_btc', 0)} BTC @ ${pos['entry_price']:.2f}")
         else:
             self.current_position = None
             self.entry_price = None
+            self.entry_rsi = None  # B-011 fix: ensure None when no position
 
+        # T-029 fix: Track stop-loss cooldown to prevent immediate re-buy
+        self.sl_cooldown_until = None
+        
         # Restore last_trade_usd_amount from open_position so SELL PnL/fee calc is correct
         # after restart (B-003 fix). If no open_position, defaults to 0.0.
         if pos and pos.get("entry_price") and pos.get("amount_btc"):
@@ -228,8 +234,7 @@ class OnlineTrader:
         else:
             self.last_trade_usd_amount = 0.0
 
-        # Track RSI at entry for dynamic sell threshold calculation
-        self.entry_rsi = None
+        exchange_name
         
         exchange_name = self.config.get("exchange", {}).get("type", "kraken").lower()
         # Kraken has no sandbox - always use CLI paper trading for Kraken (unless live trading)
@@ -373,9 +378,6 @@ class OnlineTrader:
     
     def self_improve_strategies(self):
         trades = self.config.get("trade_history", [])
-        if len(trades) < self.config["reflection_cadence"]: return
-        
-        logging.info("🔍 Reflection Cadence Reached.")
         
         # CRITICAL: Exclude emergency trades from reflection pool (D-025)
         # Emergency sells (stop-loss triggered or manual close) should NOT influence
@@ -467,6 +469,11 @@ class OnlineTrader:
 
             # Generate hypotheses with regime-aware reasoning (PRIMARY GOAL spec)
             self._generate_and_apply_hypotheses(current_regime=current_regime, avg_ret=avg_return, max_dd=max_drawdown, sharpe=sharpe)
+
+            # B-013 fix: Check for rollback condition - Sharpe negative after tuning = strategy still failing
+            if sharpe < 0 and previous_strategies:
+                logging.warning(f"⚠️ Performance still failing after tuning (Sharpe: {sharpe:.2f}) - triggering rollback")
+                self.restore_strategy()
 
             # Increment version AFTER successful hypothesis application (PRIMARY GOAL: rollback capability)
             version += 1
@@ -809,6 +816,12 @@ class OnlineTrader:
             # ===============================
 
             if rsi_val < buy_threshold and self.current_position is None:
+                # T-029: Check stop-loss cooldown before allowing BUY
+                if self.sl_cooldown_until and time.time() < self.sl_cooldown_until:
+                    remaining = int(self.sl_cooldown_until - time.time())
+                    logging.info(f"⏳ In stop-loss cooldown ({remaining}s remaining) - skipping BUY signal")
+                    return
+                
                 try:
                     balance = self.exchange.fetch_balance()
                     usdt_free = balance.get('USDT', {}).get('free', 0) or balance.get('USD', {}).get('free', 0)
