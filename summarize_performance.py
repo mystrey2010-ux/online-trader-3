@@ -319,7 +319,8 @@ def print_open_position(config, spot_price):
 def print_strategy(config):
     """
     Data: config.json current_strategy + performance targets.
-    Note: sell threshold = indicator_threshold + 20 (hardcoded offset in engine, NOT a config field).
+    Sell threshold: dynamic when entry_rsi is available (entry_rsi + fee_hurdle_rsi + 5,
+    min threshold+10); falls back to threshold+20 when no position / no entry_rsi (D-032).
     """
     print("[3] CURRENT STRATEGY")
     print(SEPARATOR_MID)
@@ -331,10 +332,25 @@ def print_strategy(config):
     version = int(config.get("version", 1))
     n_snaps = len(config.get("previous_strategies", []))
 
-    sell_thresh = thresh + 20.0  # hardcoded +20 offset in engine run_cycle
+    # Replicate engine D-032 dynamic sell threshold logic for accurate display
+    pos = config.get("open_position")
+    entry_rsi = pos.get("entry_rsi") if pos else None
+    kraken_fee_pct = config.get("kraken_fee_pct", 0.0026)
+    if entry_rsi is not None:
+        try:
+            fee_hurdle_rsi = abs(float(entry_rsi)) * kraken_fee_pct * 2 * 50  # rough RSI-to-price ratio
+            dynamic = float(entry_rsi) + fee_hurdle_rsi + 5
+            sell_thresh = max(dynamic, thresh + 10)
+            sell_thresh_note = f"dynamic (entry RSI {float(entry_rsi):.1f} + fee hurdle + 5, min thr+10)"
+        except (TypeError, ValueError):
+            sell_thresh = thresh + 20.0
+            sell_thresh_note = "threshold + 20 (fallback, entry_rsi unreadable)"
+    else:
+        sell_thresh = thresh + 20.0
+        sell_thresh_note = "threshold + 20 (fallback, no open position)"
 
     print(f"  RSI BUY signal   : RSI < {thresh:.1f}")
-    print(f"  RSI SELL signal  : RSI > {sell_thresh:.1f}  (buy_threshold + 20, not a config field)")
+    print(f"  RSI SELL signal  : RSI > {sell_thresh:.2f}  ({sell_thresh_note})")
     print(f"  Stop-Loss        : -{fmt_pct(sl_pct)}  below entry price")
     print(f"  Position Size    : {fmt_pct(ps_pct)}  of available USD balance")
     print(f"  Strategy Version : v{version}  ({n_snaps} rollback snapshot(s))")

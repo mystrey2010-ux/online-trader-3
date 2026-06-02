@@ -1,4 +1,4 @@
-# KNOWN ISSUES — Online Trader-3 v2.15
+# KNOWN ISSUES — Online Trader-3 v2.17
 
 ## ACTIVE (Resolving)
 | ID | Issue | Severity | Resolution Status |
@@ -9,7 +9,7 @@
 ## BUGS — Confirmed, Pending Fix
 | ID | File | Line(s) | Description | Severity |
 |----|------|---------|-------------|----------|
-| None | — | — | All known bugs resolved in v2.16 | — |
+| None | — | — | All known bugs resolved in v2.17 | — |
 
 ## WATCH (Monitor)
 | ID | Issue | Severity | Mitigation/Notes |
@@ -24,6 +24,10 @@
 ## RESOLVED
 | ID | Issue | Severity | Resolution |
 |----|-------|----------|------------|
+| B-020 [RESOLVED] | BUY execution block nested under `if self.current_position == 'long'` — fired every cycle while holding, draining USD to near-zero via 64+ unintended consecutive buys | Critical | B-020/D-060 (v2.17) — moved buy block inside correct `if rsi_val < buy_threshold and self.current_position is None` branch |
+| B-021 [RESOLVED] | Dashboard section [3] hardcoded sell threshold as `threshold+20` regardless of D-032 dynamic value | Low | B-021/D-061 (v2.17) — replicates engine D-032 formula using entry_rsi from open_position |
+| B-022 [RESOLVED] | Stale `# ===== TREND FILTER CHECK` comment at column 0 in main.py (outside run_cycle indentation) | Low | B-022 (v2.17) — fixed indentation to 12 spaces inside method |
+| B-023 [RESOLVED] | config.json missing `exchange` and `kraken_fee_pct` top-level keys per schema | Low | B-023 (v2.17) — added both keys with correct defaults |
 | B-017 [RESOLVED] | `NameError: target_ret not defined` in `_generate_and_apply_hypotheses()` — self-improvement brain completely broken, hypotheses never generated | Critical | D-043 (v2.15) |
 | B-018 [RESOLVED] | Hypothesis ledger entries used wrong key names — dashboard showed `?` for all fields | Medium | D-044 (v2.15) |
 | B-019 [RESOLVED] | Stop-loss triggered immediate re-buy in same cycle | Medium | D-045 (v2.15) |
@@ -48,4 +52,4 @@
 | DASHBOARD-ENGINE-DETECTION [RESOLVED] | pgrep -a python3 missed venv process | Low | pgrep -f "main.py" |
 
 ---
-**Last Updated:** 2026-06-02 15:41 | Engineer: J.A.R.V.I.S.
+**Last Updated:** 2026-06-02 23:05 | Engineer: J.A.R.V.I.S.

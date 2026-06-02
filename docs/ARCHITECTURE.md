@@ -1,4 +1,4 @@
-# ARCHITECTURE — Online Trader-3 v2.16
+# ARCHITECTURE — Online Trader-3 v2.17
 
 ## System Overview
 - **Engine:** Single-process Python (main.py), 60s cycle, paper trading via Kraken CLI
@@ -144,7 +144,7 @@ Key invariants:
 ## Known Bugs & Architectural Risks
 | ID | File | Lines | Description | Severity |
 |----|------|-------|-------------|----------|
-All bugs resolved in v2.16 — see KNOWN_ISSUES.md
+All bugs resolved in v2.17 — see KNOWN_ISSUES.md
 
 **Full details and fix tasks: see KNOWN_ISSUES.md and TASKS.md.**
 
@@ -161,4 +161,4 @@ All bugs resolved in v2.16 — see KNOWN_ISSUES.md
 - Docs backups: `/docs/backups/`
 
 ---
-**Last Updated:** 2026-06-02 21:45 | Engineer: J.A.R.V.I.S.
+**Last Updated:** 2026-06-02 23:05 | Engineer: J.A.R.V.I.S.

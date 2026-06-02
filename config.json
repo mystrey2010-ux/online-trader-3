@@ -4,8 +4,12 @@
   "max_daily_drawdown": 0.01,
   "min_sharpe_ratio": 2.0,
   "reflection_cadence": 3,
+  "kraken_fee_pct": 0.0026,
+  "exchange": {
+    "type": "kraken"
+  },
   "current_strategy": {
-    "indicator_threshold": 63.0,
+    "indicator_threshold": 66.15,
     "stop_loss_pct": 0.016,
     "position_size_pct": 0.037
   },
@@ -125,10 +129,51 @@
       "fee_usd": 0.191599,
       "net_pnl_usd": -0.828773,
       "stop_loss_triggered": true
+    },
+    {
+      "timestamp": "2026-06-02T20:34:08.479674",
+      "entry": 67752.4,
+      "exit": 66612.7,
+      "pnl_pct": -0.016821544329056935,
+      "symbol": "BTC/USDT",
+      "pnl_usd": -0.6088393531482171,
+      "gross_pnl_usd": -0.608839,
+      "fee_usd": 0.191429,
+      "net_pnl_usd": -0.800268,
+      "stop_loss_triggered": true
+    },
+    {
+      "timestamp": "2026-06-02T20:50:15.478646",
+      "entry": 66778.8,
+      "exit": 67180.9,
+      "pnl_pct": 0.006021372052208055,
+      "symbol": "BTC/USDT",
+      "pnl_usd": 0.22149483779540546,
+      "gross_pnl_usd": 0.221495,
+      "fee_usd": 0.191281,
+      "net_pnl_usd": 0.030214
     }
   ],
-  "hypothesis_ledger": [],
-  "version": 1,
+  "hypothesis_ledger": [
+    {
+      "timestamp": "2026-06-02T20:50:18.515096",
+      "description": "Adjusting indicator_threshold from 63.0 to 66.1500",
+      "metrics_at_failure": {
+        "return": 0.08143600236059208,
+        "drawdown": 0,
+        "sharpe": 1.9375178596251357
+      },
+      "regime_tag": "BEAR",
+      "regime": "BEAR",
+      "parameter": "indicator_threshold",
+      "old_value": 63.0,
+      "new_value": 66.15,
+      "expected_score_direction": "stabilize",
+      "direction": "stabilize",
+      "confidence_reasoning": "BEAR market + optimization mode \u2192 105% increase to Wait for better confirmation in weak downtrend"
+    }
+  ],
+  "version": 2,
   "previous_strategies": [
     {
       "timestamp": "2026-05-29T20:35:07.906910",
@@ -140,11 +185,12 @@
       }
     }
   ],
+  "needs_rollback": false,
   "open_position": {
-    "timestamp": "2026-06-02T15:27:46.688240",
+    "timestamp": "2026-06-02T22:56:38.858707",
     "symbol": "BTC/USDT",
-    "entry_price": 67752.4,
-    "entry_rsi": 67.0,
-    "amount_btc": 0.000543350178772024
+    "entry_price": 67579.92,
+    "entry_rsi": 12.268704746576148,
+    "amount_btc": 0.013522066748546299
   }
 }

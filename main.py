@@ -223,20 +223,17 @@ class OnlineTrader:
         else:
             self.current_position = None
             self.entry_price = None
-            self.entry_rsi = None  # B-011 fix: ensure None when no position
+# B-011 fix: ensure None when no position
 
-        # T-029 fix: Track stop-loss cooldown to prevent immediate re-buy
-        self.sl_cooldown_until = None
+        # T-029 fix: Restore stop-loss cooldown from config to prevent immediate re-buy after restart
+        self.sl_cooldown_until = self.config.get("sl_cooldown_until", 0)
         # after restart (B-003 fix). If no open_position, defaults to 0.0.
         if pos and pos.get("entry_price") and pos.get("amount_btc"):
             self.last_trade_usd_amount = pos["amount_btc"] * pos["entry_price"]
             logging.info(f"🔄 Restored last_trade_usd_amount: ${self.last_trade_usd_amount:.2f}")
         else:
             self.last_trade_usd_amount = 0.0
-
-# T-029 fix: Track stop-loss cooldown to prevent immediate re-buy
-        self.sl_cooldown_until = None
-        
+         
         exchange_name = self.config.get("exchange", {}).get("type", "kraken").lower()
         # Kraken has no sandbox - always use CLI paper trading for Kraken (unless live trading)
         # For other exchanges, check sandbox_mode setting
@@ -744,11 +741,21 @@ class OnlineTrader:
         # Reload config from disk each cycle to pick up external writes
         # (e.g. EMERGENCY_STOP set by emergency_stop_trader.py, manual edits) — B-007 fix.
         self.config = load_config()
+        # Restore cooldown state after config reload
+        self.sl_cooldown_until = self.config.get("sl_cooldown_until", 0)
         symbol = self.config["target_asset"]
         # Emergency STOP check – if active, log and skip this cycle
         if self.config.get("system_status") == "EMERGENCY_STOP":
             logging.warning("🚨 EMERGENCY STOP ACTIVE – skipping all trading logic this cycle")
             return
+        
+        # Clean expired cooldown
+        if self.sl_cooldown_until and time.time() >= self.sl_cooldown_until:
+            self.sl_cooldown_until = 0
+            if "sl_cooldown_until" in self.config:
+                del self.config["sl_cooldown_until"]
+                save_config(self.config)
+            logging.info("🧹 Stop-loss cooldown expired - cleared from config")
         
         # Get current ticker price for real-time price monitoring (for stop-loss)
         try:
@@ -829,12 +836,13 @@ class OnlineTrader:
                             if "open_position" in self.config:
                                 del self.config["open_position"]
                             self.config["trade_history"].append(trade_record)
-                            logging.info(f"💰 TRADE CLOSED: PnL: {pnl_pct:.4%} (${pnl_usd:.2f}) | Gross: ${gross_pnl_usd:.4f} | Fee: ${fee_usd:.4f} | Net: ${net_pnl_usd:.4f}")
+                            self.config["sl_cooldown_until"] = time.time() + SL_COOLDOWN_SECONDS
                             save_config(self.config)
                             self.current_position = None
                             self.entry_price = None
                             self.entry_rsi = None
                             self.sl_cooldown_until = time.time() + SL_COOLDOWN_SECONDS
+                            logging.info(f"💰 TRADE CLOSED: PnL: {pnl_pct:.4%} (${pnl_usd:.2f}) | Gross: ${gross_pnl_usd:.4f} | Fee: ${fee_usd:.4f} | Net: ${net_pnl_usd:.4f}")
                             logging.info(f"⏳ Stop-loss cooldown activated for {SL_COOLDOWN_SECONDS}s")
                             return
                         else:
@@ -848,59 +856,50 @@ class OnlineTrader:
                     # ===============================
             # ===============================
 
-            # ===== TREND FILTER CHECK (T-018 / L-004) =====
-            # Don't buy if price is in sustained downtrend - reduces consecutive stop-loss risk
+            # ===== TREND FILTER / COOLDOWN CHECK (T-018 / T-029) =====            # Don't buy if price is in sustained downtrend - reduces consecutive stop-loss risk
+            # T-029: Check stop-loss cooldown before allowing BUY (must run when no position)
+            if self.sl_cooldown_until and time.time() < self.sl_cooldown_until:
+                remaining = int(self.sl_cooldown_until - time.time())
+                logging.info(f"⏳ In stop-loss cooldown ({remaining}s remaining) - skipping BUY signal")
+                return
+
+            # ===== BUY BRANCH: RSI below threshold, no open position =====
             if rsi_val < buy_threshold and self.current_position is None:
                 if not self._is_uptrend(prices):
                     logging.info(f"📉 Skipping BUY - trend filter signals DOWNTREND (price declining over 20m)")
                     return
-                
-            # ===== POSITION TIMEOUT CHECK (T-018 / L-004) =====
-            # Warn if position open >24h without close signal
-            if self.current_position == 'long':
-                pos_age = self._position_age_hours()
-                if pos_age > 24:
-                    logging.warning(f"⚠️ POSITION TIMEOUT: Open for {pos_age:.1f}h - consider manual review")
-                # T-029: Check stop-loss cooldown before allowing BUY
-                if self.sl_cooldown_until and time.time() < self.sl_cooldown_until:
-                    remaining = int(self.sl_cooldown_until - time.time())
-                    logging.info(f"⏳ In stop-loss cooldown ({remaining}s remaining) - skipping BUY signal")
-                    return
-                
+
                 try:
                     balance = self.exchange.fetch_balance()
                     usdt_free = balance.get('USDT', {}).get('free', 0) or balance.get('USD', {}).get('free', 0)
-                    
-                    # Removed: Virtual sub-account spend cap — now using position_size_pct directly from strategy
+
                     amount_to_spend = usdt_free * self.config['current_strategy']['position_size_pct']
-                    
+
                     if amount_to_spend > 1:
                         current_price = prices[-1]
                         cli_sym = symbol.replace("/", "").replace("USDT", "USD")
                         btc_amount = amount_to_spend / current_price
-                        
+
                         logging.info(f"🛒 Executing BUY Order: {btc_amount:.6f} {symbol} @ ~{current_price:.2f}")
                         self.exchange.create_market_buy_order(cli_sym, btc_amount)
-                        
+
                         self.last_trade_usd_amount = amount_to_spend
                         self.current_position = 'long'
                         self.entry_rsi = rsi_val  # Track RSI at entry for dynamic sell threshold
-                        
-                        # Removed: No longer tracking virtual sub-account balance for shadow accounting
-                        
+
                         # Track open position with timestamp for persistence
                         # Accumulate BTC amount and weighted average entry price if position exists
                         existing_pos = self.config.get("open_position", {})
                         accumulated_btc = existing_pos.get("amount_btc", 0) + btc_amount
-                        
+
                         # Calculate weighted average entry price using value-weighted formula
                         # Formula: (value1 + value2) / total_amount
                         existing_value = existing_pos.get("amount_btc", 0) * existing_pos.get("entry_price", current_price)
                         new_value = btc_amount * current_price
                         total_value = existing_value + new_value
-                        
+
                         avg_price = round(total_value / accumulated_btc, 2) if accumulated_btc > 0 else current_price
-                        
+
                         self.config["open_position"] = {
                             "timestamp": datetime.now().isoformat(),
                             "symbol": symbol,
@@ -911,7 +910,7 @@ class OnlineTrader:
 
                         # Update instance variable with weighted average entry price for PnL calculations
                         self.entry_price = avg_price
-                        
+
                         # Persist immediately after position open
                         save_config(self.config)
                         logging.info(f"📝 Open Position Updated: {accumulated_btc:.6f} BTC @ ${avg_price:.2f} (weighted avg)")
@@ -920,6 +919,7 @@ class OnlineTrader:
                 except Exception as e:
                     logging.error(f"❌ Buy Order Failed: {e}")
 
+            # ===== SELL BRANCH: RSI above threshold, position open =====
             elif rsi_val > sell_threshold and self.current_position == 'long':
                 try:
                     # Calculate potential profit/loss after fees before selling
@@ -992,6 +992,13 @@ class OnlineTrader:
                     # We have a position - waiting for SELL signal  
                     waiting_reason = f"Waiting for RSI to rise above {sell_threshold} to sell"
                 logging.info(f"💤 {waiting_reason} (RSI {rsi_val:.2f}, buy {buy_threshold}, sell {sell_threshold})")
+
+            # ===== POSITION TIMEOUT CHECK (T-018 / L-004) =====
+            # Warn if position open >24h without close signal (runs every cycle, independent of BUY/SELL)
+            if self.current_position == 'long':
+                pos_age = self._position_age_hours()
+                if pos_age > 24:
+                    logging.warning(f"⚠️ POSITION TIMEOUT: Open for {pos_age:.1f}h - consider manual review")
 
         except Exception as e:
             logging.error(f"❌ Cycle Error: {str(e)}")

@@ -1,5 +1,11 @@
 # CHANGELOG — Online Trader-3
 
+## v2.17 (2026-06-02)
+- B-020: Fixed critical BUY logic bug — BUY execution block was nested under `if self.current_position == 'long'` instead of `if rsi_val < buy_threshold and self.current_position is None`. Caused 64+ unintended consecutive buys every cycle while holding a position, draining USD balance from ~$960 to ~$79. Fixed by restructuring run_cycle so BUY block is inside the correct buy-signal condition; position timeout warning restored as independent post-block check (D-060)
+- B-021: Fixed dashboard section [3] sell threshold — replaced hardcoded `threshold+20` with D-032 dynamic formula using `entry_rsi` from open_position; falls back to `threshold+20` when no position (D-061)
+- B-022: Fixed stale `# ===== TREND FILTER CHECK` comment at column 0 — indented to correct 12-space level inside run_cycle method
+- B-023: Added missing `exchange` and `kraken_fee_pct` top-level keys to config.json per ARCHITECTURE schema; fixes `Exchange: N/A` in dashboard
+
 ## v2.16 (2026-06-02)
 - B-011: Fixed `entry_rsi` not persisted in config — now saved to `open_position` on BUY and restored on startup (D-046), enabling D-032 dynamic threshold to survive restarts
 - B-012: Fixed reflection cadence firing on emergency trades — now enforces `len(strategic_trades) >= reflection_cadence` check BEFORE any fallback to all trades (D-047)
