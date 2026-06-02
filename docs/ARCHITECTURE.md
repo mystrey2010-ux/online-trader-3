@@ -141,21 +141,17 @@ Key invariants:
 ## Known Bugs & Architectural Risks
 | ID | File | Lines | Description | Severity |
 |----|------|-------|-------------|----------|
-| B-011 | main.py | 232, 726 | `entry_rsi` not saved to config / restored on startup — D-032 dynamic threshold silently bypassed after restart | Medium |
-| B-012 | main.py | 376 | Cadence check uses all trades including emergency ones — 3 stop-losses can trigger reflection (D-025 violation) | Medium |
-| B-013 | main.py | 478 | `restore_strategy()` never called — brain rollback (PRIMARY GOAL) is dead code | Medium |
-| B-014 | manage_trader.sh | 23, 50, 62, 85 | `pgrep -a "python" \| grep main.py` fragile in venvs — should be `pgrep -f "main.py"` | Low |
+| B-014 | manage_trader.sh | 23, 50, 62, 85 | `pgrep -a "python" \| grep "/.*main\.py"` fragile in venvs — should be `pgrep -f "main.py"` | Low |
 | B-015 | manage_trader.sh | 106 | Hardcoded version string stale (needs updating to 2.15) | Low |
 | B-016 | manage_trader.sh | 210 | `clean` sets `open_position={}` not deletes key (D-009/D-020 violation) | Low |
 
-**Full details and fix tasks: see KNOWN_ISSUES.md and TASKS.md (T-023–T-029).**
+**Full details and fix tasks: see KNOWN_ISSUES.md and TASKS.md.**
 
 ## Deferred Items
 | ID | Item | Notes |
 |----|------|-------|
 | Q-003 | Multi-symbol support | Architecture supports, not implemented |
 | Q-004 | Native stop-loss orders (Kraken API) | Currently price-check based |
-| T-029 | Post-SL cooldown period | Prevents immediate re-buy after stop-loss into continuing downtrend (L-010) |
 
 ## Backup Convention
 - Git repository in use for version control

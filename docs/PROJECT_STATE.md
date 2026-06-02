@@ -11,13 +11,10 @@
 | T-019 | Verify hypothesis_ledger dashboard display works with new key schema (D-044) | Medium | T-003 | PENDING |
 | T-020 | Consolidate stop-loss into helper function | Low | None | PENDING |
 | T-021 | Add sell_threshold to cycle log output | Low | None | PENDING |
-| T-023 | Fix B-011: Save/restore entry_rsi in open_position config | Medium | main.py 232, 841 | PENDING |
-| T-024 | Fix B-012: Cadence check on strategic_trades count not all trades | Medium | main.py 376 | PENDING |
-| T-025 | Fix B-013: Wire restore_strategy() into brain loop or CLI | Medium | main.py 478 | PENDING |
-| T-026 | Fix B-014: pgrep -f "main.py" in manage_trader.sh | Low | manage_trader.sh | PENDING |
-| T-027 | Fix B-015: Update version string in manage_trader.sh to 2.15 | Low | manage_trader.sh 106 | PENDING |
-| T-028 | Fix B-016: del open_position in clean command | Low | manage_trader.sh 210 | PENDING |
-| T-029 | Post-SL cooldown period to prevent immediate re-buy after stop-loss (L-010) | Medium | main.py | PENDING |
+| T-023 | Fix B-011: Save/restore entry_rsi in open_position config | Medium | main.py 232, 841 | DONE |
+| T-024 | Fix B-012: Cadence check on strategic_trades count not all trades | Medium | main.py 376 | DONE |
+| T-025 | Fix B-013: Wire restore_strategy() into brain loop or CLI | Medium | main.py 478 | DONE |
+| T-029 | Post-SL cooldown period to prevent immediate re-buy after stop-loss (L-010) | Medium | main.py | DONE |
 
 ## Bug Status
 ### Active (v2.15)
@@ -36,6 +33,10 @@
 | B-017 | Critical | D-043 — NameError in `_generate_and_apply_hypotheses()` blocked all hypothesis generation |
 | B-018 | Medium | D-044 — Hypothesis ledger key schema mismatch with dashboard |
 | B-019 | Medium | D-045 — Stop-loss triggered immediate re-buy in same cycle |
+| B-011 | Medium | D-046 — entry_rsi persisted in open_position for D-032 |
+| B-012 | Medium | D-047 — Cadence check on strategic_trades count |
+| B-013 | Medium | D-048 — restore_strategy() wired for rollback |
+| T-029 (B-019 enhancement) | Medium | D-049 — Post-SL cooldown period |
 
 ### Resolved (v2.14 — 2026-05-31)
 | ID | Severity | Resolution |

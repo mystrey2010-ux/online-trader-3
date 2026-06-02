@@ -32,6 +32,10 @@
 | B-017 [RESOLVED] | `NameError: target_ret not defined` in `_generate_and_apply_hypotheses()` — self-improvement brain completely broken, hypotheses never generated | Critical | D-043 (v2.15) |
 | B-018 [RESOLVED] | Hypothesis ledger entries used wrong key names — dashboard showed `?` for all fields | Medium | D-044 (v2.15) |
 | B-019 [RESOLVED] | Stop-loss triggered immediate re-buy in same cycle | Medium | D-045 (v2.15) |
+| B-011 [RESOLVED] | entry_rsi lost on restart — D-032 dynamic threshold bypassed | Medium | D-046 (v2.16) |
+| B-012 [RESOLVED] | Reflection cadence fires on emergency trades (D-025 intent violated) | Medium | D-047 (v2.16) |
+| B-013 [RESOLVED] | restore_strategy() never called — rollback dead code | Medium | D-048 (v2.16) |
+| T-029 [RESOLVED] | Post-SL cooldown prevents immediate re-buy after stop-loss | Medium | D-049 (v2.16) |
 | B-001 [RESOLVED] | ticker unbound in stop-loss if initial fetch failed | High | D-035 |
 | B-002 [RESOLVED] | entry_rsi not cleared after stop-loss | Medium | D-036 |
 | B-003 [RESOLVED] | last_trade_usd_amount=0 after restart | High | D-034 |

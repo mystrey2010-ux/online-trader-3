@@ -35,6 +35,10 @@ Key design decisions, one line each. Code location noted for traceability.
 | D-043 | B-017 fix: `_generate_and_apply_hypotheses()` reads `target_daily_return`/`max_daily_drawdown` from `self.config` directly — they are not in scope from `self_improve_strategies()` | main.py _generate_and_apply_hypotheses() | v2.15 |
 | D-044 | B-018 fix: hypothesis ledger record now includes `parameter`, `old_value`, `new_value`, `regime`, `direction` alias keys alongside existing keys for `summarize_performance.py` display compatibility | main.py _generate_and_apply_hypotheses() | v2.15 |
 | D-045 | B-019 fix: `return` added after stop-loss sell execution so buy branch cannot fire in same cycle immediately after stop-loss clears `current_position` | main.py run_cycle() | v2.15 |
+| D-046 | B-011 fix: `entry_rsi` persisted in open_position config + restored on startup for D-032 dynamic threshold | main.py __init__, run_cycle() | v2.16 |
+| D-047 | B-012 fix: Cadence check uses strategic_trades.length, not trades.length (D-025 compliance) | main.py self_improve_strategies() | v2.16 |
+| D-048 | B-013 fix: restore_strategy() called when Sharpe < 0 after hypothesis tuning | main.py self_improve_strategies() | v2.16 |
+| D-049 | T-029 fix: 300s cooldown after stop-loss prevents immediate re-buy | main.py run_cycle() | v2.16 |
 
 ---
 **Last Updated:** 2026-06-02 15:41 | Engineer: J.A.R.V.I.S.

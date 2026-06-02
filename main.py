@@ -27,6 +27,7 @@ LOG_FILE = "trader.log"
 CONFIG_PATH = "config.json"
 LIVE_TRADING_ENABLED = os.getenv("LIVE_TRADING_ENABLED", "false").lower() == "true"
 SL_COOLDOWN_SECONDS = 300  # T-029: 5-minute cooldown after stop-loss prevents immediate re-buy
+SL_COOLDOWN_SECONDS = 300  # T-029: 5-minute cooldown after stop-loss prevents immediate re-buy
 
 
 # Redirect STDOUT and STDERR to trader.log
@@ -217,10 +218,12 @@ class OnlineTrader:
             self.current_position = 'long'
             self.entry_price = pos["entry_price"]
             self.entry_rsi = pos.get("entry_rsi")  # B-011 fix: restore entry_rsi for D-032 dynamic threshold
+            self.entry_rsi = pos.get("entry_rsi")  # B-011 fix: restore entry_rsi for D-032 dynamic threshold
             logging.info(f"🔄 Restored open position from config: {pos.get('amount_btc', 0)} BTC @ ${pos['entry_price']:.2f}")
         else:
             self.current_position = None
             self.entry_price = None
+            self.entry_rsi = None  # B-011 fix: ensure None when no position
             self.entry_rsi = None  # B-011 fix: ensure None when no position
 
         # T-029 fix: Track stop-loss cooldown to prevent immediate re-buy
@@ -233,6 +236,9 @@ class OnlineTrader:
             logging.info(f"🔄 Restored last_trade_usd_amount: ${self.last_trade_usd_amount:.2f}")
         else:
             self.last_trade_usd_amount = 0.0
+
+        # T-029 fix: Track stop-loss cooldown to prevent immediate re-buy
+        self.sl_cooldown_until = None
 
         exchange_name
         
