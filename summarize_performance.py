@@ -113,6 +113,17 @@ def engine_running():
     except Exception:
         return False
 
+def get_regime_stability(config, current_regime):
+    """Calculate regime stability metric from hypothesis ledger.
+    Returns percentage of recent hypotheses in same regime.
+    """
+    ledger = config.get("hypothesis_ledger", [])
+    if not ledger:
+        return None
+    recent = ledger[-10:]  # Last 10 hypotheses
+    matches = sum(1 for h in recent if h.get("regime") == current_regime)
+    return f"{matches * 10:.1f}%" if len(recent) > 0 else "N/A"
+
 
 def btc_spot_price():
     """
@@ -538,6 +549,13 @@ def print_brain_status(config):
             except (TypeError, ValueError):
                 snap_line = f"v{snap_ver}  {strat_s}"
             print(f"    {snap_ts}  {snap_line}")
+
+    # Regime stability metric (last 10 hypotheses)
+    if ledger:
+        current_regime = ledger[-1].get("regime", "NEUTRAL") if ledger else "NEUTRAL"
+        stability = get_regime_stability(config, current_regime)
+        print()
+        print(f"  Regime Stability: {stability} of last 10 hypotheses in '{current_regime}' regime")
 
     print(SEPARATOR_MID)
 
