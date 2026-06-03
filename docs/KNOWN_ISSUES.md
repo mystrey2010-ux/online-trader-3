@@ -1,4 +1,4 @@
-# KNOWN ISSUES — Online Trader-3 v2.17
+# KNOWN ISSUES — Online Trader-3 v2.18
 
 ## ACTIVE (Resolving)
 | ID | Issue | Severity | Resolution Status |
