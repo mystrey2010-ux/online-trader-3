@@ -73,7 +73,7 @@ Action:
 
 **Fee:** `trade_value × kraken_fee_pct × 2` (both legs). Default 0.26% per leg (0.52% round-trip).
 
-## Config Schema (v2.15)
+## Config Schema (v2.15-2.18)
 ```json
 {
   "target_asset": "BTC/USDT",
@@ -82,6 +82,7 @@ Action:
   "min_sharpe_ratio": 2.0,
   "reflection_cadence": 3,
   "kraken_fee_pct": 0.0026,
+  "exchange": {"type": "kraken"},
   "current_strategy": {
     "indicator_threshold": 63.0,
     "sell_threshold_base": 10,
@@ -97,10 +98,12 @@ Action:
   "hypothesis_ledger": [],
   "version": 1,
   "previous_strategies": [],
+  "needs_rollback": false,
   "open_position": {
     "timestamp": "ISO8601",
     "symbol": "BTC/USDT",
     "entry_price": 67752.40,
+    "entry_rsi": 59.4,
     "amount_btc": 0.000543
   },
   "system_status": null
@@ -118,7 +121,7 @@ Hypothesis log table reads keys: `parameter`, `old_value`, `new_value`, `regime`
 - `start` → python main.py
 - `stop` → pkill -9 -f main.py (quiet kill)
 - `restart` → stop + start
-- `status` → pgrep output (NOTE: fragile pattern — B-014/T-026 pending fix)
+- `status` → pgrep output (fixed in v2.16)
 - `clean` → DESTRUCTIVE: engine stopped + SANDBOX cleared
 
 ### Emergency Stop (emergency_stop_trader.py)
@@ -170,4 +173,4 @@ All bugs resolved in v2.17 — see KNOWN_ISSUES.md
 - Docs backups: `/docs/backups/`
 
 ---
-**Last Updated:** 2026-06-02 23:05 | Engineer: J.A.R.V.I.S.
+**Last Updated:** 2026-06-03 23:45 | Engineer: J.A.R.V.I.S.
