@@ -1,11 +1,11 @@
 # NOW — Online Trader-3 v2.17
 
-**Timestamp:** 2026-06-03 09:05 | Engine: READY | Mode: PAPER/SANDBOX
+**Timestamp:** 2026-06-03 17:35 | Engine: RUNNING | Mode: PAPER/SANDBOX
 
 ## Current State
 - **EMERGENCY_STOP:** CLEARED
-- **Position:** OPEN (0.000537 BTC @ $67,158.10) — BUY 2026-06-03T06:18:44
-- **Completed Trades:** 16 total (8 strategic wins, 8 stop-losses)
+- **Position:** OPEN (0.000544 BTC @ $66,200.00) — BUY 2026-06-03T17:16:36
+- **Completed Trades:** 17 total (7 strategic wins, 10 stop-losses)
 - **hypothesis_ledger:** 2 hypotheses logged (indicator_threshold tuned: 63.0 → 66.15 → 69.46 in BEAR regime)
 
 ## Recent Changes (2026-06-03)
@@ -24,4 +24,4 @@ Monitor for SELL signal; B-020 fix prevents spurious BUY while holding position.
 
 ---
 **See PROJECT_STATE.md for verification status, tasks, and deferred items.**
-**Last Updated:** 2026-06-03 09:05 | Engineer: J.A.R.V.I.S.
+**Last Updated:** 2026-06-03 17:35 | Engineer: J.A.R.V.I.S.
