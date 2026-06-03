@@ -42,6 +42,7 @@ Key design decisions, one line each. Code location noted for traceability.
 | D-055 | T-018 fix: Trend filter skips BUY when price declining over 20 periods prevents buying into downtrend | main.py run_cycle() | v2.16 |
 | D-060 | Trade-level analytics: Rolling Sharpe, TWR, Consecutive SL Count added to dashboard | summarize_performance.py | v2.16 |
 | D-061 | position_size_pct default: 3.7% of balance per trade — conservative risk exposure for paper trading; tunable via brain | config.json | v2.5 |
+| D-062 | rsi_period tunable via brain: BEAR→21-period (smoothing), BULL→maintain, NEUTRAL→unchanged (14 default) | main.py run_cycle(), _generate_and_apply_hypotheses() | v2.17 |
 
 ---
 **Last Updated:** 2026-06-02 23:15 | Engineer: J.A.R.V.I.S.

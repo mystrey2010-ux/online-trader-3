@@ -109,9 +109,10 @@ Non-exchange configuration parameters:
 - `reflection_cadence`: Number of trades before self-improvement check (default: 3)
 - `kraken_fee_pct`: Maker/taker fee percentage (default: 0.0026 = 0.26%)
 - `current_strategy`: Active trading parameters
-  - `indicator_threshold`: RSI buy threshold (default: 63.0)
-  - `stop_loss_pct`: Stop-loss percentage (default: 0.016 = 1.6%)
-  - `position_size_pct`: Percentage of balance to use per trade (default: 0.037 = 3.7%)
+       - `indicator_threshold`: RSI buy threshold (default: 63.0)
+       - `stop_loss_pct`: Stop-loss percentage (default: 0.016 = 1.6%)
+       - `position_size_pct`: Percentage of balance to use per trade (default: 0.037 = 3.7%)
+       - `rsi_period`: RSI calculation period (default: 14, tunable by brain)
 
 ## Disclaimer
 

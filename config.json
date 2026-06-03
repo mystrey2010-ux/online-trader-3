@@ -9,9 +9,10 @@
     "type": "kraken"
   },
   "current_strategy": {
-    "indicator_threshold": 66.15,
+    "indicator_threshold": 69.46,
     "stop_loss_pct": 0.016,
-    "position_size_pct": 0.037
+    "position_size_pct": 0.037,
+    "rsi_period": 14
   },
   "trade_history": [
     {
@@ -164,6 +165,40 @@
       "fee_usd": 4.751865,
       "net_pnl_usd": -20.248128,
       "stop_loss_triggered": true
+    },
+    {
+      "timestamp": "2026-06-03T01:17:18.644527",
+      "entry": 66582.7,
+      "exit": 67049.5,
+      "pnl_pct": 0.007010830140562082,
+      "symbol": "BTC/USDT",
+      "pnl_usd": 0.25299099527296787,
+      "gross_pnl_usd": 0.252991,
+      "fee_usd": 0.187646,
+      "net_pnl_usd": 0.065345
+    },
+    {
+      "timestamp": "2026-06-03T04:44:03.554488",
+      "entry": 66913.0,
+      "exit": 65808.1,
+      "pnl_pct": -0.016512486362889038,
+      "symbol": "BTC/USDT",
+      "pnl_usd": -0.5860689515380114,
+      "gross_pnl_usd": -0.586069,
+      "fee_usd": 0.18766,
+      "net_pnl_usd": -0.773729,
+      "stop_loss_triggered": true
+    },
+    {
+      "timestamp": "2026-06-03T06:05:29.994521",
+      "entry": 66160.0,
+      "exit": 66935.3,
+      "pnl_pct": 0.011718561064087106,
+      "symbol": "BTC/USDT",
+      "pnl_usd": 0.4225777176709903,
+      "gross_pnl_usd": 0.422578,
+      "fee_usd": 0.187515,
+      "net_pnl_usd": 0.235063
     }
   ],
   "hypothesis_ledger": [
@@ -183,9 +218,26 @@
       "expected_score_direction": "stabilize",
       "direction": "stabilize",
       "confidence_reasoning": "BEAR market + optimization mode \u2192 105% increase to Wait for better confirmation in weak downtrend"
+    },
+    {
+      "timestamp": "2026-06-03T06:05:33.048318",
+      "description": "Adjusting indicator_threshold from 66.15 to 69.4600",
+      "metrics_at_failure": {
+        "return": 0.31698621882499606,
+        "drawdown": 0,
+        "sharpe": 1.797416480537877
+      },
+      "regime_tag": "BEAR",
+      "regime": "BEAR",
+      "parameter": "indicator_threshold",
+      "old_value": 66.15,
+      "new_value": 69.46,
+      "expected_score_direction": "stabilize",
+      "direction": "stabilize",
+      "confidence_reasoning": "BEAR market + optimization mode \u2192 105% increase to Wait for better confirmation in weak downtrend"
     }
   ],
-  "version": 2,
+  "version": 3,
   "previous_strategies": [
     {
       "timestamp": "2026-05-29T20:35:07.906910",
@@ -195,14 +247,24 @@
         "stop_loss_pct": 0.016,
         "position_size_pct": 0.037
       }
+    },
+    {
+      "timestamp": "2026-06-03T06:05:33.044254",
+      "version": 2,
+      "strategy": {
+        "indicator_threshold": 66.15,
+        "stop_loss_pct": 0.016,
+        "position_size_pct": 0.037,
+        "rsi_period": 14
+      }
     }
   ],
   "needs_rollback": false,
   "open_position": {
-    "timestamp": "2026-06-03T00:10:40.925290",
+    "timestamp": "2026-06-03T06:18:44.881212",
     "symbol": "BTC/USDT",
-    "entry_price": 66582.7,
-    "entry_rsi": 42.405207857468966,
-    "amount_btc": 0.0005419687130954719
+    "entry_price": 67158.1,
+    "entry_rsi": 69.27980702963566,
+    "amount_btc": 0.0005370822671176235
   }
 }

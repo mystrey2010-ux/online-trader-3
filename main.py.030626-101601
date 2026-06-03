@@ -597,8 +597,7 @@ class OnlineTrader:
             "BEAR": {  # Bear market: prices crashing, high risk
                 "indicator_threshold": {"direction": "higher", "new_value_multiplier": 1.05, "reasoning": "Wait for better confirmation in weak downtrend"},
                 "stop_loss_pct": {"direction": "wider", "new_value_multiplier": 1.2, "reasoning": "Prevent premature exits during normal bear volatility"},
-                "position_size_pct": {"direction": "decrease", "new_value_multiplier": 0.8, "reasoning": "Reduce exposure in unfavorable regime"},
-                "rsi_period": {"direction": "longer", "new_value_multiplier": 1.33, "reasoning": "Smoother RSI in choppy bear market"}  # D-062
+                "position_size_pct": {"direction": "decrease", "new_value_multiplier": 0.8, "reasoning": "Reduce exposure in unfavorable regime"}
             },
             "SIDEWAYS": {  # Choppy market, low trend
                 "indicator_threshold": {"direction": "stricter", "new_value_multiplier": 0.95, "reasoning": "Require stronger signals to cut through noise"},
@@ -608,8 +607,7 @@ class OnlineTrader:
             "NEUTRAL": {  # Neutral: use performance-based tuning
                 "indicator_threshold": {"direction": "adjust_toward_optimal", "new_value_multiplier": None, "reasoning": "Fine-tune based on signal frequency"},
                 "stop_loss_pct": {"direction": "maintain_current", "new_value_multiplier": 1.0, "reasoning": "Risk already calibrated"},
-                "position_size_pct": {"direction": "fine_tune", "new_value_multiplier": None, "reasoning": "Adjust based on risk/reward ratio"},
-                "rsi_period": {"direction": "maintain_current", "new_value_multiplier": 1.0, "reasoning": "14-period standard; extend in choppy BEAR, shorten in trending BULL"}  # D-062
+                "position_size_pct": {"direction": "fine_tune", "new_value_multiplier": None, "reasoning": "Adjust based on risk/reward ratio"}
             },
         }
         
@@ -634,9 +632,6 @@ class OnlineTrader:
             elif key == "position_size_pct":
                 # Position sizing is percentage of balance (e.g., 0.037 for 3.7%), adjust by ±50% max
                 new_val = round(old_val * new_val_multiplier, 3)
-            elif key == "rsi_period":
-                # RSI period: integer (e.g., 14), adjust by ±33% based on regime
-                new_val = int(max(5, min(30, round(old_val * new_val_multiplier))))
             
             # Calculate expected score direction based on performance metrics
             if avg_ret < 0 or max_dd > 0.01:
@@ -749,7 +744,6 @@ class OnlineTrader:
         # Restore cooldown state after config reload
         self.sl_cooldown_until = self.config.get("sl_cooldown_until", 0)
         symbol = self.config["target_asset"]
-        rsi_period = self.config["current_strategy"].get("rsi_period", 14)  # D-062: tunable RSI period
         # Emergency STOP check – if active, log and skip this cycle
         if self.config.get("system_status") == "EMERGENCY_STOP":
             logging.warning("🚨 EMERGENCY STOP ACTIVE – skipping all trading logic this cycle")
@@ -780,7 +774,7 @@ class OnlineTrader:
             if current_price is None:
                 current_price = float(prices[-1])
             
-            rsi_val = self.calculate_rsi(prices, rsi_period)
+            rsi_val = self.calculate_rsi(prices, 14)
             threshold = self.config["current_strategy"]["indicator_threshold"]
             buy_threshold = threshold
             
