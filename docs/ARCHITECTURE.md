@@ -39,7 +39,7 @@ Action:
    2. Calculate fee-aware metrics (net_pnl_usd)
    3. Tag market regime via 20-period rolling return on 1h OHLCV
    4. If underperforming: backup strategy → generate regime-aware hypotheses → apply best
-   5. Tunes ONE of: indicator_threshold, stop_loss_pct, position_size_pct, rsi_period, sl_cooldown_seconds
+   5. Tunes ONE of: indicator_threshold, stop_loss_pct, position_size_pct, rsi_period, sl_cooldown_seconds, trend_filter_lookback, ohlcv_limit, ohlcv_timeframe
    6. Rollback: previous_strategies[] → restore_strategy() — Sharpe < 0 triggers rollback (D-048)
 ```
 
