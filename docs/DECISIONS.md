@@ -50,8 +50,9 @@ Key design decisions, one line each. Code location noted for traceability.
 | D-068 | Multi-timeframe regime sync: Dedicated 1d OHLCV fetch (30 bars) for 20-day macro trend in self_improve_strategies(); isolated from 1m execution signals | main.py self_improve_strategies(), _tag_regime() | v2.17 |
 | D-069 | Pre-commit backtest safety gate: _run_local_backtest() validates hypotheses against historical 500-bar data before live application; gating requires strictly positive backtest improvement | main.py _generate_and_apply_hypotheses(), _run_local_backtest() | v2.17 |
 | D-070 | Statistical Window Fix: evaluation_window_size (default 20) decouples cadence trigger from metric calculation window; cold-start fallback uses all available trades when < 20 | main.py self_improve_strategies() | v2.17 |
-| D-071 | T-020: Stop-loss logic extracted into _execute_stop_loss() helper for code clarity | main.py _execute_stop_loss(), run_cycle() | v2.18 |
+| D-071 | T-020: Stop-loss logic extracted into _execute_stop_loss() helper | main.py _execute_stop_loss(), run_cycle() | v2.18 |
 | D-072 | N-002 fix: Switched CryptoPanic RSS to CoinTelegraph RSS feed due to 502 errors/malformed XML | main.py _fetch_news_sentiment() | v2.18 |
+| D-073 | N-003 fix: Wire _fetch_news_sentiment() into self_improve_strategies() to populate news_sentiment in config | main.py self_improve_strategies() | v2.18 |
 
 ---
 **Last Updated:** 2026-06-03 23:55 | Engineer: opencode

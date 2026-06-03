@@ -40,8 +40,8 @@
 |------|----------|-------|
 | main.py syntax (v2.18) | ✓ | py_compile clean |
 | main.py syntax (v2.18 + T-021) | ✓ | py_compile clean |
-| News sentiment (RSS) | ✓ | Switched to CoinTelegraph RSS feed (working) |
-| Position sizing (10%) | ✓ | Updated in config.json, validated against Kraken balance |
+| News sentiment (RSS) | ✓ | CoinTelegraph RSS feed working, wired to self_improve_strategies() |
+| News sentiment call added | ✓ | _fetch_news_sentiment() now populates config.news_sentiment |
 | Cascade bug fix | ✓ | Trade #13 position accumulation resolved |
 | Stop-loss helper (T-020) | ✓ | _execute_stop_loss() extracted, syntax verified |
 | Sell threshold log (T-021) | ✓ | Added sell_threshold to cycle log output |
