@@ -285,5 +285,12 @@
       }
     }
   ],
-  "needs_rollback": false
+  "needs_rollback": false,
+  "open_position": {
+    "timestamp": "2026-06-03T17:16:36.651920",
+    "symbol": "BTC/USDT",
+    "entry_price": 66200.0,
+    "entry_rsi": 62.747996576674566,
+    "amount_btc": 0.0005443794880710859
+  }
 }
