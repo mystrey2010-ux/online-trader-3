@@ -356,6 +356,17 @@ def print_strategy(config):
     print(f"  Position Size    : {fmt_pct(ps_pct)}  of available USD balance")
     print(f"  Strategy Version : v{version}  ({n_snaps} rollback snapshot(s))")
 
+    # Additional tunable parameters (D-062, D-049, D-055, D-065, D-066)
+    rsi_period = strat.get("rsi_period", 14)
+    sl_cooldown = strat.get("sl_cooldown_seconds", 300)
+    tf_lookback = strat.get("trend_filter_lookback", 20)
+    ohlcv_lim = strat.get("ohlcv_limit", 50)
+    ohlcv_tf = strat.get("ohlcv_timeframe", "1m")
+    print(f"  RSI Period       : {rsi_period}")
+    print(f"  SL Cooldown      : {sl_cooldown}s post-stop-loss")
+    print(f"  Trend Lookback   : {tf_lookback} periods")
+    print(f"  OHLCV Limit      : {ohlcv_lim} bars ({ohlcv_tf})")
+
     print()
     print("  Performance Targets (self-improvement thresholds):")
     print(f"    Daily Return    : >= {fmt_pct(config.get('target_daily_return', 0))}")
