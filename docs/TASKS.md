@@ -3,11 +3,7 @@
 ## Open Tasks
 | ID | Description | Priority | Dependencies | Status |
 |----|-------------|----------|--------------|--------|
-| T-003 | Confirm hypothesis_ledger populated after first reflection post-B-017 fix | Medium | Requires restart + 3 strategic trades | DONE |
-| T-016 | Add git version control (git init + baseline commit) | High | None | DONE |
-| T-018 | Position timeout: warn if open >24h (L-004) | Medium | None | DONE |
-| T-019 | Verify hypothesis_ledger dashboard display works with new key schema (D-044) | Medium | T-003, B-018 fix | DONE |
-| T-020 | Consolidate stop-loss into helper function | Low | None | PENDING |
+| T-020 | Consolidate stop-loss into helper function | Low | None | COMPLETED |
 | T-021 | Add sell_threshold to cycle log output | Low | None | PENDING |
 | T-029 | Post-SL cooldown: prevent re-buy for N minutes after a stop-loss fires (L-010) | Medium | None | DONE |
 | T-TREND | Trend filter to prevent buying in sustained downtrend | Medium | None | DONE |

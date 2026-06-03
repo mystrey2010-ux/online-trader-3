@@ -907,6 +907,70 @@ class OnlineTrader:
         except Exception:
             return 0
 
+    def _execute_stop_loss(self, current_price, symbol):
+        """
+        Execute stop-loss if price drops below threshold.
+        
+        Args:
+            current_price: Current market price
+            symbol: Trading pair symbol (e.g., 'BTC/USDT')
+            
+        Returns:
+            True if stop-loss executed (causes early return from run_cycle), False otherwise
+        """
+        open_position = self.config.get("open_position")
+        if open_position and current_price < open_position["entry_price"]:
+            entry_price = open_position["entry_price"]
+            stop_loss_threshold = entry_price * (1 - self.config["current_strategy"]["stop_loss_pct"])
+            if current_price < stop_loss_threshold:
+                logging.warning(f"🚨 STOP-LOSS TRIGGERED! Price ${current_price:.2f} < SL threshold ${stop_loss_threshold:.2f}")
+                try:
+                    balance = self.exchange.fetch_balance()
+                    btc_free = balance.get('BTC', {}).get('free', 0) or open_position.get("amount_btc", 0)
+                    if btc_free > 0:
+                        cli_sym = symbol.replace("/", "").replace("USDT", "USD")
+                        logging.info(f"🚨 Executing Emergency SELL Order via Stop-Loss: {btc_free:.6f} {symbol} @ ${current_price:.2f}")
+                        self.exchange.create_market_sell_order(cli_sym, btc_free)
+                        
+                        pnl_pct = (current_price - entry_price) / entry_price
+                        trade_value_sl = open_position["amount_btc"] * entry_price
+                        pnl_usd = open_position["amount_btc"] * current_price * pnl_pct
+                        kraken_fee_pct = self.config.get("kraken_fee_pct", 0.0026)
+                        fee_usd = round(trade_value_sl * kraken_fee_pct * 2, 6)
+                        gross_pnl_usd = round(pnl_usd, 6)
+                        net_pnl_usd = round(pnl_usd - fee_usd, 6)
+                        trade_record = {
+                            "timestamp": datetime.now().isoformat(),
+                            "entry": entry_price, "exit": current_price,
+                            "pnl_pct": pnl_pct, "symbol": symbol,
+                            "pnl_usd": pnl_usd,
+                            "gross_pnl_usd": gross_pnl_usd,
+                            "fee_usd": fee_usd,
+                            "net_pnl_usd": net_pnl_usd,
+                            "stop_loss_triggered": True
+                        }
+                        if "open_position" in self.config:
+                            del self.config["open_position"]
+                        self.config["trade_history"].append(trade_record)
+                        self.config["sl_cooldown_until"] = time.time() + DEFAULT_SL_COOLDOWN
+                        save_config(self.config)
+                        self.current_position = None
+                        self.entry_price = None
+                        self.entry_rsi = None
+                        self.sl_cooldown_until = time.time() + DEFAULT_SL_COOLDOWN
+                        logging.info(f"💰 TRADE CLOSED: PnL: {pnl_pct:.4%} (${pnl_usd:.2f}) | Gross: ${gross_pnl_usd:.4f} | Fee: ${fee_usd:.4f} | Net: ${net_pnl_usd:.4f}")
+                        logging.info(f"⏳ Stop-loss cooldown activated for {DEFAULT_SL_COOLDOWN}s")
+                        return True
+                    else:
+                        logging.warning("⚠️ No BTC available to close on stop-loss.")
+                except Exception as e:
+                    logging.error(f"❌ Stop-Loss Sell Order Failed: {e}")
+                    self.current_position = None
+                    self.entry_price = None
+                    self.entry_rsi = None
+                    return True
+        return False
+
     def run_cycle(self):
         # Reload config from disk each cycle to pick up external writes
         # (e.g. EMERGENCY_STOP set by emergency_stop_trader.py, manual edits) — B-007 fix.
@@ -972,64 +1036,8 @@ class OnlineTrader:
             
             logging.info(f"📊 {symbol} | RSI: {rsi_val:.2f} | Threshold: {threshold}")
 
-            # ===== STOP-LOSS CHECK (Priority #1 - Risk Management) =====
-            # Execute immediate exit if price dropped more than stop_loss_pct below entry
-            open_position = self.config.get("open_position")
-            if open_position and current_price < open_position["entry_price"]:
-                entry_price = open_position["entry_price"]
-                stop_loss_threshold = entry_price * (1 - self.config["current_strategy"]["stop_loss_pct"])
-                if current_price < stop_loss_threshold:
-                    logging.warning(f"🚨 STOP-LOSS TRIGGERED! Price ${current_price:.2f} < SL threshold ${stop_loss_threshold:.2f}")
-                    try:
-                        balance = self.exchange.fetch_balance()
-                        btc_free = balance.get('BTC', {}).get('free', 0) or open_position.get("amount_btc", 0)
-                        if btc_free > 0:
-                            # Use current_price already resolved at top of cycle (OHLCV fallback safe).
-                            # Do NOT re-access ticker['last'] here — ticker may be unbound if fetch failed (B-001 fix).
-                            cli_sym = symbol.replace("/", "").replace("USDT", "USD")
-                            logging.info(f"🚨 Executing Emergency SELL Order via Stop-Loss: {btc_free:.6f} {symbol} @ ${current_price:.2f}")
-                            self.exchange.create_market_sell_order(cli_sym, btc_free)
-                            
-                            pnl_pct = (current_price - entry_price) / entry_price
-                            trade_value_sl = open_position["amount_btc"] * entry_price
-                            pnl_usd = open_position["amount_btc"] * current_price * pnl_pct
-                            # Fee-aware fields (stop-loss path)
-                            kraken_fee_pct = self.config.get("kraken_fee_pct", 0.0026)
-                            fee_usd = round(trade_value_sl * kraken_fee_pct * 2, 6)  # fee on entry + exit legs
-                            gross_pnl_usd = round(pnl_usd, 6)
-                            net_pnl_usd = round(pnl_usd - fee_usd, 6)
-                            trade_record = {
-                                "timestamp": datetime.now().isoformat(),
-                                "entry": entry_price, "exit": current_price,
-                                "pnl_pct": pnl_pct, "symbol": symbol,
-                                "pnl_usd": pnl_usd,
-                                "gross_pnl_usd": gross_pnl_usd,
-                                "fee_usd": fee_usd,
-                                "net_pnl_usd": net_pnl_usd,
-                                "stop_loss_triggered": True
-                            }
-                            if "open_position" in self.config:
-                                del self.config["open_position"]
-                            self.config["trade_history"].append(trade_record)
-                            self.config["sl_cooldown_until"] = time.time() + DEFAULT_SL_COOLDOWN
-                            save_config(self.config)
-                            self.current_position = None
-                            self.entry_price = None
-                            self.entry_rsi = None
-                            self.sl_cooldown_until = time.time() + DEFAULT_SL_COOLDOWN
-                            logging.info(f"💰 TRADE CLOSED: PnL: {pnl_pct:.4%} (${pnl_usd:.2f}) | Gross: ${gross_pnl_usd:.4f} | Fee: ${fee_usd:.4f} | Net: ${net_pnl_usd:.4f}")
-                            logging.info(f"⏳ Stop-loss cooldown activated for {DEFAULT_SL_COOLDOWN}s")
-                            return
-                        else:
-                            logging.warning("⚠️ No BTC available to close on stop-loss.")
-                    except Exception as e:
-                        logging.error(f"❌ Stop-Loss Sell Order Failed: {e}")
-                        self.current_position = None
-                        self.entry_price = None
-                        self.entry_rsi = None
-                        return
-                    # ===============================
-            # ===============================
+            if self._execute_stop_loss(current_price, symbol):
+                return
 
             # ===== TREND FILTER / COOLDOWN CHECK (T-018 / T-029) =====            # Don't buy if price is in sustained downtrend - reduces consecutive stop-loss risk
             # T-029: Check stop-loss cooldown before allowing BUY (must run when no position)

@@ -5,7 +5,7 @@
 ## Open Tasks
 | ID | Description | Priority | Dependencies | Status |
 |----|-------------|----------|--------------|--------|
-| T-020 | Consolidate stop-loss into helper function | Low | None | PENDING |
+| T-020 | Consolidate stop-loss into helper function | Low | None | COMPLETED |
 | T-021 | Add sell_threshold to cycle log output | Low | None | PENDING |
 
 ## Bug Status
@@ -43,6 +43,7 @@
 | News sentiment (RSS) | ✓ | Uses built-in xml.etree.ElementTree, free CryptoPanic RSS feed |
 | Position sizing (3%) | ✓ | Updated in config.json for $100 balance |
 | Cascade bug fix | ✓ | Trade #13 position accumulation resolved |
+| Stop-loss helper (T-020) | ✓ | _execute_stop_loss() extracted, syntax verified |
 
 ## Performance Observations
 - Fresh start with $100 balance

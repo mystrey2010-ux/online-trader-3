@@ -4,6 +4,7 @@
 - RESET & REALLOCATION: Trader reset to $100 balance, cascade bug fixed, position sizing updated to 3% ($3/trade)
 - N-001: News sentiment integration via free CryptoPanic RSS feed (no API token required); uses built-in xml.etree.ElementTree for parsing
 - manage_trader.sh clean: Updated to reset Kraken paper account to $100 instead of $1000
+- T-020: Stop-loss logic consolidated into _execute_stop_loss() helper function for code clarity
 
 ## v2.17 (2026-06-02)
 - T-REGIME: Multi-timeframe regime sync — 1d OHLCV (30 bars) replaces 1h OHLCV for 20-day macro trend; thresholds recalibrated to ±10% (D-068)
