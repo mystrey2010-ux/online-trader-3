@@ -47,7 +47,7 @@ Key design decisions, one line each. Code location noted for traceability.
 | D-064 | trend_filter_lookback tunable via brain: BEAR→40, BULL→10, SIDEWAYS→30 periods | main.py run_cycle(), _generate_and_apply_hypotheses() | v2.17 |
 | D-065 | ohlcv_limit tunable via brain: BEULL→38, SIDEWAYS→75, BULL→38 bars | main.py run_cycle(), _generate_and_apply_hypotheses() | v2.17 |
 | D-066 | ohlcv_timeframe tunable via brain: BEAR→5m, BULL→maintain, NEUTRAL→unchanged (1m) | main.py run_cycle(), _generate_and_apply_hypotheses() | v2.17 |
-| D-067 | DEFAULT_SL_COOLDOWN constant used for stop-loss cooldown; supports D-049 300s default | main.py run_cycle() | v2.17
+| D-068 | Multi-timeframe regime sync: Dedicated 1d OHLCV fetch (30 bars) for 20-day macro trend in self_improve_strategies(); isolated from 1m execution signals | main.py self_improve_strategies(), _tag_regime() | v2.17 |
 
 ---
 **Last Updated:** 2026-06-02 23:15 | Engineer: J.A.R.V.I.S.

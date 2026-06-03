@@ -354,17 +354,16 @@ class OnlineTrader:
         if len(df) < 21:
             return "INSUFFICIENT_DATA"
         
-        # Calculate rolling 20-day returns from close prices
         df['rolling_20_pct'] = df['c'].pct_change(periods=20).dropna()
         
-        recent_returns = df['rolling_20_pct'].tail(10)  # Use last 10 rolling points
+        recent_returns = df['rolling_20_pct'].tail(10)
         avg_rolling_return = recent_returns.mean() if not recent_returns.empty else 0
         
-        # Classification thresholds (market standard: ±3% weekly moves)
-        if avg_rolling_return > 0.03:
+        # Classification thresholds scaled for 20-day crypto macro shifts (±10%)
+        if avg_rolling_return > 0.10:
             regime = "BULL"
             regime_confidence = min(0.9, 0.5 + abs(avg_rolling_return) * 2)
-        elif avg_rolling_return < -0.03:
+        elif avg_rolling_return < -0.10:
             regime = "BEAR"
             regime_confidence = min(0.9, 0.5 + abs(avg_rolling_return) * 2)
         else:
@@ -438,14 +437,15 @@ class OnlineTrader:
         performance_ok = (avg_return >= target_ret and max_drawdown <= target_dd and sharpe >= target_sharpe)
 
         # Tag regime BEFORE hypothesis generation (PRIMARY GOAL: "ask what market regime we're in")
+        # Multi-timeframe regime: fetch dedicated daily macro data for 20-day rolling return analysis
         try:
-            ohlcv = self.exchange.fetch_ohlcv(self.config["target_asset"], timeframe='1h', limit=60)
-            df = pd.DataFrame(ohlcv, columns=['ts', 'o', 'h', 'l', 'c', 'v'])
-            current_regime = self._tag_regime(df)
-            logging.info(f"📊 Market Regime: {current_regime}")
+            daily_ohlcv = self.exchange.fetch_ohlcv(self.config["target_asset"], timeframe='1d', limit=30)
+            daily_df = pd.DataFrame(daily_ohlcv, columns=['ts', 'o', 'h', 'l', 'c', 'v'])
+            current_regime = self._tag_regime(daily_df)
+            logging.info(f"📊 Market Regime (20-day macro): {current_regime}")
         except Exception as e:
-            logging.warning(f"⚠️ Could not fetch OHLCV for regime tagging: {e}, using neutral regime")
-            current_regime = "NEUTRAL"
+            logging.warning(f"⚠️ Could not fetch daily OHLCV for regime tagging: {e}, using INSUFFICIENT_DATA")
+            current_regime = "INSUFFICIENT_DATA"
 
         if performance_ok:
             logging.info(f"✅ Performance OK (Ret:{avg_return:.4%}, DD:{max_drawdown:.4%}, Sharpe:{sharpe:.2f})")
