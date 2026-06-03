@@ -12,7 +12,8 @@
     "indicator_threshold": 69.46,
     "stop_loss_pct": 0.016,
     "position_size_pct": 0.037,
-    "rsi_period": 14
+    "rsi_period": 14,
+    "sl_cooldown_seconds": 300
   },
   "trade_history": [
     {
@@ -255,7 +256,8 @@
         "indicator_threshold": 66.15,
         "stop_loss_pct": 0.016,
         "position_size_pct": 0.037,
-        "rsi_period": 14
+        "rsi_period": 14,
+    "sl_cooldown_seconds": 300
       }
     }
   ],

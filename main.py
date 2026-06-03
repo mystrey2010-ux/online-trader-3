@@ -26,7 +26,7 @@ import ccxt
 LOG_FILE = "trader.log"
 CONFIG_PATH = "config.json"
 LIVE_TRADING_ENABLED = os.getenv("LIVE_TRADING_ENABLED", "false").lower() == "true"
-SL_COOLDOWN_SECONDS = 300  # T-029: 5-minute cooldown after stop-loss prevents immediate re-buy
+DEFAULT_SL_COOLDOWN = 300  # fallback if config missing
 
 
 # Redirect STDOUT and STDERR to trader.log
@@ -603,13 +603,16 @@ class OnlineTrader:
             "SIDEWAYS": {  # Choppy market, low trend
                 "indicator_threshold": {"direction": "stricter", "new_value_multiplier": 0.95, "reasoning": "Require stronger signals to cut through noise"},
                 "stop_loss_pct": {"direction": "wider", "new_value_multiplier": 1.1, "reasoning": "Avoid whipsaws in range-bound market"},
-                "position_size_pct": {"direction": "slightly_increase", "new_value_multiplier": 1.05, "reasoning": "Compensate for lower win rate in chop"}
+                "position_size_pct": {"direction": "slightly_increase", "new_value_multiplier": 1.05, "reasoning": "Compensate for lower win rate in chop"},
+                "rsi_period": {"direction": "longer", "new_value_multiplier": 1.33, "reasoning": "Smoother RSI in choppy sideways market"},
+                "sl_cooldown_seconds": {"direction": "longer", "new_value_multiplier": 1.5, "reasoning": "Extended cooldown to avoid chop re-triggers"}
             },
             "NEUTRAL": {  # Neutral: use performance-based tuning
                 "indicator_threshold": {"direction": "adjust_toward_optimal", "new_value_multiplier": None, "reasoning": "Fine-tune based on signal frequency"},
                 "stop_loss_pct": {"direction": "maintain_current", "new_value_multiplier": 1.0, "reasoning": "Risk already calibrated"},
                 "position_size_pct": {"direction": "fine_tune", "new_value_multiplier": None, "reasoning": "Adjust based on risk/reward ratio"},
-                "rsi_period": {"direction": "maintain_current", "new_value_multiplier": 1.0, "reasoning": "14-period standard; extend in choppy BEAR, shorten in trending BULL"}  # D-062
+                "rsi_period": {"direction": "maintain_current", "new_value_multiplier": 1.0, "reasoning": "14-period standard; extend in choppy BEAR, shorten in trending BULL"},
+                "sl_cooldown_seconds": {"direction": "maintain_current", "new_value_multiplier": 1.2, "reasoning": "Slight extension in neutral conditions"}
             },
         }
         
@@ -637,6 +640,9 @@ class OnlineTrader:
             elif key == "rsi_period":
                 # RSI period: integer (e.g., 14), adjust by ±33% based on regime
                 new_val = int(max(5, min(30, round(old_val * new_val_multiplier))))
+            elif key == "sl_cooldown_seconds":
+                # Cooldown: seconds (e.g., 300), adjust but keep reasonable bounds
+                new_val = int(max(60, min(600, round(old_val * new_val_multiplier))))
             
             # Calculate expected score direction based on performance metrics
             if avg_ret < 0 or max_dd > 0.01:

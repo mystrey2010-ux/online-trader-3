@@ -113,6 +113,7 @@ Non-exchange configuration parameters:
        - `stop_loss_pct`: Stop-loss percentage (default: 0.016 = 1.6%)
        - `position_size_pct`: Percentage of balance to use per trade (default: 0.037 = 3.7%)
        - `rsi_period`: RSI calculation period (default: 14, tunable by brain)
+        - `sl_cooldown_seconds`: Stop-loss cooldown duration in seconds (default: 300 = 5 min, tunable by brain)
 
 ## Disclaimer
 
