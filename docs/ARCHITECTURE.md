@@ -84,7 +84,8 @@ Action:
     "stop_loss_pct": 0.016,
     "position_size_pct": 0.037,
     "rsi_period": 14
-    "sl_cooldown_seconds": 300
+    "sl_cooldown_seconds": 300,
+    "trend_filter_lookback": 20
   },
   "trade_history": [],
   "hypothesis_ledger": [],
