@@ -14,7 +14,8 @@
     "position_size_pct": 0.037,
     "rsi_period": 14,
     "sl_cooldown_seconds": 300,
-    "trend_filter_lookback": 20
+    "trend_filter_lookback": 20,
+    "ohlcv_limit": 50
   },
   "trade_history": [
     {
@@ -248,7 +249,8 @@
         "indicator_threshold": 63.0,
         "stop_loss_pct": 0.016,
         "position_size_pct": 0.037,
-        "trend_filter_lookback": 20
+        "trend_filter_lookback": 20,
+        "ohlcv_limit": 50
       }
     },
     {
@@ -260,7 +262,8 @@
         "position_size_pct": 0.037,
         "rsi_period": 14,
         "sl_cooldown_seconds": 300,
-        "trend_filter_lookback": 20
+        "trend_filter_lookback": 20,
+        "ohlcv_limit": 50
       }
     }
   ],

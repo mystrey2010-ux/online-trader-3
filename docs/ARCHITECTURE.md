@@ -85,7 +85,8 @@ Action:
     "position_size_pct": 0.037,
     "rsi_period": 14
     "sl_cooldown_seconds": 300,
-    "trend_filter_lookback": 20
+    "trend_filter_lookback": 20,
+    "ohlcv_limit": 50
   },
   "trade_history": [],
   "hypothesis_ledger": [],

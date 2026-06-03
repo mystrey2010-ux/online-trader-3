@@ -44,7 +44,8 @@ Key design decisions, one line each. Code location noted for traceability.
 | D-061 | position_size_pct default: 3.7% of balance per trade — conservative risk exposure for paper trading; tunable via brain | config.json | v2.5 |
 | D-062 | rsi_period
 | D-063 | sl_cooldown_seconds
-| D-064 | trend_filter_lookback tunable via brain: BEAR→40, BULL→10, SIDEWAYS→30 periods for trend detection | main.py run_cycle(), _generate_and_apply_hypotheses() | v2.17 | tunable via brain: BEAR→2x (extended), BULL→0.5x (shorter), SIDEWAYS→1.5x (extended) | main.py run_cycle(), _generate_and_apply_hypotheses() | v2.17 | tunable via brain: BEAR→21-period (smoothing), BULL→maintain, NEUTRAL→unchanged (14 default) | main.py run_cycle(), _generate_and_apply_hypotheses() | v2.17 |
+| D-064 | trend_filter_lookback
+| D-065 | ohlcv_limit tunable via brain: BEAR→75, BULL→38, SIDEWAYS→75 bars for OHLCV history | main.py run_cycle() | v2.17 | tunable via brain: BEAR→40, BULL→10, SIDEWAYS→30 periods for trend detection | main.py run_cycle(), _generate_and_apply_hypotheses() | v2.17 | tunable via brain: BEAR→2x (extended), BULL→0.5x (shorter), SIDEWAYS→1.5x (extended) | main.py run_cycle(), _generate_and_apply_hypotheses() | v2.17 | tunable via brain: BEAR→21-period (smoothing), BULL→maintain, NEUTRAL→unchanged (14 default) | main.py run_cycle(), _generate_and_apply_hypotheses() | v2.17 |
 
 ---
 **Last Updated:** 2026-06-02 23:15 | Engineer: J.A.R.V.I.S.
