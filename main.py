@@ -9,6 +9,7 @@ import numpy as np
 import random
 from datetime import datetime, timedelta
 import ccxt
+import requests
 
 # ============================================
 # PRIMARY GOAL: A SELF-IMPROVING Trading Bot
@@ -1034,7 +1035,7 @@ class OnlineTrader:
                 sell_threshold_base = self.config["current_strategy"].get("sell_threshold_base", 10)
                 sell_threshold = round(threshold + sell_threshold_base * 2)  # Double buffer when no position context
             
-            logging.info(f"📊 {symbol} | RSI: {rsi_val:.2f} | Threshold: {threshold}")
+            logging.info(f"📊 {symbol} | RSI: {rsi_val:.2f} | Threshold: {threshold} | Sell Threshold: {sell_threshold}")
 
             if self._execute_stop_loss(current_price, symbol):
                 return

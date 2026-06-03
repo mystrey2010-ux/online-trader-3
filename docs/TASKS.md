@@ -1,10 +1,9 @@
-# TASKS — Online Trader-3 v2.16 (ALL FIXES COMPLETE)
+# TASKS — Online Trader-3 v2.18 (ALL FIXES COMPLETE)
 
 ## Open Tasks
 | ID | Description | Priority | Dependencies | Status |
 |----|-------------|----------|--------------|--------|
-| T-020 | Consolidate stop-loss into helper function | Low | None | COMPLETED |
-| T-021 | Add sell_threshold to cycle log output | Low | None | PENDING |
+| T-021 | Add sell_threshold to cycle log output | Low | None | DONE |
 | T-029 | Post-SL cooldown: prevent re-buy for N minutes after a stop-loss fires (L-010) | Medium | None | DONE |
 | T-TREND | Trend filter to prevent buying in sustained downtrend | Medium | None | DONE |
 | T-STABILITY | Regime stability metric in dashboard | Medium | T-019 | DONE |
@@ -30,6 +29,7 @@
 | T-029b | Fix B-017: `target_ret` NameError in `_generate_and_apply_hypotheses()` | B-017/D-043 | COMPLETED |
 | T-019 | Regime stability metric in dashboard | D-044 | COMPLETED |
 | T-ANALYTICS | Trade-level analytics (Sharpe, TWR, consecutive SL) | New | COMPLETED |
+| T-021 | Add sell_threshold to cycle log output | T-021 | COMPLETED |
 
 ## Task Dependencies
 ```
@@ -46,4 +46,4 @@ T-029                      → reduce stop-loss chain loss events (L-010)
 
 ---
 **See PROJECT_STATE.md for verification status, deferred items, and documentation gaps.**
-**Last Updated:** 2026-06-02 | Engineer: J.A.R.V.I.S.
+**Last Updated:** 2026-06-03 | Engineer: J.A.R.V.I.S.

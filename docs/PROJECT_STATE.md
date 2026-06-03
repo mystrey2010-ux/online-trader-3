@@ -5,8 +5,7 @@
 ## Open Tasks
 | ID | Description | Priority | Dependencies | Status |
 |----|-------------|----------|--------------|--------|
-| T-020 | Consolidate stop-loss into helper function | Low | None | COMPLETED |
-| T-021 | Add sell_threshold to cycle log output | Low | None | PENDING |
+| T-021 | Add sell_threshold to cycle log output | Low | None | COMPLETED |
 
 ## Bug Status
 ### Active
@@ -40,10 +39,12 @@
 | Item | Verified | Notes |
 |------|----------|-------|
 | main.py syntax (v2.18) | ✓ | py_compile clean |
+| main.py syntax (v2.18 + T-021) | ✓ | py_compile clean |
 | News sentiment (RSS) | ✓ | Uses built-in xml.etree.ElementTree, free CryptoPanic RSS feed |
 | Position sizing (3%) | ✓ | Updated in config.json for $100 balance |
 | Cascade bug fix | ✓ | Trade #13 position accumulation resolved |
 | Stop-loss helper (T-020) | ✓ | _execute_stop_loss() extracted, syntax verified |
+| Sell threshold log (T-021) | ✓ | Added sell_threshold to cycle log output |
 
 ## Performance Observations
 - Fresh start with $100 balance
@@ -58,4 +59,4 @@
 | Q-004 | Native stop-loss orders (Kraken API) | Currently price-check based |
 
 ---
-**Last Updated:** 2026-06-03 19:30 | Engineer: J.A.R.V.I.S.
+**Last Updated:** 2026-06-03 23:45 | Engineer: J.A.R.V.I.S.

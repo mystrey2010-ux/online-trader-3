@@ -23,7 +23,7 @@ Before executing any code or modifications, emit a grounding summary using this 
 ### 3. Blockers, Risks & Inconsistencies
 [Explicit technical friction or conflicting logic identified in docs]
 
-### 4. Recommended Next Actions
+### 4. Recommended Next Actions (sort by priority of action).
 - [ ] Action item 1
 - [ ] Action item 2
 </session_bootstrap>
