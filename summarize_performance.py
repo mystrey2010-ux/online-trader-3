@@ -573,7 +573,7 @@ def print_brain_status(config):
     if ledger:
         print()
         print("  Hypothesis Log:")
-        print(f"  {'#':<3} {'Timestamp':<20} {'Regime':<10} {'Parameter':<22} {'Change':<20} {'Direction'}")
+        print(f"  {'#':<3} {'Timestamp':<20} {'Regime':<10} {'Parameter':<22} {'Change':<20} {'BacktestΔ'}")
         print(f"  {'-'*3} {'-'*20} {'-'*10} {'-'*22} {'-'*20} {'-'*10}")
         for i, h in enumerate(ledger, 1):
             ts_h   = str(h.get("timestamp", ""))[:19]
@@ -581,12 +581,17 @@ def print_brain_status(config):
             param  = str(h.get("parameter", h.get("param_adjusted", "?")))[:22]
             old_v  = h.get("old_value", h.get("previous_value", "?"))
             new_v  = h.get("new_value", h.get("applied_value", "?"))
-            dirn   = str(h.get("expected_score_direction", h.get("direction", "?")))
+            sim_ret = h.get("simulated_backtest_return", h.get("backtest_return", "?"))
+            baseline_ret = h.get("baseline_backtest_return", None)
+            if baseline_ret is not None and isinstance(sim_ret, (int, float)):
+                delta = f"{sim_ret*100:.2f}% (bl:{baseline_ret*100:.2f}%)"
+            else:
+                delta = "N/A"
             try:
                 change = f"{float(old_v):.4f} -> {float(new_v):.4f}"
             except (TypeError, ValueError):
                 change = f"{old_v} -> {new_v}"
-            print(f"  {i:<3} {ts_h:<20} {regime:<10} {param:<22} {change:<20} {dirn}")
+            print(f"  {i:<3} {ts_h:<20} {regime:<10} {param:<22} {change:<20} {delta}")
     else:
         n_to_first = cadence - n_trades if n_trades < cadence else 0
         if n_to_first > 0:
