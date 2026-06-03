@@ -42,10 +42,12 @@
 ## Verification Status
 | Item | Verified | Notes |
 |------|----------|-------|
-| main.py syntax (v2.17) | ✓ | py_compile clean |
+| main.py syntax (v2.17) | ✓ | py_compile clean
+| BACKTEST-GATE implementation | ✓ | D-069 - _run_local_backtest() active, gating logic verified |
 | B-011/B-012/B-013/T-029 implementation | ✓ | Gap fixes applied and verified 2026-06-02 |
 | B-017–B-019 fixed | ✓ | D-043/D-044/D-045 applied; engine restart needed |
 | B-020/B-021/B-022/B-023 fixed | ✓ | v2.17 fixes applied (BUY block, sell threshold, TREND comment, config keys) |
+| T-REGIME regime sync | ✓ | D-068 - 1d OHLCV for macro trend validated |
 | Fee fields in both sell paths | ✓ | D-018 |
 | Fee trap prevention | ✓ | D-031 — confirmed holding at RSI 84-87+ in live session |
 | Dynamic RSI threshold | ✓ | D-032 — B-011 fix ensures threshold survives restart |
@@ -88,4 +90,4 @@
 | Medium | Emergency stop duplicate trade risk | L-005: Only use emergency_sell when position exists |
 
 ---
-**Last Updated:** 2026-06-03 08:00 | Engineer: J.A.R.V.I.S.
+**Last Updated:** 2026-06-03 08:30 | Engineer: J.A.R.V.I.S.
