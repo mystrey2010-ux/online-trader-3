@@ -23,6 +23,7 @@
 | B-022 | Low | B-022 — TREND FILTER comment indentation fix |
 | B-023 | Low | B-023 — Added exchange/kraken_fee_pct keys |
 | B-024 | High | Fixed undefined `SL_COOLDOWN_SECONDS` → `DEFAULT_SL_COOLDOWN` (300s cooldown now functional) |
+| STAT-WINDOW | Medium | D-070 — evaluation_window_size (20) decoupled from cadence, cold-start fallback implemented |
 
 ### Resolved (v2.16)
 | ID | Severity | Resolution |
@@ -43,31 +44,16 @@
 | Item | Verified | Notes |
 |------|----------|-------|
 | main.py syntax (v2.17) | ✓ | py_compile clean
-| BACKTEST-GATE implementation | ✓ | D-069 - _run_local_backtest() active, gating logic verified |
+| BACKTEST-GATE implementation | ✓ | D-069 - _run_local_backtest() active, gating logic verified
+| STAT-WINDOW fix | ✓ | D-070 - evaluation_window_size (default 20) decoupled from cadence, cold-start fallback tested
 | B-011/B-012/B-013/T-029 implementation | ✓ | Gap fixes applied and verified 2026-06-02 |
 | B-017–B-019 fixed | ✓ | D-043/D-044/D-045 applied; engine restart needed |
 | B-020/B-021/B-022/B-023 fixed | ✓ | v2.17 fixes applied (BUY block, sell threshold, TREND comment, config keys) |
 | T-REGIME regime sync | ✓ | D-068 - 1d OHLCV for macro trend validated |
 | Fee fields in both sell paths | ✓ | D-018 |
-| Fee trap prevention | ✓ | D-031 — confirmed holding at RSI 84-87+ in live session |
-| Dynamic RSI threshold | ✓ | D-032 — B-011 fix ensures threshold survives restart |
-| Position restoration on startup | ✓ | D-020 |
-| Config reloaded each cycle | ✓ | D-038 |
-| EMERGENCY_STOP guard | ✓ | D-023 |
-| Emergency trades excluded from brain | ✓ | D-025 — B-012 fix ensures correct count-based filtering |
-| Hypothesis numeric confidence | ✓ | D-037 |
-| Hypothesis ledger key schema | ✓ | D-044 — now includes display alias keys |
-| Stop-loss no same-cycle re-buy | ✓ | D-045 |
-| Stop-loss cooldown | ✓ | D-049 — 300s cooldown after stop-loss (B-024 verified: DEFAULT_SL_COOLDOWN constant used) |
+| Stop-loss cooldown | ✓ | D-049/B-024 — 300s cooldown after stop-loss (DEFAULT_SL_COOLDOWN constant used) |
 | B-024 (undefined variable) | ✓ | SL_COOLDOWN_SECONDS → DEFAULT_SL_COOLDOWN fixed, py_compile clean |
 | Trend filter active | ✓ | D-055 — skips BUY when price declining over 20 periods |
-| Regime stability metric | ✓ | Dashboard shows % of hypotheses in current regime |
-| Rolling Sharpe metric | ✓ | Dashboard shows risk-adjusted returns |
-| Time-Weighted Return | ✓ | Dashboard shows compounding-adjusted percentage |
-| Consecutive SL Count | ✓ | Dashboard shows max cascade risk |
-| RSI signal log accuracy | ✓ | D-030/D-040 |
-| Python interpreter standardized | ✓ | Shebang/detection updated |
-| Deduplication of previous_strategies | ✓ | D-028 |
 
 ## Performance Observations (2026-05-31 to 2026-06-02)
 - 12 completed trades: 5 wins (+$0.159 total net), 7 stop-losses (-$5.701 total net)
@@ -90,4 +76,4 @@
 | Medium | Emergency stop duplicate trade risk | L-005: Only use emergency_sell when position exists |
 
 ---
-**Last Updated:** 2026-06-03 08:30 | Engineer: J.A.R.V.I.S.
+**Last Updated:** 2026-06-03 09:00 | Engineer: J.A.R.V.I.S.
