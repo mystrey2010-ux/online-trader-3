@@ -16,8 +16,7 @@
 ### Resolved (v2.18)
 | ID | Severity | Resolution |
 |----|----------|------------|
-| B-020 | Critical | Cascade accumulation bug fixed, position sizing now controlled |
-| N-001 | New | RSS-based news sentiment integration (free, no API token) |
+| D-074 | High | Daily loss limit circuit breaker added to run_cycle() |
 
 ### Resolved (v2.17)
 | ID | Severity | Resolution |
@@ -39,7 +38,7 @@
 | Item | Verified | Notes |
 |------|----------|-------|
 | main.py syntax (v2.18) | ✓ | py_compile clean |
-| main.py syntax (v2.18 + T-021) | ✓ | py_compile clean |
+| main.py syntax (+D-074 daily loss limit) | ✓ | py_compile clean |
 | News sentiment (RSS) | ✓ | CoinTelegraph RSS feed working, wired to self_improve_strategies() |
 | News sentiment call added | ✓ | _fetch_news_sentiment() now populates config.news_sentiment |
 | Cascade bug fix | ✓ | Trade #13 position accumulation resolved |

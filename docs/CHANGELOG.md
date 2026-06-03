@@ -1,6 +1,7 @@
 # CHANGELOG — Online Trader-3
 
 ## v2.18 (2026-06-03)
+- D-074: Daily loss limit circuit breaker — EMERGENCY_STOP activates if daily net PnL < -max_daily_loss_pct (5%)
 - N-002: Switched news sentiment feed from CryptoPanic RSS (502 error) to CoinTelegraph RSS
 - N-003: Wired _fetch_news_sentiment() into self_improve_strategies() to populate news_sentiment in config
 - Position sizing: 10% as user-adjusted (from 3% baseline)

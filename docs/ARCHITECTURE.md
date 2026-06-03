@@ -15,14 +15,15 @@
 ## Trading Loop (run_cycle, 60s)
 ```
 0. EMERGENCY_STOP? → log "EMERGENCY STOP ACTIVE", return (D-023 guard)
-1. Fetch ticker (for real-time stop-loss price check)
-2. Fetch OHLCV (50 x 1m bars)
-3. Calculate RSI-14
-4. STOP-LOSS: price < entry × (1-stop_loss_pct) → emergency sell → return (D-045)
-5. TREND CHECK: skip BUY if price declining over 20 periods (T-018)
-6. POSITION TIMEOUT: warn if open >24h without close signal (T-018)
-7. BUY:  RSI < indicator_threshold and uptrend, no position → buy position_size_pct of balance
-8. SELL: RSI > sell_threshold AND net PnL after fees > 0 → sell all BTC
+1. DAILY LOSS CHECK: daily PnL < -max_daily_loss_pct → EMERGENCY_STOP (D-074)
+2. Fetch ticker (for real-time stop-loss price check)
+3. Fetch OHLCV (50 x 1m bars)
+4. Calculate RSI-14
+5. STOP-LOSS: price < entry × (1-stop_loss_pct) → emergency sell → return (D-045)
+6. TREND CHECK: skip BUY if price declining over 20 periods (T-018)
+7. POSITION TIMEOUT: warn if open >24h without close signal (T-018)
+8. BUY:  RSI < indicator_threshold and uptrend, no position → buy position_size_pct of balance
+9. SELL: RSI > sell_threshold AND net PnL after fees > 0 → sell all BTC
 ```
 
 **Sell threshold** = dynamic, based on `entry_rsi + estimated_rsi_change_for_fee_hurdle + 5` buffer, minimum `indicator_threshold + 10`. Falls back to `indicator_threshold + 20` when no entry RSI is available (D-032).
@@ -79,6 +80,7 @@ Action:
   "target_asset": "BTC/USDT",
   "target_daily_return": 0.002,
   "max_daily_drawdown": 0.01,
+  "max_daily_loss_pct": 0.05,
   "min_sharpe_ratio": 2.0,
   "reflection_cadence": 3,
   "kraken_fee_pct": 0.0026,

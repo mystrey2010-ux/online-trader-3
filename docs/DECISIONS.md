@@ -53,6 +53,7 @@ Key design decisions, one line each. Code location noted for traceability.
 | D-071 | T-020: Stop-loss logic extracted into _execute_stop_loss() helper | main.py _execute_stop_loss(), run_cycle() | v2.18 |
 | D-072 | N-002 fix: Switched CryptoPanic RSS to CoinTelegraph RSS feed due to 502 errors/malformed XML | main.py _fetch_news_sentiment() | v2.18 |
 | D-073 | N-003 fix: Wire _fetch_news_sentiment() into self_improve_strategies() to populate news_sentiment in config | main.py self_improve_strategies() | v2.18 |
+| D-074 | Daily loss limit circuit breaker: Check daily net PnL against max_daily_loss_pct; activates EMERGENCY_STOP if exceeded | main.py run_cycle() | v2.18 |
 
 ---
 **Last Updated:** 2026-06-03 23:55 | Engineer: opencode

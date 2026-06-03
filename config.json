@@ -2,6 +2,7 @@
   "target_asset": "BTC/USDT",
   "target_daily_return": 0.002,
   "max_daily_drawdown": 0.01,
+  "max_daily_loss_pct": 0.05,
   "min_sharpe_ratio": 2.0,
   "reflection_cadence": 3,
   "kraken_fee_pct": 0.0026,
