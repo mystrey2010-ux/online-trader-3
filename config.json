@@ -10,6 +10,7 @@
   },
   "current_strategy": {
     "indicator_threshold": 69.46,
+    "sell_threshold_base": 10,
     "stop_loss_pct": 0.016,
     "position_size_pct": 0.037,
     "rsi_period": 14,
@@ -248,6 +249,7 @@
       "version": 1,
       "strategy": {
         "indicator_threshold": 63.0,
+        "sell_threshold_base": 10,
         "stop_loss_pct": 0.016,
         "position_size_pct": 0.037,
         "trend_filter_lookback": 20,
@@ -260,6 +262,7 @@
       "version": 2,
       "strategy": {
         "indicator_threshold": 66.15,
+        "sell_threshold_base": 10,
         "stop_loss_pct": 0.016,
         "position_size_pct": 0.037,
         "rsi_period": 14,

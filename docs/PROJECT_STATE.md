@@ -1,6 +1,6 @@
 # PROJECT STATE — Online Trader-3 v2.17
 
-**Status:** PAPER/SANDBOX | EMERGENCY_STOP: CLEARED | Engine: RUNNING | Trade Progress: 13 completed (6 strategic wins, 7 stop-losses) | 1 open position
+**Status:** PAPER/SANDBOX | EMERGENCY_STOP: CLEARED | Engine: RUNNING | Trade Progress: 16 completed (8 strategic wins, 8 stop-losses) | 1 open position
 
 ## Open Tasks
 | ID | Description | Priority | Dependencies | Status |
@@ -22,6 +22,7 @@
 | B-021 | Low | D-061 — Dashboard dynamic sell threshold |
 | B-022 | Low | B-022 — TREND FILTER comment indentation fix |
 | B-023 | Low | B-023 — Added exchange/kraken_fee_pct keys |
+| B-024 | High | Fixed undefined `SL_COOLDOWN_SECONDS` → `DEFAULT_SL_COOLDOWN` (300s cooldown now functional) |
 
 ### Resolved (v2.16)
 | ID | Severity | Resolution |
@@ -55,7 +56,8 @@
 | Hypothesis numeric confidence | ✓ | D-037 |
 | Hypothesis ledger key schema | ✓ | D-044 — now includes display alias keys |
 | Stop-loss no same-cycle re-buy | ✓ | D-045 |
-| Stop-loss cooldown | ✓ | D-049 — 300s cooldown after stop-loss |
+| Stop-loss cooldown | ✓ | D-049 — 300s cooldown after stop-loss (B-024 verified: DEFAULT_SL_COOLDOWN constant used) |
+| B-024 (undefined variable) | ✓ | SL_COOLDOWN_SECONDS → DEFAULT_SL_COOLDOWN fixed, py_compile clean |
 | Trend filter active | ✓ | D-055 — skips BUY when price declining over 20 periods |
 | Regime stability metric | ✓ | Dashboard shows % of hypotheses in current regime |
 | Rolling Sharpe metric | ✓ | Dashboard shows risk-adjusted returns |
@@ -86,4 +88,4 @@
 | Medium | Emergency stop duplicate trade risk | L-005: Only use emergency_sell when position exists |
 
 ---
-**Last Updated:** 2026-06-02 23:10 | Engineer: J.A.R.V.I.S.
+**Last Updated:** 2026-06-03 08:00 | Engineer: J.A.R.V.I.S.

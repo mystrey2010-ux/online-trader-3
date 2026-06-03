@@ -1,6 +1,7 @@
 # CHANGELOG — Online Trader-3
 
 ## v2.17 (2026-06-02)
+- B-024: Fixed undefined `SL_COOLDOWN_SECONDS` variable in stop-loss path — changed to `DEFAULT_SL_COOLDOWN` constant; stop-loss cooldown now properly enforces 300s after emergency sell
 - B-020: Fixed critical BUY logic bug — BUY execution block was nested under `if self.current_position == 'long'` instead of `if rsi_val < buy_threshold and self.current_position is None`. Caused 64+ unintended consecutive buys every cycle while holding a position, draining USD balance from ~$960 to ~$79. Fixed by restructuring run_cycle so BUY block is inside the correct buy-signal condition; position timeout warning restored as independent post-block check (D-060)
 - B-021: Fixed dashboard section [3] sell threshold — replaced hardcoded `threshold+20` with D-032 dynamic formula using `entry_rsi` from open_position; falls back to `threshold+20` when no position (D-061)
 - B-022: Fixed stale `# ===== TREND FILTER CHECK` comment at column 0 — indented to correct 12-space level inside run_cycle method

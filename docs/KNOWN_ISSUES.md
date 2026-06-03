@@ -23,7 +23,7 @@
 
 ## RESOLVED
 | ID | Issue | Severity | Resolution |
-|----|-------|----------|------------|
+| B-024 [RESOLVED] | Undefined `SL_COOLDOWN_SECONDS` variable in stop-loss path caused NameError on cooldown activation | High | Fixed: Changed to `DEFAULT_SL_COOLDOWN` (line 29) - cooldown now correctly enforces 300s after stop-loss |
 | B-020 [RESOLVED] | BUY execution block nested under `if self.current_position == 'long'` — fired every cycle while holding, draining USD to near-zero via 64+ unintended consecutive buys | Critical | B-020/D-060 (v2.17) — moved buy block inside correct `if rsi_val < buy_threshold and self.current_position is None` branch |
 | B-021 [RESOLVED] | Dashboard section [3] hardcoded sell threshold as `threshold+20` regardless of D-032 dynamic value | Low | B-021/D-061 (v2.17) — replicates engine D-032 formula using entry_rsi from open_position |
 | B-022 [RESOLVED] | Stale `# ===== TREND FILTER CHECK` comment at column 0 in main.py (outside run_cycle indentation) | Low | B-022 (v2.17) — fixed indentation to 12 spaces inside method |

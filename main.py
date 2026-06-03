@@ -591,6 +591,7 @@ class OnlineTrader:
         regime_tuning_map = {
             "BULL": {  # Bull market: prices trending up aggressively
                 "indicator_threshold": {"direction": "lower", "new_value_multiplier": 0.9, "reasoning": "Aggressive buying on pullbacks in strong uptrend"},
+                "sell_threshold_base": {"direction": "lower", "new_value_multiplier": 0.75, "reasoning": "Tighter sell buffer to capture quick gains in uptrend"},
                 "stop_loss_pct": {"direction": "tighter", "new_value_multiplier": 0.9, "reasoning": "Protect aggressive gains in bull market"},
                 "position_size_pct": {"direction": "increase", "new_value_multiplier": 1.2, "reasoning": "Take advantage of favorable conditions"},
                 "trend_filter_lookback": {"direction": "shorter", "new_value_multiplier": 0.5, "reasoning": "Shorter lookback for quick trend detection in uptrend"},
@@ -599,6 +600,7 @@ class OnlineTrader:
             },
             "BEAR": {  # Bear market: prices crashing, high risk
                 "indicator_threshold": {"direction": "higher", "new_value_multiplier": 1.05, "reasoning": "Wait for better confirmation in weak downtrend"},
+                "sell_threshold_base": {"direction": "higher", "new_value_multiplier": 1.25, "reasoning": "Wider sell buffer to avoid premature exits in choppy bear market"},
                 "stop_loss_pct": {"direction": "wider", "new_value_multiplier": 1.2, "reasoning": "Prevent premature exits during normal bear volatility"},
                 "position_size_pct": {"direction": "decrease", "new_value_multiplier": 0.8, "reasoning": "Reduce exposure in unfavorable regime"},
                 "rsi_period": {"direction": "longer", "new_value_multiplier": 1.33, "reasoning": "Smoother RSI in choppy bear market"},
@@ -608,6 +610,7 @@ class OnlineTrader:
             },
             "SIDEWAYS": {  # Choppy market, low trend
                 "indicator_threshold": {"direction": "stricter", "new_value_multiplier": 0.95, "reasoning": "Require stronger signals to cut through noise"},
+                "sell_threshold_base": {"direction": "higher", "new_value_multiplier": 1.2, "reasoning": "Wider sell buffer to avoid whipsaw exits in chop"},
                 "stop_loss_pct": {"direction": "wider", "new_value_multiplier": 1.1, "reasoning": "Avoid whipsaws in range-bound market"},
                 "position_size_pct": {"direction": "slightly_increase", "new_value_multiplier": 1.05, "reasoning": "Compensate for lower win rate in chop"},
                 "rsi_period": {"direction": "longer", "new_value_multiplier": 1.33, "reasoning": "Smoother RSI in choppy sideways market"},
@@ -618,6 +621,7 @@ class OnlineTrader:
             },
             "NEUTRAL": {  # Neutral: use performance-based tuning
                 "indicator_threshold": {"direction": "adjust_toward_optimal", "new_value_multiplier": None, "reasoning": "Fine-tune based on signal frequency"},
+                "sell_threshold_base": {"direction": "maintain_current", "new_value_multiplier": 1.0, "reasoning": "Stable buffer for neutral conditions"},
                 "stop_loss_pct": {"direction": "maintain_current", "new_value_multiplier": 1.0, "reasoning": "Risk already calibrated"},
                 "position_size_pct": {"direction": "fine_tune", "new_value_multiplier": None, "reasoning": "Adjust based on risk/reward ratio"},
                 "rsi_period": {"direction": "maintain_current", "new_value_multiplier": 1.0, "reasoning": "14-period standard; extend in choppy BEAR, shorten in trending BULL"},
@@ -642,6 +646,9 @@ class OnlineTrader:
             if key == "indicator_threshold":
                 # RSI thresholds are percentages (e.g., 63.0), adjust by ±15% max
                 new_val = round(old_val * new_val_multiplier, 2)
+            elif key == "sell_threshold_base":
+                # Sell threshold base: integer RSI points (e.g., 10), adjust but keep reasonable bounds
+                new_val = int(max(5, min(20, round(old_val * new_val_multiplier))))
             elif key == "stop_loss_pct":
                 # Stop-loss is a ratio (e.g., 0.016 for 1.6%), adjust by ±30% max
                 new_val = round(strat[key] * new_val_multiplier, 4)
@@ -825,13 +832,16 @@ class OnlineTrader:
                 # Estimate what RSI change corresponds to overcoming the fee hurdle
                 estimated_rsi_change_needed = self._estimate_rsi_change_for_price_change(fee_hurdle_pct)
                 
-                # Dynamic sell threshold: entry RSI + estimated change needed + small buffer
-                dynamic_sell_threshold = self.entry_rsi + estimated_rsi_change_needed + 5  # +5 buffer
-                sell_threshold = max(dynamic_sell_threshold, threshold + 10)  # Ensure minimum threshold
+                # Dynamic sell threshold: entry RSI + estimated change needed + configurable buffer
+                sell_threshold_base = self.config["current_strategy"].get("sell_threshold_base", 10)
+                estimated_rsi_change_needed = round(self._estimate_rsi_change_for_price_change(fee_hurdle_pct), 2)
+                dynamic_sell_threshold = self.entry_rsi + estimated_rsi_change_needed + sell_threshold_base
+                sell_threshold = round(max(dynamic_sell_threshold, threshold + sell_threshold_base), 2)  # Ensure minimum threshold, rounded to 2 decimals
                 logging.debug(f"📊 Dynamic sell threshold: {sell_threshold:.2f} (entry RSI: {self.entry_rsi:.2f}, fee hurdle: {fee_hurdle_pct:.4%}, est RSI change: {estimated_rsi_change_needed:.2f})")
             else:
                 # Default fixed threshold when no position or entry RSI not tracked
-                sell_threshold = threshold + 20
+                sell_threshold_base = self.config["current_strategy"].get("sell_threshold_base", 10)
+                sell_threshold = round(threshold + sell_threshold_base * 2)  # Double buffer when no position context
             
             logging.info(f"📊 {symbol} | RSI: {rsi_val:.2f} | Threshold: {threshold}")
 
@@ -874,14 +884,14 @@ class OnlineTrader:
                             if "open_position" in self.config:
                                 del self.config["open_position"]
                             self.config["trade_history"].append(trade_record)
-                            self.config["sl_cooldown_until"] = time.time() + SL_COOLDOWN_SECONDS
+                            self.config["sl_cooldown_until"] = time.time() + DEFAULT_SL_COOLDOWN
                             save_config(self.config)
                             self.current_position = None
                             self.entry_price = None
                             self.entry_rsi = None
-                            self.sl_cooldown_until = time.time() + SL_COOLDOWN_SECONDS
+                            self.sl_cooldown_until = time.time() + DEFAULT_SL_COOLDOWN
                             logging.info(f"💰 TRADE CLOSED: PnL: {pnl_pct:.4%} (${pnl_usd:.2f}) | Gross: ${gross_pnl_usd:.4f} | Fee: ${fee_usd:.4f} | Net: ${net_pnl_usd:.4f}")
-                            logging.info(f"⏳ Stop-loss cooldown activated for {SL_COOLDOWN_SECONDS}s")
+                            logging.info(f"⏳ Stop-loss cooldown activated for {DEFAULT_SL_COOLDOWN}s")
                             return
                         else:
                             logging.warning("⚠️ No BTC available to close on stop-loss.")

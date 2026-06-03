@@ -319,14 +319,15 @@ def print_open_position(config, spot_price):
 def print_strategy(config):
     """
     Data: config.json current_strategy + performance targets.
-    Sell threshold: dynamic when entry_rsi is available (entry_rsi + fee_hurdle_rsi + 5,
-    min threshold+10); falls back to threshold+20 when no position / no entry_rsi (D-032).
+    Sell threshold: dynamic when entry_rsi is available (entry_rsi + fee_hurdle_rsi + sell_threshold_base,
+    min threshold+sell_threshold_base); falls back to threshold+sell_threshold_base when no position / no entry_rsi (D-032).
     """
     print("[3] CURRENT STRATEGY")
     print(SEPARATOR_MID)
 
     strat   = config.get("current_strategy", {})
     thresh  = float(strat.get("indicator_threshold", 0))
+    sell_thresh_base = float(strat.get("sell_threshold_base", 10))
     sl_pct  = float(strat.get("stop_loss_pct", 0))
     ps_pct  = float(strat.get("position_size_pct", 0))
     version = int(config.get("version", 1))
@@ -339,15 +340,15 @@ def print_strategy(config):
     if entry_rsi is not None:
         try:
             fee_hurdle_rsi = abs(float(entry_rsi)) * kraken_fee_pct * 2 * 50  # rough RSI-to-price ratio
-            dynamic = float(entry_rsi) + fee_hurdle_rsi + 5
-            sell_thresh = max(dynamic, thresh + 10)
-            sell_thresh_note = f"dynamic (entry RSI {float(entry_rsi):.1f} + fee hurdle + 5, min thr+10)"
+            dynamic = float(entry_rsi) + fee_hurdle_rsi + sell_thresh_base
+            sell_thresh = max(dynamic, thresh + sell_thresh_base)
+            sell_thresh_note = f"dynamic (entry RSI {float(entry_rsi):.1f} + fee hurdle + {sell_thresh_base}, min thr+{sell_thresh_base})"
         except (TypeError, ValueError):
-            sell_thresh = thresh + 20.0
-            sell_thresh_note = "threshold + 20 (fallback, entry_rsi unreadable)"
+            sell_thresh = thresh + sell_thresh_base * 2
+            sell_thresh_note = f"threshold + {sell_thresh_base * 2} (fallback, entry_rsi unreadable)"
     else:
-        sell_thresh = thresh + 20.0
-        sell_thresh_note = "threshold + 20 (fallback, no open position)"
+        sell_thresh = thresh + sell_thresh_base * 2
+        sell_thresh_note = f"threshold + {sell_thresh_base * 2} (fallback, no open position)"
 
     print(f"  RSI BUY signal   : RSI < {thresh:.1f}")
     print(f"  RSI SELL signal  : RSI > {sell_thresh:.2f}  ({sell_thresh_note})")
