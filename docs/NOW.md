@@ -1,6 +1,6 @@
 # NOW — Online Trader-3 v2.18
 
-**Timestamp:** 2026-06-03 19:30 | Engine: READY | Mode: PAPER/SANDBOX
+**Timestamp:** 2026-06-03 22:22 | Engine: RUNNING | Mode: PAPER/SANDBOX
 
 ## Current State
 - **EMERGENCY_STOP:** CLEARED
@@ -20,7 +20,7 @@
 - **News Integration:** RSS-based sentiment (free tier)
 
 ## Next Action
-Run fresh trading session with $100 balance and news-augmented regime detection.
+Await RSI rise above 79.46 (sell threshold) for position close; 3 strategic trades needed for brain activation.
 
 ---
 **See PROJECT_STATE.md for verification status, tasks, and deferred items.**
