@@ -1,6 +1,6 @@
 # NOW — Online Trader-3 v2.17
 
-**Timestamp:** 2026-06-03 08:30 | Engine: READY | Mode: PAPER/SANDBOX
+**Timestamp:** 2026-06-03 09:05 | Engine: READY | Mode: PAPER/SANDBOX
 
 ## Current State
 - **EMERGENCY_STOP:** CLEARED
@@ -10,6 +10,7 @@
 
 ## Recent Changes (2026-06-03)
 - **BACKTEST-GATE (D-069):** Pre-commit backtest safety validates hypotheses against 500-bar historical slice before live application; gating requires strictly positive backtest improvement
+- **STAT-WINDOW (D-070):** evaluation_window_size (default 20) decoupled from cadence trigger; cold-start fallback uses all available trades for stable metric calculation
 - **T-REGIME (D-068):** Multi-timeframe regime sync — 1d OHLCV (30 bars) for 20-day macro trend; thresholds recalibrated to ±10%
 - **B-024:** Fixed undefined SL_COOLDOWN_SECONDS → DEFAULT_SL_COOLDOWN (300s cooldown now functional)
 
@@ -23,4 +24,4 @@ Monitor for SELL signal; B-020 fix prevents spurious BUY while holding position.
 
 ---
 **See PROJECT_STATE.md for verification status, tasks, and deferred items.**
-**Last Updated:** 2026-06-03 08:30 | Engineer: J.A.R.V.I.S.
+**Last Updated:** 2026-06-03 09:05 | Engineer: J.A.R.V.I.S.
