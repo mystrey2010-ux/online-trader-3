@@ -5,7 +5,6 @@
 |----|-------|----------|-------------------|
 | L-003 | hypothesis_ledger empty until 3 strategic trades complete after B-017 fix | Low | Requires restart + 3 strategic trades to trigger first reflection |
 | L-004 | No position timeout mechanism | Low (deferred) | Re-evaluate if open >24h without SELL/SL signal (T-018) |
-| N-002 | CryptoPanic RSS feed returns 502/malformed XML - news sentiment broken | Medium | External service; add timeout + error handling in v2.19 |
 
 ## BUGS — Confirmed, Pending Fix
 | ID | File | Line(s) | Description | Severity |
@@ -51,6 +50,7 @@
 | B-016 [RESOLVED] | clean command sets open_position={} not deletes key | Low | Fixed in v2.16 - uses d.pop('open_position', None) |
 | B-EMERGENCY [RESOLVED] | EMERGENCY_STOP flag blocked trading logic | High | D-024/D-026 |
 | DASHBOARD-ENGINE-DETECTION [RESOLVED] | pgrep -a python3 missed venv process | Low | pgrep -f "main.py" |
+| N-002 [RESOLVED] | CryptoPanic RSS feed returned 502/malformed XML - news sentiment broken | Medium | Switched to CoinTelegraph RSS feed (working)
 
 ---
 **Last Updated:** 2026-06-03 23:55 | Engineer: opencode

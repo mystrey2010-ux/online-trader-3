@@ -46,7 +46,7 @@ Action:
 
 **hypothesis_ledger** populated only after reflection fires. Each ledger entry includes: `parameter`, `old_value`, `new_value`, `regime`, `direction`, `regime_tag`, `expected_score_direction`, `metrics_at_failure`, `confidence_reasoning`.
 
-**news_sentiment** (N-001): Free CryptoPanic RSS feed integration; classifies sentiment as positive/neutral/negative based on keyword analysis; stored in config for strategy context.
+**news_sentiment** (N-002): CoinTelegraph RSS feed integration; classifies sentiment as positive/neutral/negative based on keyword analysis; stored in config for strategy context.
 
 ## Position Management
 - Multi-buy accumulation, value-weighted average entry price

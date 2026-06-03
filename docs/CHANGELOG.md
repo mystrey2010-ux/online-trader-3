@@ -1,9 +1,8 @@
 # CHANGELOG — Online Trader-3
 
 ## v2.18 (2026-06-03)
-- RESET & REALLOCATION: Trader reset to $100 balance, cascade bug fixed, position sizing updated to 3% ($3/trade)
-- N-001: News sentiment integration via free CryptoPanic RSS feed (no API token required); uses built-in xml.etree.ElementTree for parsing
-- manage_trader.sh clean: Updated to reset Kraken paper account to $100 instead of $1000
+- N-002: Switched news sentiment feed from CryptoPanic RSS (502 error) to CoinTelegraph RSS
+- Position sizing: 10% as user-adjusted (from 3% baseline)
 - T-020: Stop-loss logic consolidated into _execute_stop_loss() helper function for code clarity
 
 ## v2.17 (2026-06-02)
