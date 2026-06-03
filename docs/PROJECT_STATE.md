@@ -1,6 +1,6 @@
 # PROJECT STATE — Online Trader-3 v2.18
 
-**Status:** PAPER/SANDBOX | EMERGENCY_STOP: CLEARED | Engine: READY | Trade Progress: 0 completed | No open position
+**Status:** PAPER/SANDBOX | EMERGENCY_STOP: CLEARED | Engine: READY | Trade Progress: 0 completed | 1 open position
 
 ## Open Tasks
 | ID | Description | Priority | Dependencies | Status |
@@ -41,15 +41,14 @@
 | main.py syntax (v2.18) | ✓ | py_compile clean |
 | main.py syntax (v2.18 + T-021) | ✓ | py_compile clean |
 | News sentiment (RSS) | ✓ | Uses built-in xml.etree.ElementTree, free CryptoPanic RSS feed |
-| Position sizing (3%) | ✓ | Updated in config.json for $100 balance |
+| Position sizing (10%) | ✓ | Updated in config.json, validated against Kraken balance |
 | Cascade bug fix | ✓ | Trade #13 position accumulation resolved |
 | Stop-loss helper (T-020) | ✓ | _execute_stop_loss() extracted, syntax verified |
 | Sell threshold log (T-021) | ✓ | Added sell_threshold to cycle log output |
 
 ## Performance Observations
-- Fresh start with $100 balance
-- Previous run (17 trades): 7 wins (+$0.235 net), 10 stop-losses (-$27.09 net)
-- Position sizing now 3% ($3/trade max)
+- Active position: ~0.00015 BTC @ $65,559 (validated against Kraken paper account)
+- Position sizing: 10% (user-adjusted from 3% to 0.1)
 - News sentiment: Free RSS integration active
 
 ## Deferred Items (Q - Quality of Service)
@@ -59,4 +58,4 @@
 | Q-004 | Native stop-loss orders (Kraken API) | Currently price-check based |
 
 ---
-**Last Updated:** 2026-06-03 23:45 | Engineer: J.A.R.V.I.S.
+**Last Updated:** 2026-06-03 23:50 | Engineer: opencode
