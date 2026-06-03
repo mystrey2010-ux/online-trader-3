@@ -1,5 +1,10 @@
 # CHANGELOG — Online Trader-3
 
+## v2.18 (2026-06-03)
+- RESET & REALLOCATION: Trader reset to $100 balance, cascade bug fixed, position sizing updated to 3% ($3/trade)
+- N-001: News sentiment integration via free CryptoPanic RSS feed (no API token required); uses built-in xml.etree.ElementTree for parsing
+- manage_trader.sh clean: Updated to reset Kraken paper account to $100 instead of $1000
+
 ## v2.17 (2026-06-02)
 - T-REGIME: Multi-timeframe regime sync — 1d OHLCV (30 bars) replaces 1h OHLCV for 20-day macro trend; thresholds recalibrated to ±10% (D-068)
 - BACKTEST-GATE: Pre-commit backtest safety gate — _run_local_backtest() validates hypotheses vs 500-bar historical slice before live application; gating requires strictly positive backtest improvement (D-069)

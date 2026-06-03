@@ -152,6 +152,13 @@ def get_regime_stability(config, current_regime):
     pct = (matches / len(recent)) * 100
     return f"{pct:.0f}%"
 
+def get_news_sentiment(config):
+    """Get news sentiment info from config if available."""
+    news_sentiment = config.get("news_sentiment", {})
+    if news_sentiment:
+        return f"{news_sentiment.get('sentiment', 'unknown')} ({news_sentiment.get('confidence', 0):.0f}%)"
+    return "N/A"
+
 
 def btc_spot_price():
     """

@@ -7,7 +7,7 @@ import subprocess
 import pandas as pd
 import numpy as np
 import random
-from datetime import datetime
+from datetime import datetime, timedelta
 import ccxt
 
 # ============================================
@@ -372,7 +372,66 @@ class OnlineTrader:
         
         logging.debug(f"🏷️ Regime: {regime} (confidence: {regime_confidence:.2f})")
         return regime
-    
+
+    def _fetch_news_sentiment(self):
+        """Fetch crypto news sentiment from CryptoPanic RSS feed (free, no auth required).
+        
+        Returns:
+            dict: {'sentiment': 'positive/neutral/negative', 'confidence': float, 'count': int}
+                  or None if unavailable.
+        """
+        try:
+            url = "https://cryptopanic.com/rss/btc/"
+            resp = requests.get(url, timeout=5)
+            if resp.status_code != 200:
+                return None
+                
+            # Parse RSS XML with regex (no external deps)
+            import xml.etree.ElementTree as ET
+            root = ET.fromstring(resp.content)
+            
+            items = root.findall('.//item')[:10]
+            if not items:
+                return None
+                
+            negative_keywords = ["dump", "crash", "fall", "drop", "loss", "decline", "bear", "plunge", "tumble", "slump"]
+            positive_keywords = ["surge", "rally", "jump", "rise", "gain", "bull", "soar", "climb", "bounce", "moon", "ATH", "breakout"]
+            
+            negative_count = 0
+            positive_count = 0
+            
+            for item in items:
+                title_elem = item.find('title')
+                title = title_elem.text.lower() if title_elem is not None else ""
+                if any(kw in title for kw in negative_keywords):
+                    negative_count += 1
+                elif any(kw in title for kw in positive_keywords):
+                    positive_count += 1
+            
+            total = len(items)
+            sentiment_score = (positive_count - negative_count) / total if total > 0 else 0
+            
+            if sentiment_score > 0.2:
+                sentiment = "positive"
+                confidence = min(0.9, 0.5 + abs(sentiment_score))
+            elif sentiment_score < -0.2:
+                sentiment = "negative"
+                confidence = min(0.9, 0.5 + abs(sentiment_score))
+            else:
+                sentiment = "neutral"
+                confidence = 0.5
+                
+            return {
+                "sentiment": sentiment,
+                "confidence": round(confidence, 2),
+                "count": total,
+                "negative": negative_count,
+                "positive": positive_count
+            }
+        except Exception as e:
+            logging.debug(f"News sentiment fetch failed: {e}")
+            return None
+
     def self_improve_strategies(self):
         trades = self.config.get("trade_history", [])
         

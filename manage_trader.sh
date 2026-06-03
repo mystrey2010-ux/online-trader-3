@@ -222,42 +222,42 @@ case "$1" in
             echo "⚠️  trader.log not found. Skipping truncation."
         fi
         
-        echo ""
-        echo "╔══════════════════════════════════════════════════════════════╗"
-        echo "║  🔄 Resetting Kraken Paper Account to one thousand dollars    ║"
-        echo "╚══════════════════════════════════════════════════════════════╝"
-        echo ""
-        
-        # Reset Kraken Paper Account to one thousand dollars
-        CARGO_BIN="$HOME/.cargo/bin/kraken"
-        KRANE_RESET_FAILED=false
-        
-        if [ -x "$CARGO_BIN/kraken" ]; then
-            echo "🔄 Checking Kraken CLI at Cargo binary..." && \
-            ("$CARGO_BIN/kraken paper reset --balance 1000 >/dev/null 2>&1") >/dev/null || true
-            
-            if [ $? -eq 0 ]; then
-                echo "✅ Kraken Paper Account reset to one thousand dollars (Cargo binary)"
-            else
-                echo "⚠️ Warning: Kraken CLI failed at Cargo binary. Skipping."
-                echo "📝 To reset manually, run: $CARGO_BIN/kraken paper reset --balance 1000"
-                KRANE_RESET_FAILED=true
-            fi
-        elif which kraken > /dev/null 2>&1; then
-            echo "🔄 Checking Kraken CLI in system PATH..." && \
-            (kraken paper reset --balance 1000 >/dev/null 2>&1) >/dev/null || true
-            
-            if [ $? -eq 0 ]; then
-                echo "✅ Kraken Paper Account reset to one thousand dollars (system PATH)"
-            else
-                echo "⚠️ Warning: kraken CLI failed in PATH. Skipping."
-                KRANE_RESET_FAILED=true
-            fi
-        else
-            echo "⚠️  Warning: kraken CLI not found anywhere!"
-            echo "📝 To install, run: curl -sSL https://kraken.io/kraken.sh | bash"
-            KRANE_RESET_FAILED=true
-        fi
+echo ""
+echo "╔══════════════════════════════════════════════════════════════╗"
+echo "║  🔄 Resetting Kraken Paper Account to One Hundred dollars    ║"
+echo "╚══════════════════════════════════════════════════════════════╝"
+echo ""
+
+# Reset Kraken Paper Account to $100
+CARGO_BIN="$HOME/.cargo/bin/kraken"
+KRANE_RESET_FAILED=false
+
+if [ -x "$CARGO_BIN/kraken" ]; then
+    echo "🔄 Checking Kraken CLI at Cargo binary..." && \
+    ("$CARGO_BIN/kraken paper reset --balance 100 >/dev/null 2>&1") >/dev/null || true
+    
+    if [ $? -eq 0 ]; then
+        echo "✅ Kraken Paper Account reset to $100 (Cargo binary)"
+    else
+        echo "⚠️ Warning: Kraken CLI failed at Cargo binary. Skipping."
+        echo "📝 To reset manually, run: $CARGO_BIN/kraken paper reset --balance 100"
+        KRANE_RESET_FAILED=true
+    fi
+elif which kraken > /dev/null 2>&1; then
+    echo "🔄 Checking Kraken CLI in system PATH..." && \
+    (kraken paper reset --balance 100 >/dev/null 2>&1) >/dev/null || true
+    
+    if [ $? -eq 0 ]; then
+        echo "✅ Kraken Paper Account reset to $100 (system PATH)"
+    else
+        echo "⚠️ Warning: kraken CLI failed in PATH. Skipping."
+        KRANE_RESET_FAILED=true
+    fi
+else
+    echo "⚠️  Warning: kraken CLI not found anywhere!"
+    echo "📝 To install, run: curl -sSL https://kraken.io/kraken.sh | bash"
+    KRANE_RESET_FAILED=true
+fi
         
         if [ "$KRANE_RESET_FAILED" = true ]; then
             echo ""
