@@ -115,7 +115,8 @@ Non-exchange configuration parameters:
        - `rsi_period`: RSI calculation period (default: 14, tunable by brain)
         - `sl_cooldown_seconds`: Stop-loss cooldown (default: 300s, tunable)
         - `trend_filter_lookback`: Trend lookback periods (default: 20, tunable)
-        - `ohlcv_limit`: OHLCV bars to fetch (default: 50, tunable)
+        - `ohlcv_limit`: OHLCV bars (default: 50, tunable)
+        - `ohlcv_timeframe`: OHLCV timeframe string (default: "1m", tunable)
 
 ## Disclaimer
 

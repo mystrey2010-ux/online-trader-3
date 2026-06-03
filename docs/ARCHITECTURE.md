@@ -86,7 +86,8 @@ Action:
     "rsi_period": 14
     "sl_cooldown_seconds": 300,
     "trend_filter_lookback": 20,
-    "ohlcv_limit": 50
+    "ohlcv_limit": 50,
+    "ohlcv_timeframe": "1m"
   },
   "trade_history": [],
   "hypothesis_ledger": [],

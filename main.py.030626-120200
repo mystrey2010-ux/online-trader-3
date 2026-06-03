@@ -602,8 +602,7 @@ class OnlineTrader:
                 "position_size_pct": {"direction": "decrease", "new_value_multiplier": 0.8, "reasoning": "Reduce exposure in unfavorable regime"},
                 "rsi_period": {"direction": "longer", "new_value_multiplier": 1.33, "reasoning": "Smoother RSI in choppy bear market"},
                 "trend_filter_lookback": {"direction": "longer", "new_value_multiplier": 2.0, "reasoning": "Longer lookback for trend confirmation in bear market"},
-                "ohlcv_limit": {"direction": "longer", "new_value_multiplier": 1.5, "reasoning": "More history for stability signal in bear market"},
-                "ohlcv_timeframe": {"direction": "longer_tf", "reasoning": "Use 5m for more stable signals in bear market"}
+                "ohlcv_limit": {"direction": "longer", "new_value_multiplier": 1.5, "reasoning": "More history for stability signal in bear market"}
             },
             "SIDEWAYS": {  # Choppy market, low trend
                 "indicator_threshold": {"direction": "stricter", "new_value_multiplier": 0.95, "reasoning": "Require stronger signals to cut through noise"},
@@ -612,8 +611,7 @@ class OnlineTrader:
                 "rsi_period": {"direction": "longer", "new_value_multiplier": 1.33, "reasoning": "Smoother RSI in choppy sideways market"},
                 "sl_cooldown_seconds": {"direction": "longer", "new_value_multiplier": 1.5, "reasoning": "Extended cooldown to avoid chop re-triggers"},
                 "trend_filter_lookback": {"direction": "longer", "new_value_multiplier": 1.5, "reasoning": "Longer lookback for trend confirmation in choppy sideways"},
-                "ohlcv_limit": {"direction": "longer", "new_value_multiplier": 1.5, "reasoning": "More history for better regime detection in chop"},
-                "ohlcv_timeframe": {"direction": "longer_tf", "reasoning": "Use 5m for smoother signals in choppy market"}
+                "ohlcv_limit": {"direction": "longer", "new_value_multiplier": 1.5, "reasoning": "More history for better regime detection in chop"}
             },
             "NEUTRAL": {  # Neutral: use performance-based tuning
                 "indicator_threshold": {"direction": "adjust_toward_optimal", "new_value_multiplier": None, "reasoning": "Fine-tune based on signal frequency"},
@@ -622,8 +620,7 @@ class OnlineTrader:
                 "rsi_period": {"direction": "maintain_current", "new_value_multiplier": 1.0, "reasoning": "14-period standard; extend in choppy BEAR, shorten in trending BULL"},
                 "sl_cooldown_seconds": {"direction": "maintain_current", "new_value_multiplier": 1.2, "reasoning": "Slight extension in neutral conditions"},
                 "trend_filter_lookback": {"direction": "maintain_current", "new_value_multiplier": 1.0, "reasoning": "Standard 20-period lookback"},
-                "ohlcv_limit": {"direction": "maintain_current", "new_value_multiplier": 1.0, "reasoning": "Standard 50-period OHLCV"},
-                "ohlcv_timeframe": {"direction": "maintain_current", "new_value_multiplier": 1.0, "reasoning": "Standard 1m timeframe"}
+                "ohlcv_limit": {"direction": "maintain_current", "new_value_multiplier": 1.0, "reasoning": "Standard 50-period OHLCV"}
             },
         }
         
@@ -660,14 +657,6 @@ class OnlineTrader:
             elif key == "ohlcv_limit":
                 # OHLCV limit: bars to fetch (e.g., 50), adjust for responsiveness vs stability
                 new_val = int(max(20, min(100, round(old_val * new_val_multiplier))))
-            elif key == "ohlcv_timeframe":
-                # Timeframe: string (1m, 5m, 15m), swap for stability vs responsiveness
-                if new_val_multiplier == 1.0:
-                    new_val = old_val  # maintain_current - no change
-                elif old_val == "1m":
-                    new_val = "5m"  # longer_tf for bear/sideways
-                else:
-                    new_val = "1m"  # back to 1m for bull
             
             # Calculate expected score direction based on performance metrics
             if avg_ret < 0 or max_dd > 0.01:
@@ -804,8 +793,7 @@ class OnlineTrader:
         
         try:
             ohlcv_limit = self.config['current_strategy'].get('ohlcv_limit', 50)
-            ohlcv_timeframe = self.config['current_strategy'].get('ohlcv_timeframe', '1m')
-            ohlcv = self.exchange.fetch_ohlcv(symbol, timeframe=ohlcv_timeframe, limit=ohlcv_limit)
+            ohlcv = self.exchange.fetch_ohlcv(symbol, timeframe='1m', limit=ohlcv_limit)
             df = pd.DataFrame(ohlcv, columns=['ts', 'o', 'h', 'l', 'c', 'v'])
             prices = df['c'].values
 
