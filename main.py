@@ -472,23 +472,23 @@ class OnlineTrader:
                 logging.info(f"💾 Saved strategy backup v{version} for rollback capability")
             
 
-            # Generate hypotheses with regime-aware reasoning (PRIMARY GOAL spec)
-            self._generate_and_apply_hypotheses(current_regime=current_regime, avg_ret=avg_return, max_dd=max_drawdown, sharpe=sharpe)
-
-            # B-013/D-048 fix: Track rollback condition for verification after next trade
-            # Cannot assess tuned strategy effectiveness until next SELL completes
-            if sharpe < 0:
-                self.config["needs_rollback"] = True
-                logging.info(f"⚠️ Performance failing (Sharpe: {sharpe:.2f}) - will verify after next trade")
-            else:
-                self.config["needs_rollback"] = False
-
-            # Increment version AFTER successful hypothesis application (PRIMARY GOAL: rollback capability)
-            version += 1
-            self.config["version"] = version
-            logging.info(f"⬆️ Version incremented from {version-1} → {version}")
-
-            save_config(self.config)  # Save config with version and previous_strategies
+            # Generate hypotheses with regime-aware reasoning + pre-commit backtest validation (PRIMARY GOAL spec)
+            # Returns version increment flag based on whether hypothesis was actually applied
+            hypothesis_applied = self._generate_and_apply_hypotheses(current_regime=current_regime, avg_ret=avg_return, max_dd=max_drawdown, sharpe=sharpe)
+            
+            # Only increment version if hypothesis was actually applied and saved
+            if hypothesis_applied:
+                # B-013/D-048 fix: Track rollback condition for verification after next trade
+                if sharpe < 0:
+                    self.config["needs_rollback"] = True
+                    logging.info(f"⚠️ Performance failing (Sharpe: {sharpe:.2f}) - will verify after next trade")
+                else:
+                    self.config["needs_rollback"] = False
+                
+                version += 1
+                self.config["version"] = version
+                logging.info(f"⬆️ Version incremented from {version-1} → {version}")
+                save_config(self.config)
             
     def restore_strategy(self, target_version=None):
         """Restore to a specific strategy version (PRIMARY GOAL: rollback capability).
@@ -571,25 +571,107 @@ class OnlineTrader:
         if len(returns) < 2 or np.std(returns) == 0: return 0
         return np.mean(returns) / np.std(returns)
 
+    def _run_local_backtest(self, ohlcv_data, strategy_dict):
+        """Simulate strategy performance on historical OHLCV data (look-before-you-leap safety gate)."""
+        if len(ohlcv_data) < strategy_dict.get("rsi_period", 14) + 20:
+            return 0.0
+        
+        fee_pct = self.config.get("kraken_fee_pct", 0.0026)
+        prices = np.array([bar[4] for bar in ohlcv_data])  # Close prices
+        rsi_period = strategy_dict.get("rsi_period", 14)
+        indicator_threshold = strategy_dict.get("indicator_threshold", 63.0)
+        stop_loss_pct = strategy_dict.get("stop_loss_pct", 0.016)
+        sell_threshold_base = strategy_dict.get("sell_threshold_base", 10)
+        trend_lookback = strategy_dict.get("trend_filter_lookback", 20)
+        
+        position_btc = 0.0
+        entry_price = 0.0
+        entry_rsi = None
+        net_roi = 0.0
+        
+        for i in range(len(prices)):
+            current_price = prices[i]
+            
+            # Calculate RSI up to current point
+            rsi_val = self.calculate_rsi(prices[:i+1], rsi_period)
+            
+            # Calculate dynamic sell threshold
+            if position_btc > 0 and entry_rsi is not None:
+                fee_hurdle = 2 * fee_pct
+                est_rsi_change = self._estimate_rsi_change_for_price_change(fee_hurdle)
+                sell_threshold = max(entry_rsi + est_rsi_change + sell_threshold_base, indicator_threshold + sell_threshold_base)
+            else:
+                sell_threshold = indicator_threshold + sell_threshold_base * 2
+            
+            # Stop-loss check (simulated)
+            if position_btc > 0 and current_price < entry_price:
+                sl_threshold = entry_price * (1 - stop_loss_pct)
+                if current_price < sl_threshold:
+                    # Simulate stop-loss exit
+                    trade_value = position_btc * entry_price
+                    pnl_usd = position_btc * current_price * (current_price - entry_price) / entry_price
+                    fee_usd = round(trade_value * fee_pct * 2, 6)
+                    net_pnl = pnl_usd - fee_usd
+                    net_roi += net_pnl / trade_value if trade_value > 0 else 0
+                    position_btc = 0.0
+                    entry_price = 0.0
+                    entry_rsi = None
+                    continue
+            
+            # Buy signal (if no position)
+            if position_btc == 0 and rsi_val < indicator_threshold:
+                # Trend filter check
+                if i >= trend_lookback:
+                    if current_price <= prices[i - trend_lookback]:
+                        continue  # Skip if declining over lookback period
+                # Simulate buy
+                position_btc = 0.037  # Normalized position size for backtest
+                entry_price = current_price
+                entry_rsi = rsi_val
+            
+            # Sell signal (if in position)
+            elif position_btc > 0 and rsi_val > sell_threshold:
+                trade_value = position_btc * entry_price
+                pnl_usd = position_btc * current_price * (current_price - entry_price) / entry_price
+                potential_fee = round(trade_value * fee_pct * 2, 6)
+                net_pnl = round(pnl_usd - potential_fee, 6)
+                if net_pnl > 0:  # Only count profitable exits
+                    net_roi += net_pnl / trade_value
+                position_btc = 0.0
+                entry_price = 0.0
+                entry_rsi = None
+        
+        return net_roi
+
     def _generate_and_apply_hypotheses(self, current_regime="NEUTRAL", avg_ret=None, max_dd=None, sharpe=None):
-        """Generate 1-3 hypotheses with regime-aware reasoning (PRIMARY GOAL spec).
+        """Generate 1-3 hypotheses with regime-aware reasoning + pre-commit backtest validation (PRIMARY GOAL spec).
         
         Each hypothesis must:
         - modify exactly ONE variable in strategy
         - predict expected score direction (improve/degrade)
-        - include confidence reasoning
+        - pass backtest validation vs baseline strategy
         
-        Then apply highest-confidence hypothesis only.
+        Then apply highest-backtested-return hypothesis only.
         """
         strat = self.config["current_strategy"]
         keys = list(strat.keys())
         
+        # Fetch deep historical slice ONCE for backtesting (sequential, rate-limited)
+        try:
+            backtest_ohlcv = self.exchange.fetch_ohlcv(self.config["target_asset"], timeframe='1m', limit=500)
+        except Exception as e:
+            logging.warning(f"⚠️ Could not fetch backtest data: {e}, skipping hypothesis generation")
+            return False
+        
+        # Establish baseline performance BEFORE any mutations
+        baseline_return = self._run_local_backtest(backtest_ohlcv, strat)
+        logging.info(f"📊 Baseline backtest return: {baseline_return:.4%}")
+        
         # Generate regime-aware hypotheses for each parameter
         generated_hypotheses = []
         
-        # Regime-specific tuning advice (PRIMARY GOAL: "ask what market regime we're in")
         regime_tuning_map = {
-            "BULL": {  # Bull market: prices trending up aggressively
+            "BULL": {
                 "indicator_threshold": {"direction": "lower", "new_value_multiplier": 0.9, "reasoning": "Aggressive buying on pullbacks in strong uptrend"},
                 "sell_threshold_base": {"direction": "lower", "new_value_multiplier": 0.75, "reasoning": "Tighter sell buffer to capture quick gains in uptrend"},
                 "stop_loss_pct": {"direction": "tighter", "new_value_multiplier": 0.9, "reasoning": "Protect aggressive gains in bull market"},
@@ -598,7 +680,7 @@ class OnlineTrader:
                 "ohlcv_limit": {"direction": "shorter", "new_value_multiplier": 0.75, "reasoning": "Less history for faster signal in uptrend"},
                 "ohlcv_timeframe": {"direction": "maintain_current", "new_value_multiplier": 1.0, "reasoning": "Keep 1m for responsive signals in uptrend"}
             },
-            "BEAR": {  # Bear market: prices crashing, high risk
+            "BEAR": {
                 "indicator_threshold": {"direction": "higher", "new_value_multiplier": 1.05, "reasoning": "Wait for better confirmation in weak downtrend"},
                 "sell_threshold_base": {"direction": "higher", "new_value_multiplier": 1.25, "reasoning": "Wider sell buffer to avoid premature exits in choppy bear market"},
                 "stop_loss_pct": {"direction": "wider", "new_value_multiplier": 1.2, "reasoning": "Prevent premature exits during normal bear volatility"},
@@ -608,7 +690,7 @@ class OnlineTrader:
                 "ohlcv_limit": {"direction": "longer", "new_value_multiplier": 1.5, "reasoning": "More history for stability signal in bear market"},
                 "ohlcv_timeframe": {"direction": "longer_tf", "reasoning": "Use 5m for more stable signals in bear market"}
             },
-            "SIDEWAYS": {  # Choppy market, low trend
+            "SIDEWAYS": {
                 "indicator_threshold": {"direction": "stricter", "new_value_multiplier": 0.95, "reasoning": "Require stronger signals to cut through noise"},
                 "sell_threshold_base": {"direction": "higher", "new_value_multiplier": 1.2, "reasoning": "Wider sell buffer to avoid whipsaw exits in chop"},
                 "stop_loss_pct": {"direction": "wider", "new_value_multiplier": 1.1, "reasoning": "Avoid whipsaws in range-bound market"},
@@ -619,7 +701,7 @@ class OnlineTrader:
                 "ohlcv_limit": {"direction": "longer", "new_value_multiplier": 1.5, "reasoning": "More history for better regime detection in chop"},
                 "ohlcv_timeframe": {"direction": "longer_tf", "reasoning": "Use 5m for smoother signals in choppy market"}
             },
-            "NEUTRAL": {  # Neutral: use performance-based tuning
+            "NEUTRAL": {
                 "indicator_threshold": {"direction": "adjust_toward_optimal", "new_value_multiplier": None, "reasoning": "Fine-tune based on signal frequency"},
                 "sell_threshold_base": {"direction": "maintain_current", "new_value_multiplier": 1.0, "reasoning": "Stable buffer for neutral conditions"},
                 "stop_loss_pct": {"direction": "maintain_current", "new_value_multiplier": 1.0, "reasoning": "Risk already calibrated"},
@@ -631,7 +713,6 @@ class OnlineTrader:
             },
         }
         
-        # Get regime-specific recommendations
         regime_recs = regime_tuning_map.get(current_regime, regime_tuning_map["NEUTRAL"])
         
         for key in keys:
@@ -639,36 +720,25 @@ class OnlineTrader:
             new_val_multiplier = regime_recs[key]["new_value_multiplier"]
             
             if new_val_multiplier is None:
-                # No automatic adjustment needed for this parameter in current regime
                 continue
             
-            # Apply adjustment based on performance context
             if key == "indicator_threshold":
-                # RSI thresholds are percentages (e.g., 63.0), adjust by ±15% max
                 new_val = round(old_val * new_val_multiplier, 2)
             elif key == "sell_threshold_base":
-                # Sell threshold base: integer RSI points (e.g., 10), adjust but keep reasonable bounds
                 new_val = int(max(5, min(20, round(old_val * new_val_multiplier))))
             elif key == "stop_loss_pct":
-                # Stop-loss is a ratio (e.g., 0.016 for 1.6%), adjust by ±30% max
                 new_val = round(strat[key] * new_val_multiplier, 4)
             elif key == "position_size_pct":
-                # Position sizing is percentage of balance (e.g., 0.037 for 3.7%), adjust by ±50% max
                 new_val = round(old_val * new_val_multiplier, 3)
             elif key == "rsi_period":
-                # RSI period: integer (e.g., 14), adjust by ±33% based on regime
                 new_val = int(max(5, min(30, round(old_val * new_val_multiplier))))
             elif key == "sl_cooldown_seconds":
-                # Cooldown: seconds (e.g., 300), adjust but keep reasonable bounds
                 new_val = int(max(60, min(600, round(old_val * new_val_multiplier))))
             elif key == "trend_filter_lookback":
-                # Trend filter lookback: periods (e.g., 20), adjust but keep reasonable bounds
                 new_val = int(max(5, min(50, round(old_val * new_val_multiplier))))
             elif key == "ohlcv_limit":
-                # OHLCV limit: bars to fetch (e.g., 50), adjust for responsiveness vs stability
                 new_val = int(max(20, min(100, round(old_val * new_val_multiplier))))
             elif key == "ohlcv_timeframe":
-                # Timeframe: string (1m, 5m), swap for stability vs responsiveness
                 if new_val_multiplier == 1.0 or "longer_tf" not in regime_recs[key]["direction"]:
                     new_val = old_val
                 elif old_val == "1m":
@@ -676,51 +746,43 @@ class OnlineTrader:
                 else:
                     new_val = "1m"
             
-            # Calculate expected score direction based on performance metrics
-            if avg_ret < 0 or max_dd > 0.01:
-                expected_direction = "improve"  # We expect adjustment to help
-            else:
-                expected_direction = "stabilize"  # Fine-tuning for optimization
+            expected_direction = "improve" if avg_ret < 0 or max_dd > 0.01 else "stabilize"
             
-            # Calculate confidence based on regime clarity and performance urgency
-            if current_regime in ["BULL", "BEAR"]:
-                regime_confidence_boost = 0.2  # Clear regimes increase confidence
-            else:
-                regime_confidence_boost = 0.0
+            regime_confidence_boost = 0.2 if current_regime in ["BULL", "BEAR"] else 0.0
+            confidence = round(max(0.5, min(0.9, regime_confidence_boost)), 2)
             
-            target_ret = self.config["target_daily_return"]
-            target_dd = self.config["max_daily_drawdown"]
-            performance_urgency = max(0, (avg_ret - target_ret) ** 2 + (target_dd - max_dd) ** 2) / 0.001
-            urgency_factor = min(0.3, performance_urgency)
+            # Create temporary strategy for backtest
+            test_strat = dict(strat)
+            test_strat[key] = new_val
+            test_strat["ohlcv_limit"] = 500  # Use full backtest data
             
-            confidence = round(max(0.5, min(0.9, regime_confidence_boost + urgency_factor)), 2)
-
+            # Run backtest for this proposed change
+            backtest_return = self._run_local_backtest(backtest_ohlcv, test_strat)
+            
             hypothesis_entry = {
                 "timestamp": datetime.now().isoformat(),
                 "description": f"Adjusting {key} from {old_val} to {new_val:.4f}",
                 "metrics_at_failure": {"return": avg_ret, "drawdown": max_dd, "sharpe": sharpe},
                 "regime_tag": current_regime,
                 "expected_score_direction": expected_direction,
-                "confidence": confidence,  # B-004 fix: numeric field used for max() sort
-                "confidence_reasoning": f"{current_regime} market + {'performance degraded' if avg_ret < 0 else 'optimization mode'} → {new_val_multiplier*100:.0f}% {'increase' if new_val_multiplier > 1 else 'decrease' if new_val_multiplier < 1 else 'adjust'} to {regime_recs[key]['reasoning']}"
+                "confidence": confidence,
+                "confidence_reasoning": f"{current_regime} market + {'performance degraded' if avg_ret < 0 else 'optimization mode'} → {new_val_multiplier*100:.0f}% {'increase' if new_val_multiplier > 1 else 'decrease' if new_val_multiplier < 1 else 'adjust'} to {regime_recs[key]['reasoning']}",
+                "simulated_backtest_return": backtest_return,
+                "baseline_backtest_return": baseline_return
             }
             generated_hypotheses.append(hypothesis_entry)
-
-        # Select highest-confidence hypothesis (PRIMARY GOAL: ONE variable per cycle)
+        
         if not generated_hypotheses:
             logging.info("No hypotheses generated for current regime and performance context.")
-            return
+            return False
         
-        # Filter for 'improve' direction first, then highest numeric confidence (B-004 fix)
-        improve_hyps = [h for h in generated_hypotheses if h["expected_score_direction"] == "improve"]
-        if improve_hyps:
-            best_hyp = max(improve_hyps, key=lambda h: h["confidence"])
-        elif generated_hypotheses:
-            best_hyp = max(generated_hypotheses, key=lambda h: h["confidence"])
-        else:
-            logging.warning("No valid hypotheses found.")
-            return
-
+        # GATING CRITERIA: Select hypothesis with highest backtest return that beats baseline
+        best_hyp = max(generated_hypotheses, key=lambda h: h["simulated_backtest_return"])
+        
+        if best_hyp["simulated_backtest_return"] <= baseline_return:
+            logging.info(f"⚠️ Hypothesis backtest failed validation: best return ({best_hyp['simulated_backtest_return']:.4%}) did not beat baseline ({baseline_return:.4%}). No strategy change this cycle.")
+            return False
+        
         # Apply the selected hypothesis (ONE variable change — PRIMARY GOAL hard constraint)
         import re
         param_match = re.search(r'Adjusting (\w+) from ([^ ]+) to ([^%\s]+)', best_hyp["description"])
@@ -729,18 +791,16 @@ class OnlineTrader:
             return
         
         param_name = param_match.group(1)
-        new_val_text = param_match.group(3)  # Extract NEW value from "X from OLD to NEW"
+        new_val_text = param_match.group(3)
         
-        # Parse and apply the change to strategy
         old_val = strat[param_name]
         strat[param_name] = float(new_val_text)
         
-        # Validate: Confirm parameter actually changed (PRIMARY GOAL compliance check)
         if strat[param_name] == old_val:
             logging.error(f"⚠️ Hypothesis application FAILED: {param_name} didn't change ({old_val} → {strat[param_name]})")
-            return
+            return False
         
-        logging.info(f"✅ Applied hypothesis: {param_name} changed from {old_val:.4f} to {strat[param_name]:.4f}")
+        logging.info(f"✅ Applied hypothesis: {param_name} changed from {old_val:.4f} to {strat[param_name]:.4f} (backtest: {best_hyp['simulated_backtest_return']:.4%} > baseline: {baseline_return:.4%})")
         
         # Log and record hypothesis in ledger (PRIMARY GOAL: append-only history)
         hypothesis_record = {
@@ -748,18 +808,22 @@ class OnlineTrader:
             "description": best_hyp["description"],
             "metrics_at_failure": best_hyp.get("metrics_at_failure", {}),
             "regime_tag": current_regime,
-            "regime": current_regime,  # summarize_performance.py compatibility alias
-            "parameter": param_name,   # summarize_performance.py reads this key
-            "old_value": old_val,      # summarize_performance.py reads this key
-            "new_value": strat[param_name],  # summarize_performance.py reads this key
+            "regime": current_regime,
+            "parameter": param_name,
+            "old_value": old_val,
+            "new_value": strat[param_name],
             "expected_score_direction": best_hyp.get("expected_score_direction"),
-            "direction": best_hyp.get("expected_score_direction"),  # summarize_performance.py alias
-            "confidence_reasoning": best_hyp.get("confidence_reasoning")
+            "direction": best_hyp.get("expected_score_direction"),
+            "confidence_reasoning": best_hyp.get("confidence_reasoning"),
+            "simulated_backtest_return": best_hyp.get("simulated_backtest_return"),
+            "baseline_backtest_return": best_hyp.get("baseline_backtest_return")
         }
         self.config["hypothesis_ledger"].append(hypothesis_record)
         
-        logging.info(f"🛠️ APPLYING HYPOTHESIS ({current_regime}): {best_hyp['description']} (confidence: {best_hyp['confidence_reasoning']})")
+        logging.info(f"🛠️ APPLYING HYPOTHESIS ({current_regime}): {best_hyp['description']} (backtest: {best_hyp['simulated_backtest_return']:.4%})")
+        
         save_config(self.config)
+        return True
 
     def _is_uptrend(self, prices, lookback=20):
         """Check if price is in uptrend (simple moving average comparison)."""

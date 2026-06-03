@@ -2,6 +2,7 @@
 
 ## v2.17 (2026-06-02)
 - T-REGIME: Multi-timeframe regime sync — 1d OHLCV (30 bars) replaces 1h OHLCV for 20-day macro trend; thresholds recalibrated to ±10% (D-068)
+- BACKTEST-GATE: Pre-commit backtest safety gate — _run_local_backtest() validates hypotheses vs 500-bar historical slice before live application; gating requires strictly positive backtest improvement (D-069)
 - B-024: Fixed undefined `SL_COOLDOWN_SECONDS` variable in stop-loss path — changed to `DEFAULT_SL_COOLDOWN` constant; stop-loss cooldown now properly enforces 300s after emergency sell
 - B-020: Fixed critical BUY logic bug — BUY execution block was nested under `if self.current_position == 'long'` instead of `if rsi_val < buy_threshold and self.current_position is None`. Caused 64+ unintended consecutive buys every cycle while holding a position, draining USD balance from ~$960 to ~$79. Fixed by restructuring run_cycle so BUY block is inside the correct buy-signal condition; position timeout warning restored as independent post-block check (D-060)
 - B-021: Fixed dashboard section [3] sell threshold — replaced hardcoded `threshold+20` with D-032 dynamic formula using `entry_rsi` from open_position; falls back to `threshold+20` when no position (D-061)
