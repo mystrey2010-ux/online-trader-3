@@ -18,6 +18,7 @@ import json
 import subprocess
 import os
 import sys
+import time
 from datetime import datetime
 
 
@@ -293,6 +294,9 @@ def print_open_position(config, spot_price):
     print(f"  Size             : {amt_btc:.8f} BTC")
     print(f"  Entry Value      : {fmt_usd(entry_value)}")
     print(f"  Opened           : {opened_at[:19] if len(opened_at) > 10 else opened_at}")
+    entry_rsi = pos.get("entry_rsi")
+    if entry_rsi is not None:
+        print(f"  Entry RSI        : {float(entry_rsi):.2f}")
     print()
     print(f"  Stop-Loss Trigger: {fmt_usd(sl_price)}  (entry - {fmt_pct(sl_pct)})")
 
@@ -306,6 +310,10 @@ def print_open_position(config, spot_price):
         print(f"  Current Value    : {fmt_usd(curr_value)}")
         print(f"  Unrealised PnL   : {fmt_pnl(unr_pnl)}  ({fmt_pct_signed(unr_pct)})")
         print(f"  Distance to SL   : {fmt_pct(dist_sl)}  [{sl_status}]")
+        cooldown = config.get("sl_cooldown_until", 0)
+        if cooldown and time.time() < cooldown:
+            remaining = int(cooldown - time.time())
+            print(f"  Cooldown Active  : {remaining}s remaining")
     else:
         print("  Current Price    : N/A (spot unavailable)")
 
@@ -579,6 +587,7 @@ def print_brain_status(config):
 
     print(f"  Hypotheses Logged: {len(ledger)}")
     print(f"  Rollback Backups : {len(prev_strats)}")
+    print(f"  Needs Rollback   : {config.get('needs_rollback', False)}")
 
     # Hypothesis ledger — show all entries
     if ledger:
@@ -654,6 +663,12 @@ def print_system_info(config):
     print(f"  Config Path      : {os.path.abspath(CONFIG_PATH)}")
     print(f"  Target Asset     : {config.get('target_asset', 'N/A')}")
     print(f"  Exchange         : {config.get('exchange', {}).get('type', 'N/A').upper()}")
+    print(f"  Emergency Stop   : {config.get('system_status', 'CLEARED')}")
+    print(f"  Eval Window Size : {config.get('evaluation_window_size', 20)} trades")
+    cooldown_ts = config.get("sl_cooldown_until")
+    if cooldown_ts and cooldown_ts > time.time():
+        remaining = int(cooldown_ts - time.time())
+        print(f"  SL Cooldown Active: {remaining}s remaining")
 
     # Last 5 log lines (non-empty)
     log_path = "trader.log"
