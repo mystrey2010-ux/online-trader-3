@@ -6,6 +6,7 @@
 | ID | Description | Priority | Dependencies | Status |
 |----|-------------|----------|--------------|--------|
 | T-021 | Add sell_threshold to cycle log output | Low | None | COMPLETED |
+| N-002 | Fix CryptoPanic RSS feed parsing (502/malformed XML) | Medium | None | OPEN |
 
 ## Bug Status
 ### Active
@@ -40,7 +41,7 @@
 |------|----------|-------|
 | main.py syntax (v2.18) | ✓ | py_compile clean |
 | main.py syntax (v2.18 + T-021) | ✓ | py_compile clean |
-| News sentiment (RSS) | ✓ | Uses built-in xml.etree.ElementTree, free CryptoPanic RSS feed |
+| News sentiment (RSS) | ✗ | CryptoPanic RSS returns 502, malformed XML (N-002) |
 | Position sizing (10%) | ✓ | Updated in config.json, validated against Kraken balance |
 | Cascade bug fix | ✓ | Trade #13 position accumulation resolved |
 | Stop-loss helper (T-020) | ✓ | _execute_stop_loss() extracted, syntax verified |
@@ -49,7 +50,7 @@
 ## Performance Observations
 - Active position: ~0.00015 BTC @ $65,559 (validated against Kraken paper account)
 - Position sizing: 10% (user-adjusted from 3% to 0.1)
-- News sentiment: Free RSS integration active
+- News sentiment: Temporarily unavailable (N-002 - CryptoPanic RSS 502 error)
 
 ## Deferred Items (Q - Quality of Service)
 | ID | Item | Notes |
@@ -58,4 +59,4 @@
 | Q-004 | Native stop-loss orders (Kraken API) | Currently price-check based |
 
 ---
-**Last Updated:** 2026-06-03 23:50 | Engineer: opencode
+**Last Updated:** 2026-06-03 23:55 | Engineer: opencode

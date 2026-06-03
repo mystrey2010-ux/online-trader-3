@@ -5,6 +5,7 @@
 |----|-------|----------|-------------------|
 | L-003 | hypothesis_ledger empty until 3 strategic trades complete after B-017 fix | Low | Requires restart + 3 strategic trades to trigger first reflection |
 | L-004 | No position timeout mechanism | Low (deferred) | Re-evaluate if open >24h without SELL/SL signal (T-018) |
+| N-002 | CryptoPanic RSS feed returns 502/malformed XML - news sentiment broken | Medium | External service; add timeout + error handling in v2.19 |
 
 ## BUGS — Confirmed, Pending Fix
 | ID | File | Line(s) | Description | Severity |
@@ -52,4 +53,4 @@
 | DASHBOARD-ENGINE-DETECTION [RESOLVED] | pgrep -a python3 missed venv process | Low | pgrep -f "main.py" |
 
 ---
-**Last Updated:** 2026-06-02 23:05 | Engineer: J.A.R.V.I.S.
+**Last Updated:** 2026-06-03 23:55 | Engineer: opencode
