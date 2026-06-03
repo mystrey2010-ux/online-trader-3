@@ -48,7 +48,8 @@ Key design decisions, one line each. Code location noted for traceability.
 | D-065 | ohlcv_limit tunable via brain: BEULL→38, SIDEWAYS→75, BULL→38 bars | main.py run_cycle(), _generate_and_apply_hypotheses() | v2.17 |
 | D-066 | ohlcv_timeframe tunable via brain: BEAR→5m, BULL→maintain, NEUTRAL→unchanged (1m) | main.py run_cycle(), _generate_and_apply_hypotheses() | v2.17 |
 | D-068 | Multi-timeframe regime sync: Dedicated 1d OHLCV fetch (30 bars) for 20-day macro trend in self_improve_strategies(); isolated from 1m execution signals | main.py self_improve_strategies(), _tag_regime() | v2.17 |
-| D-069 | Pre-commit backtest safety gate: _run_local_backtest() validates hypotheses against historical 500-bar data before live application; gating requires strictly positive backtest improvement | main.py _generate_and_apply_hypotheses(), _run_local_backtest() | v2.17
+| D-069 | Pre-commit backtest safety gate: _run_local_backtest() validates hypotheses against historical 500-bar data before live application; gating requires strictly positive backtest improvement | main.py _generate_and_apply_hypotheses(), _run_local_backtest() | v2.17 |
+| D-070 | Statistical Window Fix: evaluation_window_size (default 20) decouples cadence trigger from metric calculation window; cold-start fallback uses all available trades when < 20 | main.py self_improve_strategies() | v2.17
 
 ---
 **Last Updated:** 2026-06-02 23:15 | Engineer: J.A.R.V.I.S.

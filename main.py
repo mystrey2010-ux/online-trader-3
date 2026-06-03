@@ -400,16 +400,20 @@ class OnlineTrader:
         # D-025/Cadence gate: Only proceed if we have enough STRATEGIC trades
         # Reflection should NEVER fire based on emergency trades alone
         reflection_cadence = self.config.get("reflection_cadence", 3)
+        evaluation_window_size = self.config.get("evaluation_window_size", 20)
+        
         if len(strategic_trades) < reflection_cadence:
             logging.info(f"⏳ Not enough strategic trades ({len(strategic_trades)}/{reflection_cadence}) - skipping reflection")
             return
         
-        recent_trades = strategic_trades[-reflection_cadence:]
+        # Statistical Window Fix: Decouple cadence trigger from evaluation window
+        # Use broader window (default 20) for stable metric calculation
+        evaluation_slice = min(evaluation_window_size, len(strategic_trades))
+        evaluation_trades = strategic_trades[-evaluation_slice:]
         
         # CRITICAL: Use net PnL for fee-aware evaluation (v2.5+ upgrade)
-        # Trade is profitable only if net_pnl_usd > 0 (after fees are deducted)
         returns = []
-        for t in recent_trades:
+        for t in evaluation_trades:
             pnl_pct = t.get('pnl_pct', 0)
             gross_pnl_usd = t.get('gross_pnl_usd', 0)
             net_pnl_usd = t.get('net_pnl_usd', None)
@@ -427,7 +431,7 @@ class OnlineTrader:
         
         # Calculate performance metrics using fee-adjusted returns
         avg_return = np.mean(returns)
-        max_drawdown = self._calculate_max_drawdown(recent_trades)
+        max_drawdown = self._calculate_max_drawdown(evaluation_trades)
         sharpe = self._calculate_sharpe(returns)
 
         target_ret = self.config["target_daily_return"]
