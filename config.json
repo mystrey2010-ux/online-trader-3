@@ -20,11 +20,35 @@
     "ohlcv_limit": 50,
     "ohlcv_timeframe": "1m"
   },
-  "trade_history": [],
+  "trade_history": [
+    {
+      "timestamp": "2026-06-04T22:09:11.139590",
+      "entry": 63512.7,
+      "exit": 63853.7,
+      "pnl_pct": 0.005369004939169647,
+      "symbol": "BTC/USDT",
+      "pnl_usd": 0.05369004939169647,
+      "gross_pnl_usd": 0.05369,
+      "fee_usd": 0.052,
+      "net_pnl_usd": 0.00169
+    }
+  ],
   "hypothesis_ledger": [],
   "version": 3,
   "previous_strategies": [],
   "needs_rollback": false,
-  "open_position": null,
-   "news_sentiment": {"sentiment": "neutral", "confidence": 0.50, "count": 20, "feeds_queried": 4, "feeds_succeeded": 4}
+  "news_sentiment": {
+    "sentiment": "neutral",
+    "confidence": 0.5,
+    "count": 20,
+    "feeds_queried": 4,
+    "feeds_succeeded": 4
+  },
+  "open_position": {
+    "timestamp": "2026-06-04T22:12:30.824287",
+    "symbol": "BTC/USDT",
+    "entry_price": 63771.7,
+    "entry_rsi": 68.80432229269466,
+    "amount_btc": 0.00015680769362482296
+  }
 }
