@@ -3,8 +3,9 @@
 ## ACTIVE (Resolving)
 | ID | Issue | Severity | Resolution Status |
 |----|-------|----------|-------------------|
-| L-003 | hypothesis_ledger empty until 3 strategic trades complete after B-017 fix | Low | Requires restart + 3 strategic trades to trigger first reflection |
+| L-003 | hypothesis_ledger empty until 3 strategic trades complete after B-017 fix | Low | Resolved - clean restart completed |
 | L-004 | No position timeout mechanism | Low (deferred) | Re-evaluate if open >24h without SELL/SL signal (T-018) |
+| L-010 | Stop-loss error messages empty - Kraken CLI returns JSON in stdout, not stderr | Medium | Fixed - captures JSON error from stdout |
 
 ## BUGS — Confirmed, Pending Fix
 | ID | File | Line(s) | Description | Severity |
@@ -51,6 +52,7 @@
 | B-EMERGENCY [RESOLVED] | EMERGENCY_STOP flag blocked trading logic | High | D-024/D-026 |
 | DASHBOARD-ENGINE-DETECTION [RESOLVED] | pgrep -a python3 missed venv process | Low | pgrep -f "main.py" |
 | N-002 [RESOLVED] | CryptoPanic RSS feed returned 502/malformed XML - news sentiment broken | Medium | Switched to CoinTelegraph RSS feed (working)
+| B-025 [RESOLVED] | Stop-loss error messages empty - Kraken CLI returns JSON in stdout, not stderr | Medium | Fixed: Captures JSON error message from stdout (line 95) |
 
 ---
 **Last Updated:** 2026-06-03 23:58 | Engineer: opencode

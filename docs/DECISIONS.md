@@ -54,6 +54,7 @@ Key design decisions, one line each. Code location noted for traceability.
 | D-072 | N-002 fix: Switched CryptoPanic RSS to CoinTelegraph RSS feed due to 502 errors/malformed XML | main.py _fetch_news_sentiment() | v2.18 |
 | D-073 | N-003 fix: Wire _fetch_news_sentiment() into self_improve_strategies() to populate news_sentiment in config | main.py self_improve_strategies() | v2.18 |
 | D-074 | Daily loss limit circuit breaker: Check daily net PnL against max_daily_loss_pct; activates EMERGENCY_STOP if exceeded | main.py run_cycle() | v2.18 |
+| D-075 | Stop-loss error capture: Parse JSON errors from Kraken CLI stdout for diagnostics (Kraken returns errors in JSON output, not stderr) | main.py KrakenCliPaperExchange._run() | v2.19 |
 
 ---
 **Last Updated:** 2026-06-03 23:55 | Engineer: opencode

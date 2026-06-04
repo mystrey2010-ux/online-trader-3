@@ -25,11 +25,6 @@
   "version": 3,
   "previous_strategies": [],
   "needs_rollback": false,
-  "open_position": {
-    "timestamp": "2026-06-03T21:12:50.725130",
-    "symbol": "BTC/USDT",
-    "entry_price": 65559.3,
-    "entry_rsi": 59.41205946216832,
-    "amount_btc": 0.00015253366036550116
-  }
+  "open_position": null,
+   "news_sentiment": {"sentiment": "neutral", "confidence": 0.50, "count": 20, "feeds_queried": 4, "feeds_succeeded": 4}
 }

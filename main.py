@@ -92,7 +92,13 @@ class KrakenCliPaperExchange:
         cmd = [self.bin, "paper"] + args + ["-o", "json"]
         result = subprocess.run(cmd, capture_output=True, text=True, env=self.path_env)
         if result.returncode != 0:
-            raise Exception(f"Kraken CLI Error: {result.stderr.strip()}")
+            # Kraken CLI returns JSON errors in stdout, not stderr
+            try:
+                err_data = json.loads(result.stdout)
+                err_msg = err_data.get("message", result.stdout.strip())
+            except (json.JSONDecodeError, ValueError):
+                err_msg = result.stdout.strip() or result.stderr.strip()
+            raise Exception(f"Kraken CLI Error: {err_msg}")
         try:
             return json.loads(result.stdout)
         except json.JSONDecodeError:
@@ -375,41 +381,60 @@ class OnlineTrader:
         return regime
 
     def _fetch_news_sentiment(self):
-        """Fetch crypto news sentiment from CryptoPanic RSS feed (free, no auth required).
+        """Fetch crypto news sentiment from RSS feeds (free, no auth required).
+        
+        Aggregates sentiment across multiple crypto news sources.
         
         Returns:
             dict: {'sentiment': 'positive/neutral/negative', 'confidence': float, 'count': int}
                   or None if unavailable.
         """
+        feeds = [
+            "https://cointelegraph.com/rss",
+            "https://www.tradingview.com/feed/?stream=crypto",
+            "https://www.livebitcoinnews.com/feed/",
+            "https://cryptoslate.com/feed/"
+        ]
+        
+        negative_keywords = ["dump", "crash", "fall", "drop", "loss", "decline", "bear", "plunge", "tumble", "slump"]
+        positive_keywords = ["surge", "rally", "jump", "rise", "gain", "bull", "soar", "climb", "bounce", "moon", "ATH", "breakout"]
+        
+        all_titles = []
+        feeds_succeeded = 0
+        
         try:
-            url = "https://cryptopanic.com/rss/btc/"
-            resp = requests.get(url, timeout=5)
-            if resp.status_code != 200:
-                return None
-                
-            # Parse RSS XML with regex (no external deps)
-            import xml.etree.ElementTree as ET
-            root = ET.fromstring(resp.content)
+            for url in feeds:
+                try:
+                    resp = requests.get(url, timeout=5)
+                    if resp.status_code != 200:
+                        continue
+                        
+                    import xml.etree.ElementTree as ET
+                    root = ET.fromstring(resp.content)
+                    
+                    items = root.findall('.//item')[:5]
+                    if items:
+                        feeds_succeeded += 1
+                    for item in items:
+                        title_elem = item.find('title')
+                        if title_elem is not None and title_elem.text:
+                            all_titles.append(title_elem.text.lower())
+                except Exception:
+                    continue
             
-            items = root.findall('.//item')[:10]
-            if not items:
+            if not all_titles:
                 return None
-                
-            negative_keywords = ["dump", "crash", "fall", "drop", "loss", "decline", "bear", "plunge", "tumble", "slump"]
-            positive_keywords = ["surge", "rally", "jump", "rise", "gain", "bull", "soar", "climb", "bounce", "moon", "ATH", "breakout"]
             
             negative_count = 0
             positive_count = 0
             
-            for item in items:
-                title_elem = item.find('title')
-                title = title_elem.text.lower() if title_elem is not None else ""
+            for title in all_titles:
                 if any(kw in title for kw in negative_keywords):
                     negative_count += 1
                 elif any(kw in title for kw in positive_keywords):
                     positive_count += 1
             
-            total = len(items)
+            total = len(all_titles)
             sentiment_score = (positive_count - negative_count) / total if total > 0 else 0
             
             if sentiment_score > 0.2:
@@ -427,7 +452,9 @@ class OnlineTrader:
                 "confidence": round(confidence, 2),
                 "count": total,
                 "negative": negative_count,
-                "positive": positive_count
+                "positive": positive_count,
+                "feeds_queried": len(feeds),
+                "feeds_succeeded": feeds_succeeded
             }
         except Exception as e:
             logging.debug(f"News sentiment fetch failed: {e}")
@@ -927,8 +954,10 @@ class OnlineTrader:
                 logging.warning(f"🚨 STOP-LOSS TRIGGERED! Price ${current_price:.2f} < SL threshold ${stop_loss_threshold:.2f}")
                 try:
                     balance = self.exchange.fetch_balance()
-                    btc_free = balance.get('BTC', {}).get('free', 0) or open_position.get("amount_btc", 0)
-                    if btc_free > 0:
+                    btc_free = balance.get('BTC', {}).get('free', 0) or balance.get('XBT', {}).get('free', 0)
+                    if btc_free <= 0:
+                        logging.warning("⚠️ No BTC available to close on stop-loss - position state mismatch.")
+                    else:
                         cli_sym = symbol.replace("/", "").replace("USDT", "USD")
                         logging.info(f"🚨 Executing Emergency SELL Order via Stop-Loss: {btc_free:.6f} {symbol} @ ${current_price:.2f}")
                         self.exchange.create_market_sell_order(cli_sym, btc_free)
@@ -962,8 +991,6 @@ class OnlineTrader:
                         logging.info(f"💰 TRADE CLOSED: PnL: {pnl_pct:.4%} (${pnl_usd:.2f}) | Gross: ${gross_pnl_usd:.4f} | Fee: ${fee_usd:.4f} | Net: ${net_pnl_usd:.4f}")
                         logging.info(f"⏳ Stop-loss cooldown activated for {DEFAULT_SL_COOLDOWN}s")
                         return True
-                    else:
-                        logging.warning("⚠️ No BTC available to close on stop-loss.")
                 except Exception as e:
                     logging.error(f"❌ Stop-Loss Sell Order Failed: {e}")
                     self.current_position = None
