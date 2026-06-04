@@ -537,6 +537,16 @@ class OnlineTrader:
         except Exception as e:
             logging.warning(f"⚠️ Could not fetch daily OHLCV for regime tagging: {e}, using INSUFFICIENT_DATA")
             current_regime = "INSUFFICIENT_DATA"
+        
+        # Fetch news sentiment for strategy context (N-003/N-004)
+        try:
+            sentiment_result = self._fetch_news_sentiment()
+            if sentiment_result:
+                self.config["news_sentiment"] = sentiment_result
+                save_config(self.config)
+                logging.info(f"📰 News sentiment: {sentiment_result.get('sentiment', 'unknown')} ({sentiment_result.get('feeds_succeeded', 0)}/{sentiment_result.get('feeds_queried', 0)} feeds)")
+        except Exception as e:
+            logging.debug(f"News sentiment fetch failed: {e}")
 
         if performance_ok:
             logging.info(f"✅ Performance OK (Ret:{avg_return:.4%}, DD:{max_drawdown:.4%}, Sharpe:{sharpe:.2f})")
@@ -661,6 +671,21 @@ class OnlineTrader:
     def _calculate_sharpe(self, returns):
         if len(returns) < 2 or np.std(returns) == 0: return 0
         return np.mean(returns) / np.std(returns)
+    
+    def _calculate_daily_pnl(self):
+        """Calculate net P&L for today's trades (last 24 hours)."""
+        trades = self.config.get("trade_history", [])
+        now = datetime.now()
+        daily_net_pnl = 0.0
+        for t in trades:
+            ts = t.get("timestamp", "")
+            try:
+                trade_time = datetime.fromisoformat(ts.replace("Z", "+00:00").replace("+00:00", ""))
+                if (now - trade_time).total_seconds() < 86400:  # 24 hours
+                    daily_net_pnl += t.get("net_pnl_usd", 0)
+            except Exception:
+                continue
+        return daily_net_pnl
 
     def _run_local_backtest(self, ohlcv_data, strategy_dict):
         """Simulate strategy performance on historical OHLCV data (look-before-you-leap safety gate)."""
@@ -1005,6 +1030,17 @@ class OnlineTrader:
         self.config = load_config()
         # Restore cooldown state after config reload
         self.sl_cooldown_until = self.config.get("sl_cooldown_until", 0)
+        
+        # D-074: Daily loss limit circuit breaker
+        # Calculate daily net PnL from trade_history (last 24h)
+        today_pnl = self._calculate_daily_pnl()
+        max_daily_loss = self.config.get("max_daily_loss_pct", 0.05)
+        if today_pnl < -max_daily_loss:
+            logging.critical(f"🚨 Daily loss limit exceeded! PnL: {today_pnl:.4%}, Limit: -{max_daily_loss:.2%}")
+            self.config["system_status"] = "EMERGENCY_STOP"
+            save_config(self.config)
+            return
+        
         symbol = self.config["target_asset"]
         rsi_period = self.config["current_strategy"].get("rsi_period", 14)  # D-062: tunable RSI period
         # Emergency STOP check – if active, log and skip this cycle

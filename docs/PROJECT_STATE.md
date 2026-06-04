@@ -1,17 +1,16 @@
 # PROJECT STATE — Online Trader-3 v2.19
 
-**Status:** PAPER/SANDBOX | EMERGENCY_STOP: CLEARED | Engine: READY | Trade Progress: 0 completed | 0 open positions
+**Status:** PAPER/SANDBOX | EMERGENCY_STOP: CLEARED | Engine: READY | Trade Progress: 0 completed | 1 open position
 
 ## Open Tasks
 | ID | Description | Priority | Dependencies | Status |
 |----|-------------|----------|--------------|--------|
-| T-021 | Add sell_threshold to cycle log output | Low | None | COMPLETED |
 
 ## Bug Status
 ### Active
 | ID | Description | Severity | Notes |
 |----|-------------|----------|-------|
-| L-003 | hypothesis_ledger waits 3 strategic trades after restart | Low | B-017 fix active, accumulating trades |
+| L-005 | emergency_sell without position creates synthetic trade | Medium | Manual caution required - only use when position exists |
 
 ### Resolved (v2.19)
 | ID | Severity | Resolution |
@@ -43,12 +42,10 @@
 | Item | Verified | Notes |
 |------|----------|-------|
 | main.py syntax (v2.19) | ✓ | py_compile clean |
-| main.py syntax (+D-074 daily loss limit) | ✓ | py_compile clean |
+| Daily loss limit (D-074) | ✓ | Circuit breaker implemented, checks daily net PnL vs max_daily_loss_pct |
 | News sentiment (RSS) | ✓ | 4 RSS feeds working (Cointelegraph, TradingView, LiveBitcoinNews, CryptoSlate) |
 | News sentiment call added | ✓ | _fetch_news_sentiment() now populates config.news_sentiment with feeds_queried/feeds_succeeded |
-| Cascade bug fix | ✓ | Trade #13 position accumulation resolved |
 | Stop-loss helper (T-020) | ✓ | _execute_stop_loss() extracted, syntax verified |
-| Sell threshold log (T-021) | ✓ | Added sell_threshold to cycle log output |
 
 ## Performance Observations
 - Active position: ~0.00015 BTC @ $65,559 (validated against Kraken paper account)

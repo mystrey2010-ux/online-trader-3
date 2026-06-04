@@ -1,4 +1,4 @@
-# ARCHITECTURE — Online Trader-3 v2.18
+# ARCHITECTURE — Online Trader-3 v2.19
 
 ## System Overview
 - **Engine:** Single-process Python (main.py), 60s cycle, paper trading via Kraken CLI
@@ -39,7 +39,7 @@ Action:
    1. Load last 25 trades, filter out emergency trades
    2. Calculate fee-aware metrics (net_pnl_usd)
    3. Tag market regime via 20-period rolling return on 1d OHLCV (D-068)
-   4. Fetch news sentiment from CryptoPanic RSS (free, no auth) — N-001
+   4. Fetch news sentiment from 4 RSS feeds (Cointelegraph, TradingView, LiveBitcoinNews, CryptoSlate) — N-004
    5. If underperforming: backup strategy → generate regime-aware hypotheses → apply best
    6. Tunes ONE of: indicator_threshold, sell_threshold_base, stop_loss_pct, position_size_pct, rsi_period, sl_cooldown_seconds, trend_filter_lookback, ohlcv_limit, ohlcv_timeframe
    7. Rollback: previous_strategies[] → restore_strategy() — Sharpe < 0 triggers rollback (D-048)
@@ -47,7 +47,7 @@ Action:
 
 **hypothesis_ledger** populated only after reflection fires. Each ledger entry includes: `parameter`, `old_value`, `new_value`, `regime`, `direction`, `regime_tag`, `expected_score_direction`, `metrics_at_failure`, `confidence_reasoning`.
 
-**news_sentiment** (N-002): CoinTelegraph RSS feed integration; classifies sentiment as positive/neutral/negative based on keyword analysis; stored in config for strategy context.
+**news_sentiment** (N-004): Multi-feed RSS aggregation (Cointelegraph, TradingView, LiveBitcoinNews, CryptoSlate); classifies sentiment as positive/neutral/negative based on keyword analysis; stored in config with feeds_queried/feeds_succeeded metrics for strategy context.
 
 ## Position Management
 - Multi-buy accumulation, value-weighted average entry price
@@ -74,7 +74,7 @@ Action:
 
 **Fee:** `trade_value × kraken_fee_pct × 2` (both legs). Default 0.26% per leg (0.52% round-trip).
 
-## Config Schema (v2.15-2.18)
+## Config Schema (v2.15-2.19)
 ```json
 {
   "target_asset": "BTC/USDT",
@@ -85,30 +85,15 @@ Action:
   "reflection_cadence": 3,
   "kraken_fee_pct": 0.0026,
   "exchange": {"type": "kraken"},
-  "current_strategy": {
-    "indicator_threshold": 63.0,
-    "sell_threshold_base": 10,
-    "stop_loss_pct": 0.016,
-    "position_size_pct": 0.03,
-    "rsi_period": 14,
-    "sl_cooldown_seconds": 300,
-    "trend_filter_lookback": 20,
-    "ohlcv_limit": 50,
-    "ohlcv_timeframe": "1m"
-  },
+  "current_strategy": {...},
   "trade_history": [],
   "hypothesis_ledger": [],
   "version": 1,
   "previous_strategies": [],
   "needs_rollback": false,
-  "open_position": {
-    "timestamp": "ISO8601",
-    "symbol": "BTC/USDT",
-    "entry_price": 67752.40,
-    "entry_rsi": 59.4,
-    "amount_btc": 0.000543
-  },
-  "system_status": null
+  "open_position": {...},
+  "system_status": null,
+  "news_sentiment": {"sentiment": "neutral", "confidence": 0.5, "count": 0, "feeds_queried": 4, "feeds_succeeded": 4}
 }
 ```
 
@@ -158,7 +143,8 @@ Key invariants:
 ## Known Bugs & Architectural Risks
 | ID | File | Lines | Description | Severity |
 |----|------|-------|-------------|----------|
-All bugs resolved in v2.17 — see KNOWN_ISSUES.md
+| L-005 | emergency_stop_trader.py | — | emergency_sell without position creates synthetic trade (manual caution required) | Medium |
+| L-010 | main.py | — | Repeated stop-losses in declining trend could drain balance (T-029 cooldown in place) | Medium |
 
 **Full details and fix tasks: see KNOWN_ISSUES.md and TASKS.md.**
 
@@ -175,4 +161,4 @@ All bugs resolved in v2.17 — see KNOWN_ISSUES.md
 - Docs backups: `/docs/backups/`
 
 ---
-**Last Updated:** 2026-06-03 23:45 | Engineer: J.A.R.V.I.S.
+**Last Updated:** 2026-06-04 | Engineer: opencode

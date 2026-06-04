@@ -1,5 +1,8 @@
 # CHANGELOG — Online Trader-3
 
+## v2.19 (2026-06-04)
+- N-004: Multi-feed news sentiment aggregation — queries all 4 RSS feeds (Cointelegraph, TradingView, LiveBitcoinNews, CryptoSlate) for diversified sentiment signal; adds feeds_queried/feeds_succeeded metrics to return
+
 ## v2.18 (2026-06-03)
 - D-074: Daily loss limit circuit breaker — EMERGENCY_STOP activates if daily net PnL < -max_daily_loss_pct (5%)
 - N-002: Switched news sentiment feed from CryptoPanic RSS (502 error) to CoinTelegraph RSS
