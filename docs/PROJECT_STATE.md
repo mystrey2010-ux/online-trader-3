@@ -1,6 +1,6 @@
 # PROJECT STATE — Online Trader-3 v2.19
 
-**Status:** PAPER/SANDBOX | EMERGENCY_STOP: CLEARED | Engine: READY | Trade Progress: 1 completed | 1 open position
+**Status:** PAPER/SANDBOX | EMERGENCY_STOP: CLEARED | Engine: READY | Trade Progress: 2 completed
 
 ## Open Tasks
 | ID | Description | Priority | Dependencies | Status |
@@ -48,8 +48,8 @@
 | Stop-loss helper (T-020) | ✓ | _execute_stop_loss() extracted, syntax verified |
 
 ## Performance Observations
-- Active position: 0.00016 BTC @ $63,771.70 (RSI 68.8 at entry)
-- Completed trades: 1 (net PnL +$0.00169, +0.05%)
+- Completed trades: 2 (1 win, 1 SL loss)
+- Win rate: 50% | Net PnL: -$0.22 (0.22% of $100)
 - Position sizing: 10% (user-adjusted)
 - News sentiment: 4 RSS feeds active (All 4/4 succeeded last check)
 
