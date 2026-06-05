@@ -111,7 +111,7 @@ Non-exchange configuration parameters:
 - `current_strategy`: Active trading parameters
        - `indicator_threshold`: RSI buy threshold (default: 63.0)
        - `stop_loss_pct`: Stop-loss percentage (default: 0.016 = 1.6%)
-       - `position_size_pct`: Percentage of balance to use per trade (default: 0.037 = 3.7%)
+       - `position_size_pct`: Percentage of balance to use per trade (default: 0.1 = 10%)
        - `rsi_period`: RSI calculation period (default: 14, tunable by brain)
         - `sl_cooldown_seconds`: Stop-loss cooldown (default: 300s, tunable)
         - `trend_filter_lookback`: Trend lookback periods (default: 20, tunable)

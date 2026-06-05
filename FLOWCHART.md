@@ -82,7 +82,7 @@ flowchart TD
 {
   "indicator_threshold": 66.15,   // RSI level to buy at
   "stop_loss_pct": 0.016,         // 1.6% stop-loss
-  "position_size_pct": 0.037,     // 3.7% of balance per trade
+  "position_size_pct": 0.1,     // 10% of balance per trade
   "reflection_cadence": 3,        // Think after every 3 trades
   "target_asset": "BTC/USDT"      // Trading pair
 }
