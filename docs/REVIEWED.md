@@ -21,7 +21,8 @@
 
 | Severity | ID | Description | Evidence | Action |
 |----------|-----|-------------|----------|--------|
-| Low | L-005 | emergency_sell creates synthetic trades when no position exists | Old code path used trade_history fallback to create fake trades | **RESOLVED** - v2.19 fix exits gracefully without synthetic trades |
+| High | D-080 | Position sizing mismatch: config (10%) vs documentation (3.7%) | config.json:0.1, README.md:0.037, FLOWCHART.md:0.037 | **URGENT** - Update README/FLOWCHART to match config OR revert config to intended 3.7% |
+| Low | - | L-005 emergency_sell creates synthetic trades when no position exists | Old code path used trade_history fallback to create fake trades | **RESOLVED** - v2.19 fix exits gracefully without synthetic trades |
 
 **No Critical/High issues identified.** Risk controls function correctly, emergency stop mechanism validated.
 
@@ -145,10 +146,10 @@
 ## SECTION 9 - Next Actions
 
 ### Immediate Actions (Next Session)
-1. Run 24-48h of continuous paper trading to generate trade volume for analysis
-2. Verify regime detection accuracy across market conditions
-3. Monitor backtest validation pass rate during next reflection cycle
-4. Test emergency_stop_trader.py emergency_sell behavior in position-less state
+1. **URGENT: Resolve position sizing discrepancy** - config.json (10%) vs README (3.7%)
+2. Run 24-48h of continuous paper trading to generate trade volume for analysis
+3. Verify regime detection accuracy across market conditions
+4. Monitor backtest validation pass rate during next reflection cycle
 5. Validate daily loss limit circuit breaker with simulated drawdown
 
 ### Short-Term Actions (1-2 Weeks)
@@ -169,12 +170,12 @@
 
 ## SECTION 10 - Questions For The Owner
 
-1. **What is the target Sharpe ratio justification?** Current 2.0 threshold seems aggressive for RSI-only strategies - what empirical data supports this?
+1. **URGENT: Position sizing discrepancy** - config.json shows 10% but README/FLOWCHART show 3.7%. Which is correct? This affects real risk exposure.
 
-2. **Why 10% position sizing in config vs 3.7% in README?** This discrepancy could cause significant risk misunderstanding.
+2. What is the target Sharpe ratio justification? Current 2.0 threshold seems aggressive for RSI-only strategies - what empirical data supports this?
 
-3. **What constitutes "strategic trade" beyond just not being stop-loss?** The brain filters emergency trades but how are "strategic" trades defined operationally?
+3. What constitutes "strategic trade" beyond just not being stop-loss? The brain filters emergency trades but how are "strategic" trades defined operationally?
 
-4. **Is the 69.46 RSI threshold based on backtesting or intuition?** This is unusually high for RSI oversold signals (typically 30-40).
+4. Is the 69.46 RSI threshold based on backtesting or intuition? This is unusually high for RSI oversold signals (typically 30-40).
 
-5. **What is the expected trade frequency target?** With 60s cycles and 20-period trend lookback, what trades/day are expected?
+5. What is the expected trade frequency target? With 60s cycles and 20-period trend lookback, what trades/day are expected?
