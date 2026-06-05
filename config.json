@@ -78,6 +78,18 @@
       "fee_usd": 0.051788,
       "net_pnl_usd": -0.214957,
       "stop_loss_triggered": true
+    },
+    {
+      "timestamp": "2026-06-05T17:10:28.192952",
+      "entry": 61030.4,
+      "exit": 60035.6,
+      "pnl_pct": -0.016300073406040314,
+      "symbol": "BTC/USDT",
+      "pnl_usd": -0.15935245167502488,
+      "gross_pnl_usd": -0.159352,
+      "fee_usd": 0.051678,
+      "net_pnl_usd": -0.21103,
+      "stop_loss_triggered": true
     }
   ],
   "hypothesis_ledger": [],
@@ -95,10 +107,10 @@
   "daily_start_balance_usd": 99.76689571424912,
   "daily_start_date": "2026-06-05",
   "open_position": {
-    "timestamp": "2026-06-05T15:16:54.167174",
+    "timestamp": "2026-06-05T17:17:06.525920",
     "symbol": "BTC/USDT",
-    "entry_price": 61030.4,
-    "entry_rsi": 50.94832410919719,
-    "amount_btc": 0.0001628397151477051
+    "entry_price": 60913.0,
+    "entry_rsi": 64.25530066041006,
+    "amount_btc": 0.00016283669064320124
   }
 }
