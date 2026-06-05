@@ -21,10 +21,11 @@
 
 | Severity | ID | Description | Evidence | Action |
 |----------|-----|-------------|----------|--------|
+| Medium | - | RSI threshold misalignment: config=69.46 vs documented oversold (~30-40) | FLOWCHART.md:66, config.json:69.46, trades=0 | **INVESTIGATE** - Validate threshold design intent, may need adjustment to generate trades |
 | - | - | D-080: Position sizing now aligned across docs | README.md, FLOWCHART.md updated to 10% | **RESOLVED** - Documentation now matches config.json |
 | Low | - | L-005 emergency_sell creates synthetic trades when no position exists | Old code path used trade_history fallback to create fake trades | **RESOLVED** - v2.19 fix exits gracefully without synthetic trades |
 
-**No Critical/High issues identified.** Risk controls function correctly, emergency stop mechanism validated.
+**Risk controls function correctly. RSI threshold requires owner clarification.**
 
 ---
 
@@ -146,11 +147,11 @@
 ## SECTION 9 - Next Actions
 
 ### Immediate Actions (Next Session)
-1. Run 24-48h of continuous paper trading to generate trade volume for analysis
-2. Verify regime detection accuracy across market conditions
-3. Monitor backtest validation pass rate during next reflection cycle
-4. Validate daily loss limit circuit breaker with simulated drawdown
-5. Test emergency_stop_trader.py emergency_sell behavior in position-less state
+1. **Investigate RSI threshold misalignment** - config=69.46 vs documented oversold (< 66) - may explain zero trades
+2. Run 24-48h of continuous paper trading to generate trade volume for analysis
+3. Verify regime detection accuracy across market conditions
+4. Monitor backtest validation pass rate during next reflection cycle
+5. Validate daily loss limit circuit breaker with simulated drawdown
 
 ### Short-Term Actions (1-2 Weeks)
 1. Collect 10+ strategic trades for Sharpe ratio calculation
