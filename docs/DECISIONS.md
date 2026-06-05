@@ -60,7 +60,7 @@ Key design decisions, one line each. Code location noted for traceability.
 | D-078 | Fix D-074 bug: _calculate_daily_pnl() now returns USD, daily_start_balance stored in config per day | main.py _calculate_daily_pnl(), run_cycle() | v2.19 |
 
 ---
-**Last Updated:** 2026-06-04 | Engineer: opencode
+**Last Updated:** 2026-06-05 | Engineer: opencode
 
 ## Git Repository Usage
 

@@ -163,4 +163,4 @@ Key invariants:
 - Docs backups: `/docs/backups/`
 
 ---
-**Last Updated:** 2026-06-04 | Engineer: opencode
+**Last Updated:** 2026-06-05 | Engineer: opencode
