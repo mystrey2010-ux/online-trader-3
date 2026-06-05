@@ -57,7 +57,7 @@ Key design decisions, one line each. Code location noted for traceability.
 | D-075 | Stop-loss error capture: Parse JSON errors from Kraken CLI stdout for diagnostics (Kraken returns errors in JSON output, not stderr) | main.py KrakenCliPaperExchange._run() | v2.19 |
 | D-076 | News sentiment wired into self_improve_strategies() on each reflection cycle - not just on startup | main.py self_improve_strategies() | v2.19 |
 | D-077 | Daily PnL calculation via _calculate_daily_pnl() - sums net_pnl_usd from trades in last 24h | main.py run_cycle(), _calculate_daily_pnl() | v2.19 |
-| D-078 | Fix D-074 bug: _calculate_daily_pnl() now returns percentage (net_pnl_usd / 100) not raw USD; prevented false EMERGENCY_STOP on -0.22% loss | main.py _calculate_daily_pnl() | v2.19 |
+| D-078 | Fix D-074 bug: _calculate_daily_pnl() now returns USD, daily_start_balance stored in config per day | main.py _calculate_daily_pnl(), run_cycle() | v2.19 |
 
 ---
 **Last Updated:** 2026-06-04 | Engineer: opencode

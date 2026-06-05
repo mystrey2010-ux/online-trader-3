@@ -15,7 +15,7 @@
 ## Trading Loop (run_cycle, 60s)
 ```
 0. EMERGENCY_STOP? → log "EMERGENCY STOP ACTIVE", return (D-023 guard)
-1. DAILY LOSS CHECK: daily PnL < -max_daily_loss_pct → EMERGENCY_STOP (D-074)
+1. DAILY LOSS CHECK: store daily_start_balance_usd on day rollover; trigger EMERGENCY_STOP if daily_net_pnl_usd < -(start_balance * max_daily_loss_pct) (D-074)
 2. Fetch ticker (for real-time stop-loss price check)
 3. Fetch OHLCV (50 x 1m bars)
 4. Calculate RSI-14
@@ -93,7 +93,9 @@ Action:
   "needs_rollback": false,
   "open_position": {...},
   "system_status": null,
-  "news_sentiment": {"sentiment": "neutral", "confidence": 0.5, "count": 0, "feeds_queried": 4, "feeds_succeeded": 4}
+  "daily_start_balance_usd": 100.00,
+  "daily_start_date": "2026-06-05",
+  "news_sentiment": {...}
 }
 ```
 

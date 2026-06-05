@@ -673,11 +673,10 @@ class OnlineTrader:
         return np.mean(returns) / np.std(returns)
     
     def _calculate_daily_pnl(self):
-        """Calculate net P&L percentage for today's trades (last 24h)."""
+        """Calculate net P&L in USD for today's trades (last 24h)."""
         trades = self.config.get("trade_history", [])
         now = datetime.now()
         daily_net_pnl_usd = 0.0
-        daily_start_balance = 100.0  # Paper trading starting balance
         for t in trades:
             ts = t.get("timestamp", "")
             try:
@@ -686,7 +685,7 @@ class OnlineTrader:
                     daily_net_pnl_usd += t.get("net_pnl_usd", 0)
             except Exception:
                 continue
-        return daily_net_pnl_usd / daily_start_balance
+        return daily_net_pnl_usd
 
     def _run_local_backtest(self, ohlcv_data, strategy_dict):
         """Simulate strategy performance on historical OHLCV data (look-before-you-leap safety gate)."""
@@ -1033,11 +1032,27 @@ class OnlineTrader:
         self.sl_cooldown_until = self.config.get("sl_cooldown_until", 0)
         
         # D-074: Daily loss limit circuit breaker
+        # Get today's starting balance (store on first cycle or EMERGENCY_STOP clear)
+        now = datetime.now()
+        today_str = now.strftime("%Y-%m-%d")
+        daily_start_balance_usd = self.config.get("daily_start_balance_usd", 0)
+        daily_start_date = self.config.get("daily_start_date", "")
+        
+        # Reset daily tracking if new day or no tracking
+        if daily_start_date != today_str or daily_start_balance_usd == 0:
+            balance = self.exchange.fetch_balance()
+            usdt_free = balance.get('USDT', {}).get('free', 0) or balance.get('USD', {}).get('free', 0)
+            self.config["daily_start_balance_usd"] = usdt_free
+            self.config["daily_start_date"] = today_str
+            save_config(self.config)
+            daily_start_balance_usd = usdt_free
+        
         # Calculate daily net PnL from trade_history (last 24h)
-        today_pnl = self._calculate_daily_pnl()
-        max_daily_loss = self.config.get("max_daily_loss_pct", 0.05)
-        if today_pnl < -max_daily_loss:
-            logging.critical(f"🚨 Daily loss limit exceeded! PnL: {today_pnl:.4%}, Limit: -{max_daily_loss:.2%}")
+        today_pnl_usd = self._calculate_daily_pnl()
+        max_daily_loss_pct = self.config.get("max_daily_loss_pct", 0.05)
+        daily_loss_limit_usd = daily_start_balance_usd * max_daily_loss_pct
+        if today_pnl_usd < -daily_loss_limit_usd:
+            logging.critical(f"🚨 Daily loss limit exceeded! PnL: ${today_pnl_usd:.2f}, Limit: -${daily_loss_limit_usd:.2f} ({max_daily_loss_pct:.0%} of ${daily_start_balance_usd:.2f})")
             self.config["system_status"] = "EMERGENCY_STOP"
             save_config(self.config)
             return
