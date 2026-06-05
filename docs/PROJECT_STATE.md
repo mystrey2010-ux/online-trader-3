@@ -1,4 +1,4 @@
-# PROJECT_STATE — Online Trader-3 v2.19
+# PROJECT_STATE — Online Trader-3 v2.20
 
 **Status:** PAPER/SANDBOX | EMERGENCY_STOP: CLEARED | Engine: RUNNING | Trades: 6 total (2 strategic)
 

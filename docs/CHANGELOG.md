@@ -1,5 +1,10 @@
 # CHANGELOG — Online Trader-3
 
+## v2.20
+- B-025: Fixed manage_trader.sh to use trader.pid file instead of pgrep -f "main.py"
+  - stop/restart/status/clean now only check/stop the specific trader process
+  - Prevents accidentally killing unrelated main.py processes (e.g., ibus-typing-booster)
+
 ## v2.19
 - D-077/D-078: Fixed daily loss limit - uses exchange balance, tracked per day
 - N-004: Multi-feed news sentiment aggregation (4 RSS feeds)
