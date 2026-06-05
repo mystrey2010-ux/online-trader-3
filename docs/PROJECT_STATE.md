@@ -2,7 +2,7 @@
 
 **Status:** PAPER/SANDBOX | EMERGENCY_STOP: CLEARED | Engine: RUNNING | Trades: 6 total (2 strategic)
 
-**Review Completed:** 2026-06-05
+**Review Completed:** 2026-06-05 | Comprehensive review in docs/REVIEWED.md
 
 **Fix Applied:** C-006 - All regime tuning maps now have complete strategy key coverage (BULL: added rsi_period, sl_cooldown_seconds; NEUTRAL: added ohlcv_limit, ohlcv_timeframe) | L-005 - emergency_sell exits gracefully without synthetic trade
 
