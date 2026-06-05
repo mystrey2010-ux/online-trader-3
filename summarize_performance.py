@@ -577,15 +577,24 @@ def print_brain_status(config):
     version     = int(config.get("version", 1))
     cadence     = int(config.get("reflection_cadence", 3))
     trades      = config.get("trade_history", [])
-    n_trades    = len(trades)
 
-    trades_since = n_trades % cadence if cadence > 0 else 0
-    trades_to_go = cadence - trades_since if trades_since > 0 else cadence if n_trades == 0 else 0
+    # Filter strategic trades (exclude emergency/stop-loss trades) - matches brain logic
+    strategic_trades = []
+    for t in trades:
+        if t.get("stop_loss_triggered", False):
+            continue
+        if t.get("note") and "Emergency" in t.get("note", ""):
+            continue
+        strategic_trades.append(t)
+    n_strategic = len(strategic_trades)
+
+    trades_since = n_strategic % cadence if cadence > 0 else 0
+    trades_to_go = cadence - trades_since if trades_since > 0 else cadence if n_strategic == 0 else 0
 
     print(f"  Strategy Version : v{version}")
-    print(f"  Completed Cycles : {n_trades}  |  Reflection every {cadence} trades")
+    print(f"  Completed Cycles : {len(trades)} total ({n_strategic} strategic) | Reflection every {cadence} strategic trades")
 
-    if n_trades == 0:
+    if n_strategic == 0:
         print(f"  Next Reflection  : {cadence} more trade(s) needed")
     elif trades_to_go == 0:
         print(f"  Next Reflection  : due NOW (cadence reached)")
@@ -620,7 +629,7 @@ def print_brain_status(config):
                 change = f"{old_v} -> {new_v}"
             print(f"  {i:<3} {ts_h:<20} {regime:<10} {param:<22} {change:<20} {delta}")
     else:
-        n_to_first = cadence - n_trades if n_trades < cadence else 0
+        n_to_first = cadence - n_strategic if n_strategic < cadence else 0
         if n_to_first > 0:
             print(f"\n  Brain is in observation mode. Needs {n_to_first} more trade(s) before first reflection.")
         else:
