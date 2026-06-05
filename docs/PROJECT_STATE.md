@@ -1,6 +1,6 @@
 # PROJECT STATE — Online Trader-3 v2.19
 
-**Status:** PAPER/SANDBOX | EMERGENCY_STOP: CLEARED | Engine: READY | Trade Progress: 2 completed
+**Status:** PAPER/SANDBOX | EMERGENCY_STOP: CLEARED | Engine: RUNNING | Trade Progress: 5 total (2 strategic)
 
 ## Open Tasks
 | ID | Description | Priority | Dependencies | Status |
@@ -15,43 +15,44 @@
 ### Resolved (v2.19)
 | ID | Severity | Resolution |
 |----|----------|------------|
-| N-004 | Low | Multi-feed news sentiment aggregation - queries 4 RSS feeds for diversified signal |
+| N-004 | Low | Multi-feed news sentiment aggregation - queries 4 RSS feeds |
+| D-077 | High | Fixed daily loss calculation - uses exchange balance for limit |
 
 ### Resolved (v2.18)
 | ID | Severity | Resolution |
 |----|----------|------------|
-| D-074 | High | Daily loss limit circuit breaker added to run_cycle() |
+| D-074 | High | Daily loss limit circuit breaker implemented in run_cycle() |
 
 ### Resolved (v2.17)
 | ID | Severity | Resolution |
 |----|----------|------------|
-| B-011 | Medium | D-046 — entry_rsi persisted in open_position config |
-| B-012 | Medium | D-047 — Cadence check on strategic_trades count |
-| B-013 | Medium | D-048 — restore_strategy() rollback trigger |
-| T-029 | Medium | D-049 — Post-SL cooldown period |
-| B-024 | High | Fixed undefined `SL_COOLDOWN_SECONDS` → `DEFAULT_SL_COOLDOWN` |
+| B-011 | Medium | entry_rsi persisted in open_position config |
+| B-012 | Medium | Cadence check on strategic_trades count |
+| B-013 | Medium | restore_strategy() rollback trigger |
+| T-029 | Medium | Post-SL cooldown period |
+| B-024 | High | Fixed undefined SL_COOLDOWN_SECONDS |
 
 ### Resolved (v2.15-2.16)
 | ID | Severity | Resolution |
 |----|----------|------------|
-| B-017 | Critical | D-043 — NameError in `_generate_and_apply_hypotheses()` blocked hypothesis generation |
-| B-018 | Medium | D-044 — Hypothesis ledger key schema mismatch with dashboard |
-| B-019 | Medium | D-045 — Stop-loss triggered immediate re-buy in same cycle |
+| B-017 | Critical | NameError in _generate_and_apply_hypotheses() fixed |
+| B-018 | Medium | Hypothesis ledger key schema mismatch with dashboard |
+| B-019 | Medium | Stop-loss triggered immediate re-buy in same cycle |
 
 ## Verification Status
 | Item | Verified | Notes |
 |------|----------|-------|
 | main.py syntax (v2.19) | ✓ | py_compile clean |
-| Daily loss limit (D-074) | ✓ | Circuit breaker implemented, checks daily net PnL vs max_daily_loss_pct |
+| Daily loss limit (D-074) | ✓ | Uses daily_start_balance_usd × max_daily_loss_pct |
 | News sentiment (RSS) | ✓ | 4 RSS feeds working (Cointelegraph, TradingView, LiveBitcoinNews, CryptoSlate) |
-| News sentiment call added | ✓ | _fetch_news_sentiment() now populates config.news_sentiment with feeds_queried/feeds_succeeded |
-| Stop-loss helper (T-020) | ✓ | _execute_stop_loss() extracted, syntax verified |
+| Dashboard strategic trade count | ✓ | Now correctly shows 5 total (2 strategic) |
 
 ## Performance Observations
-- Completed trades: 2 (1 win, 1 SL loss)
-- Win rate: 50% | Net PnL: -$0.22 (0.22% of $100)
-- Position sizing: 10% (user-adjusted)
-- News sentiment: 4 RSS feeds active (All 4/4 succeeded last check)
+- Trades: 5 total (2 strategic, 3 stop-loss)
+- Strategic: 1 win (+$0.0017), 1 pending
+- Net PnL: -$0.40 USD (fee-adjusted)
+- Position: 0.00016 BTC @ $61,030.40
+- News sentiment: 4/4 feeds succeeded
 
 ## Deferred Items (Q - Quality of Service)
 | ID | Item | Notes |
@@ -60,4 +61,4 @@
 | Q-004 | Native stop-loss orders (Kraken API) | Currently price-check based |
 
 ---
-**Last Updated:** 2026-06-04 | Engineer: opencode
+**Last Updated:** 2026-06-05 | Engineer: opencode
