@@ -14,10 +14,11 @@
 ## Verification Status
 | Item | Status | Notes |
 |------|--------|-------|
-| Syntax (main.py, summarize_performance.py) | ✓ | py_compile clean |
+| Syntax (main.py, summarize_performance.py, emergency_stop_trader.py) | ✓ | py_compile clean |
 | Daily loss limit (D-074/D-078) | ✓ | Uses daily_start_balance_usd × max_daily_loss_pct |
 | News sentiment (RSS) | ✓ | 4/4 feeds succeeded |
 | Dashboard display | ✓ | Shows strategic trade count correctly |
+| Emergency stop (L-005 fix) | ✓ | No synthetic trades on missing position |
 
 ## Deferred
 | Q-003 | Multi-symbol support | Architecture supports, not implemented |
