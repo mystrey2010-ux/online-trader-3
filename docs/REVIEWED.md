@@ -56,7 +56,7 @@
 
 ### Position Sizing (10% of available USD)
 - **Risk:** Aggressive for crypto volatility
-- **Evidence:** position_size_pct = 0.1 in config, but README cites 3.7%
+- **Evidence:** position_size_pct = 0.1 in config (aligned in README/FLOWCHART)
 
 ### Self-Improvement Brain
 - **Strength:** Uses regime-aware tuning, pre-commit backtest validation (D-069)
