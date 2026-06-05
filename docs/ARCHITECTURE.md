@@ -1,166 +1,38 @@
 # ARCHITECTURE — Online Trader-3 v2.19
 
 ## System Overview
-- **Engine:** Single-process Python (main.py), 60s cycle, paper trading via Kraken CLI
-- **Dashboard:** Read-only summarize_performance.py (reads config.json + Kraken CLI)
-- **Config State:** Persisted in config.json (trade_history, open_position, hypothesis_ledger, strategy, news_sentiment)
-
-## Exchange Adapters
-| Adapter | When Active | Location |
-|---------|-------------|----------|
-| KrakenCliPaperExchange | exchange=kraken, LIVE_TRADING_ENABLED=false (**active**) | main.py + ~/.cargo/bin/kraken |
-| RealKrakenExchange | CCXT with live API keys (inactive) | main.py (live mode only) |
-| GenericCCXTExchange | Any CCXT exchange (inactive) | Future multi-symbol support |
+- Engine: Single-process Python (main.py), 60s cycle, PAPER trading via Kraken CLI
+- Dashboard: Read-only summarize_performance.py (reads config.json + Kraken CLI)  
+- Config State: trade_history, open_position, hypothesis_ledger, current_strategy, news_sentiment, daily_start_balance_usd/date
 
 ## Trading Loop (run_cycle, 60s)
 ```
-0. EMERGENCY_STOP? → log "EMERGENCY STOP ACTIVE", return (D-023 guard)
-1. DAILY LOSS CHECK: store daily_start_balance_usd on day rollover; trigger EMERGENCY_STOP if daily_net_pnl_usd < -(start_balance * max_daily_loss_pct) (D-074)
-2. Fetch ticker (for real-time stop-loss price check)
-3. Fetch OHLCV (50 x 1m bars)
-4. Calculate RSI-14
-5. STOP-LOSS: price < entry × (1-stop_loss_pct) → emergency sell → return (D-045)
-6. TREND CHECK: skip BUY if price declining over 20 periods (T-018)
-7. POSITION TIMEOUT: warn if open >24h without close signal (T-018)
-8. BUY:  RSI < indicator_threshold and uptrend, no position → buy position_size_pct of balance
-9. SELL: RSI > sell_threshold AND net PnL after fees > 0 → sell all BTC
+0. EMERGENCY_STOP? → return (D-023)
+1. DAILY LOSS CHECK: daily_net_pnl_usd < -(start_balance × max_daily_loss_pct) → EMERGENCY_STOP (D-074/D-078)
+2. Fetch ticker → OHLCV (50 x 1m) → RSI-14
+3. STOP-LOSS: price < entry × (1-stop_loss_pct) → sell → return (D-045)
+4. TREND CHECK: skip BUY if price declining over lookback (T-018)
+5. BUY: RSI < threshold + no position + uptrend → buy position_size_pct
+6. SELL: RSI > dynamic_threshold + net_pnl_usd > 0 → sell all
 ```
 
-**Sell threshold** = dynamic, based on `entry_rsi + estimated_rsi_change_for_fee_hurdle + 5` buffer, minimum `indicator_threshold + 10`. Falls back to `indicator_threshold + 20` when no entry RSI is available (D-032).
+## Key Schemas
+**Current Strategy:** indicator_threshold, sell_threshold_base, stop_loss_pct, position_size_pct, rsi_period, sl_cooldown_seconds, trend_filter_lookback, ohlcv_limit, ohlcv_timeframe
 
-**Stop-loss exits with `return`** — buy branch cannot fire in same cycle after a stop-loss (D-045).
+**Trade Record:** timestamp, entry, exit, pnl_pct, pnl_usd, gross_pnl_usd, fee_usd, net_pnl_usd, stop_loss_triggered, note
 
-## Self-Improvement Brain (D-006 / D-025)
-```
-Trigger: Every 3 completed STRATEGIC trades (excluding emergency)
-Strategic trade = RSI buy signal (RSI<threshold) → RSI sell signal (RSI>sell_threshold)
-Emergency trades excluded if: stop_loss_triggered=true OR note contains "Emergency"
-Action:
-   1. Load last 25 trades, filter out emergency trades
-   2. Calculate fee-aware metrics (net_pnl_usd)
-   3. Tag market regime via 20-period rolling return on 1d OHLCV (D-068)
-   4. Fetch news sentiment from 4 RSS feeds (Cointelegraph, TradingView, LiveBitcoinNews, CryptoSlate) — N-004
-   5. If underperforming: backup strategy → generate regime-aware hypotheses → apply best
-   6. Tunes ONE of: indicator_threshold, sell_threshold_base, stop_loss_pct, position_size_pct, rsi_period, sl_cooldown_seconds, trend_filter_lookback, ohlcv_limit, ohlcv_timeframe
-   7. Rollback: previous_strategies[] → restore_strategy() — Sharpe < 0 triggers rollback (D-048)
-```
-
-**hypothesis_ledger** populated only after reflection fires. Each ledger entry includes: `parameter`, `old_value`, `new_value`, `regime`, `direction`, `regime_tag`, `expected_score_direction`, `metrics_at_failure`, `confidence_reasoning`.
-
-**news_sentiment** (N-004): Multi-feed RSS aggregation (Cointelegraph, TradingView, LiveBitcoinNews, CryptoSlate); classifies sentiment as positive/neutral/negative based on keyword analysis; stored in config with feeds_queried/feeds_succeeded metrics for strategy context.
-
-## Position Management
-- Multi-buy accumulation, value-weighted average entry price
-- `open_position` persists in config.json until close; restored on startup (D-020)
-- `entry_rsi` persisted in open_position config + restored on startup (B-011, D-046)
-- Single symbol: BTC/USDT (Q-003 deferred: multi-symbol support)
-
-## Trade Record Schema (v2.15)
-```json
-{
-  "timestamp": "ISO8601",
-  "entry": 70228.20,
-  "exit": 70595.20,
-  "pnl_pct": 0.00523,
-  "symbol": "BTC/USDT",
-  "pnl_usd": 0.19284,
-  "gross_pnl_usd": 0.192845,
-  "fee_usd": 0.191892,
-  "net_pnl_usd": 0.000953,
-  "stop_loss_triggered": false,
-  "note": null
-}
-```
-
-**Fee:** `trade_value × kraken_fee_pct × 2` (both legs). Default 0.26% per leg (0.52% round-trip).
-
-## Config Schema (v2.15-2.19)
-```json
-{
-  "target_asset": "BTC/USDT",
-  "target_daily_return": 0.002,
-  "max_daily_drawdown": 0.01,
-  "max_daily_loss_pct": 0.05,
-  "min_sharpe_ratio": 2.0,
-  "reflection_cadence": 3,
-  "kraken_fee_pct": 0.0026,
-  "exchange": {"type": "kraken"},
-  "current_strategy": {...},
-  "trade_history": [],
-  "hypothesis_ledger": [],
-  "version": 1,
-  "previous_strategies": [],
-  "needs_rollback": false,
-  "open_position": {...},
-  "system_status": null,
-  "daily_start_balance_usd": 100.00,
-  "daily_start_date": "2026-06-05",
-  "news_sentiment": {...}
-}
-```
-
-## Dashboard (summarize_performance.py)
-7 sections: Account → Position → Strategy → Orders → Trades → Brain → System
-Read-only; uses Kraken CLI for real-time data.
-
-Hypothesis log table reads keys: `parameter`, `old_value`, `new_value`, `regime`, `direction` (set by D-044 fix).
+**News Sentiment (N-004):** sentiment(positive/neutral/negative), confidence, count, feeds_queried(4), feeds_succeeded
 
 ## Operations
-### Engine Management (manage_trader.sh)
-- `start` → python main.py
-- `stop` → pkill -9 -f main.py (quiet kill)
-- `restart` → stop + start
-- `status` → pgrep output (fixed in v2.16)
-- `clean` → DESTRUCTIVE: engine stopped + SANDBOX cleared
+- `manage_trader.sh {start|stop|status|backup|clean}` - Engine lifecycle
+- `emergency_stop_trader.py {emergency_only|emergency_sell|off}` - Emergency controls
+- STOP/RESTART: Non-destructive to persistent state
 
-### Emergency Stop (emergency_stop_trader.py)
-- `emergency_only` → sets EMERGENCY_STOP flag (D-023)
-- `emergency_sell` → flag + market-sell position (⚠ only when position exists, L-005)
-- `off` → clears EMERGENCY_STOP, resumes trading (D-024/D-026)
-- Help: run without arguments
-
-### Data Preservation
-- STOP/RESTART: Non-destructive to all persistent state (D-020/D-009)
-- CLEAN command only: Destructive (engine stopped + sandbox cleared)
-- Config.json fields NEVER touched by normal operations: version, exchange credentials
-
-## Logging
-- **Format:** `[YYYY-MM-DD HH:MM:SS,ms] [LEVEL] msg`
-- **File:** trader.log (append mode)
-- **Engine Detection:** `pgrep -f "main.py"` (summarize_performance.py; manage_trader.sh still uses fragile pattern — B-014)
-
-## Design Decisions (See DECISIONS.md for full list)
-Key invariants:
-- D-013: f"${val:.2f}" exclusively; NEVER comma specifier
-- D-016: PAPER/SANDBOX mode detected from CLI output, not config key
-- D-018: Both sell paths write gross_pnl_usd/fee_usd/net_pnl_usd at close
-- D-023: EMERGENCY_STOP guard at top of run_cycle()
-- D-025: Emergency trades excluded from self-improvement brain reflection pool
-- D-031: Sell only if net PnL after fees > 0 (fee trap prevention)
-- D-032: Dynamic sell threshold based on entry RSI + fee hurdle
-- D-044: Hypothesis ledger entries include display alias keys for dashboard
-- D-045: Stop-loss exits with `return` — no same-cycle re-buy
-- D-055: Trend filter skips BUY when price declining over 20 periods (T-018)
-
-## Known Bugs & Architectural Risks
-| ID | File | Lines | Description | Severity |
-|----|------|-------|-------------|----------|
-| L-005 | emergency_stop_trader.py | — | emergency_sell without position creates synthetic trade (manual caution required) | Medium |
-| L-010 | main.py | — | Repeated stop-losses in declining trend could drain balance (T-029 cooldown in place) | Medium |
-
-**Full details and fix tasks: see KNOWN_ISSUES.md and TASKS.md.**
-
-## Deferred Items
+## Deferred
 | ID | Item | Notes |
 |----|------|-------|
-| Q-003 | Multi-symbol support | Architecture supports, not implemented |
-| Q-004 | Native stop-loss orders (Kraken API) | Currently price-check based |
-
-## Backup Convention
-- Git repository in use for version control
-- Local backups: `*.ddmmyy-hhmmss` prefix before major changes
-- Project backups: `/backups/`
-- Docs backups: `/docs/backups/`
+| Q-003 | Multi-symbol support | Architecture ready, not implemented |
+| Q-004 | Native stop-loss orders | Currently price-check based |
 
 ---
-**Last Updated:** 2026-06-05 | Engineer: opencode
+**Last Updated:** 2026-06-05 | Full decisions: DECISIONS.md | Issues: KNOWN_ISSUES.md
