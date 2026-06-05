@@ -20,78 +20,7 @@
     "ohlcv_limit": 50,
     "ohlcv_timeframe": "1m"
   },
-  "trade_history": [
-    {
-      "timestamp": "2026-06-04T22:09:11.139590",
-      "entry": 63512.7,
-      "exit": 63853.7,
-      "pnl_pct": 0.005369004939169647,
-      "symbol": "BTC/USDT",
-      "pnl_usd": 0.05369004939169647,
-      "gross_pnl_usd": 0.05369,
-      "fee_usd": 0.052,
-      "net_pnl_usd": 0.00169
-    },
-    {
-      "timestamp": "2026-06-05T03:30:25.619426",
-      "entry": 63771.7,
-      "exit": 62666.7,
-      "pnl_pct": -0.017327435210289205,
-      "symbol": "BTC/USDT",
-      "pnl_usd": -0.1702701334127357,
-      "gross_pnl_usd": -0.17027,
-      "fee_usd": 0.051999,
-      "net_pnl_usd": -0.222269,
-      "stop_loss_triggered": true
-    },
-    {
-      "timestamp": "2026-06-05T10:15:13.080876",
-      "entry": 62581.6,
-      "exit": 63171.2,
-      "pnl_pct": 0.009421299551305792,
-      "symbol": "BTC/USDT",
-      "pnl_usd": 0.0939933809827827,
-      "gross_pnl_usd": 0.093993,
-      "fee_usd": 0.051879,
-      "net_pnl_usd": 0.042114
-    },
-    {
-      "timestamp": "2026-06-05T13:00:15.287047",
-      "entry": 62957.2,
-      "exit": 61945.0,
-      "pnl_pct": -0.01607758921934262,
-      "symbol": "BTC/USDT",
-      "pnl_usd": -0.15788081746955482,
-      "gross_pnl_usd": -0.157881,
-      "fee_usd": 0.051898,
-      "net_pnl_usd": -0.209779,
-      "stop_loss_triggered": true
-    },
-    {
-      "timestamp": "2026-06-05T14:51:48.677944",
-      "entry": 62240.7,
-      "exit": 61203.7,
-      "pnl_pct": -0.016661123669881605,
-      "symbol": "BTC/USDT",
-      "pnl_usd": -0.16316873116500671,
-      "gross_pnl_usd": -0.163169,
-      "fee_usd": 0.051788,
-      "net_pnl_usd": -0.214957,
-      "stop_loss_triggered": true
-    },
-    {
-      "timestamp": "2026-06-05T17:10:28.192952",
-      "entry": 61030.4,
-      "exit": 60035.6,
-      "pnl_pct": -0.016300073406040314,
-      "symbol": "BTC/USDT",
-      "pnl_usd": -0.15935245167502488,
-      "gross_pnl_usd": -0.159352,
-      "fee_usd": 0.051678,
-      "net_pnl_usd": -0.21103,
-      "stop_loss_triggered": true
-    }
-  ],
+  "trade_history": [],
   "hypothesis_ledger": [],
   "version": 3,
   "previous_strategies": [],
@@ -106,11 +35,5 @@
   "system_status": null,
   "daily_start_balance_usd": 99.76689571424912,
   "daily_start_date": "2026-06-05",
-  "open_position": {
-    "timestamp": "2026-06-05T17:17:06.525920",
-    "symbol": "BTC/USDT",
-    "entry_price": 60913.0,
-    "entry_rsi": 64.25530066041006,
-    "amount_btc": 0.00016283669064320124
-  }
+  "sl_cooldown_until": 1780685373.5369213
 }

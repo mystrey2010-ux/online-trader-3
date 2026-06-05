@@ -78,40 +78,32 @@ def close_position(cfg):
     """
     Close any open position with a market order and record the trade.
     Marks trade with stop_loss_triggered=true + note="Emergency stop trade" (D-025).
+    Does NOT create synthetic trades if no position exists (fixes L-005).
     """
     # --------------------------------------------------------------
-    # 1: Extract position data (try to recover from config state)
+    # 1: Extract position data
     # --------------------------------------------------------------
     pos = cfg.get("open_position")
-    trade_history = cfg.get("trade_history", [])
-    
-    # Initialize defaults to avoid UnboundLocalError in fallback path
-    entry_price = None
-    current_price = None
-    symbol = None
-    amount_btc = None
     
     if not pos:
-        # No open position found - fall back to using the LAST trade's entry price
-        if not trade_history:
-            log("ℹ️  No open_position and no trade history - cannot close.")
-            return
-        entry_price = trade_history[-1]["entry"]
-        symbol = trade_history[-1]["symbol"]
-        current_price = trade_history[-1]["exit"]
-        log(f"🔄 No open_position found - using synthetic entry ${entry_price:.2f} and exit ${current_price:.2f} to preserve trade_history integrity.")
-    else:
-        entry_price = pos["entry_price"]
-        symbol = pos["symbol"]
-        amount_btc = pos.get("amount_btc", 0.0)
-        if amount_btc <= 0:
-            log("⚠️  Detected position but amount_btc <= 0 - skipping.")
-            return
-        log(f"🔄 Closing {symbol} position - market SELL {amount_btc:.8f} BTC")
+        log("ℹ️  No open_position found - emergency_sell has nothing to close.")
+        log("💡 Tip: Use emergency_only to set EMERGENCY_STOP flag without closing position.")
+        return
+    
+    entry_price = pos.get("entry_price")
+    symbol = pos.get("symbol")
+    amount_btc = pos.get("amount_btc", 0.0)
+    
+    if not entry_price or not symbol or amount_btc <= 0:
+        log("⚠️  Invalid open_position data - skipping close.")
+        return
+    
+    log(f"🔄 Closing {symbol} position - market SELL {amount_btc:.8f} BTC")
     
     # --------------------------------------------------------------
     # 2: Determine current market price
     # --------------------------------------------------------------
+    current_price = None
     try:
         result = subprocess.run(
             [KRAKEN_BINARY, "ticker", symbol.replace("/", "").replace("USDT", "USD")],
@@ -121,16 +113,12 @@ def close_position(cfg):
         current_price = float(ticker_data["c"][0])
         log(f"💵 Retrieved live price: ${current_price:.2f}")
     except Exception as e:
-        log(f"⚠️  Could not fetch ticker - using last known price from trade_history")
-        if trade_history and "exit" in trade_history[-1]:
-            current_price = float(trade_history[-1]["exit"])
-        else:
-            current_price = float(entry_price)
+        log(f"⚠️  Could not fetch ticker - using entry price as fallback")
+        current_price = float(entry_price)
     
     # --------------------------------------------------------------
     # 3: Execute trade based on mode
     # --------------------------------------------------------------
-    synthetic_amount = float(amount_btc) if amount_btc else 0.001
     if is_paper_mode(cfg):
         cli_symbol = symbol.replace("/", "").replace("USDT", "USD")
         order_cmd = [
@@ -138,7 +126,7 @@ def close_position(cfg):
             "paper",
             "sell",
             cli_symbol,
-            str(synthetic_amount),
+            str(amount_btc),
             "--type",
             "market"
         ]
@@ -152,6 +140,7 @@ def close_position(cfg):
             log(f"✅ Kraken CLI response: {result.stdout.strip()}")
         except subprocess.CalledProcessError as e:
             log(f"❌ Paper sell failed: {e.stderr.strip()}")
+            return
     else:
         try:
             import ccxt
@@ -161,32 +150,33 @@ def close_position(cfg):
                 'enableRateLimit': True,
                 'options': {'defaultType': 'spot'}
             })
-            order = exchange.create_market_sell_order(symbol.replace("/", ""), synthetic_amount if amount_btc else 0.001)
+            order = exchange.create_market_sell_order(symbol.replace("/", ""), amount_btc)
             log(f"✅ CCXT sell response: {order}")
         except Exception as e:
             log(f"❌ Live sell failed: {e}")
+            return
     
     # --------------------------------------------------------------
     # 4: Compute PnL and persist trade (MARKED AS EMERGENCY D-025)
     # --------------------------------------------------------------
     pnl_pct = round((current_price - entry_price) / entry_price, 6)
-    trade_value_usd = entry_price * (amount_btc if amount_btc else 0.001)
+    trade_value_usd = entry_price * amount_btc
     gross_pnl_usd = round(pnl_pct * trade_value_usd, 6)
     kraken_fee_pct = cfg.get("kraken_fee_pct", 0.0026)
-    fee_usd = round(trade_value_usd * kraken_fee_pct * 2, 6)  # fee on entry + exit legs
+    fee_usd = round(trade_value_usd * kraken_fee_pct * 2, 6)
     net_pnl_usd = round(gross_pnl_usd - fee_usd, 6)
     
     trade_record = {
         "timestamp": datetime.now().isoformat(),
         "entry": entry_price,
         "exit": current_price,
-        "symbol": symbol if symbol else trade_history[-1]["symbol"],
+        "symbol": symbol,
         "pnl_pct": pnl_pct,
         "pnl_usd": gross_pnl_usd,
         "gross_pnl_usd": gross_pnl_usd,
         "fee_usd": fee_usd,
         "net_pnl_usd": net_pnl_usd,
-        "stop_loss_triggered": True,  # Mark as emergency (D-025)
+        "stop_loss_triggered": True,
         "note": "Emergency stop trade"
     }
     
@@ -194,9 +184,8 @@ def close_position(cfg):
         cfg["trade_history"] = []
     cfg["trade_history"].append(trade_record)
     
-    if pos:
-        if "open_position" in cfg:
-            del cfg["open_position"]  # B-008 fix: delete key entirely (D-009/D-020), not set to None
+    if "open_position" in cfg:
+        del cfg["open_position"]
         log("🪫 Cleared open_position after successful close")
     
     save_config(cfg)
@@ -207,9 +196,9 @@ def close_position(cfg):
 def show_help():
     """Display help message when no action specified."""
     print("""
-═══════════════════════════════════════════════════════════════
-    EMERGENCY STOP TRADER - Command Reference v2.13+
-═══════════════════════════════════════════════════════════════
+═════════════════════════════════════════════════════════════
+    EMERGENCY STOP TRADER - Command Reference v2.19+
+═════════════════════════════════════════════════════════════
 
 Emergency Stop Commands for Online Trader-3 (D-025)
 
@@ -222,14 +211,14 @@ Emergency Stop Commands for Online Trader-3 (D-025)
       Does everything above PLUS:
       - Immediately closes open position with market sell order
       - Records trade marked as emergency (stop_loss_triggered=true)
-      ⚠️ Only use when you want to close the position immediately
+      - If no position exists, exits gracefully (fixes L-005)
   
   python emergency_stop_trader.py off
       Removes system_status from config.json
       Engine resumes normal trading on next cycle
       Position data preserved for future signals
 
-═══════════════════════════════════════════════════════════════
+═════════════════════════════════════════════════════════════
 
 Examples:
   # Trigger emergency stop (position stays open)
@@ -242,7 +231,7 @@ Examples:
   $ python emergency_stop_trader.py off
 
 See ARCHITECTURE.md and KNOWN_ISSUES.md for D-023/D-024/D-025 details.
-═══════════════════════════════════════════════════════════════
+═════════════════════════════════════════════════════════════
     """)
 
 
@@ -266,7 +255,7 @@ def main():
         cfg = load_config()
         cfg["system_status"] = "EMERGENCY_STOP"
         log("⚡️ Set system_status = EMERGENCY_STOP in config.json")
-        close_position(cfg)  # Execute market sell
+        close_position(cfg)
     
     elif action == "off":
         log("🔔 Clearing EMERGENCY_STOP flag (off)")

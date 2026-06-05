@@ -4,6 +4,7 @@
 - D-077/D-078: Fixed daily loss limit - uses exchange balance, tracked per day
 - N-004: Multi-feed news sentiment aggregation (4 RSS feeds)
 - Dashboard: Shows strategic trade count (excludes stop-loss trades)
+- L-005: emergency_sell exits gracefully without synthetic trade when no position exists
 
 ## v2.18
 - D-074: Daily loss limit circuit breaker implemented

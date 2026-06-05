@@ -794,7 +794,9 @@ class OnlineTrader:
                 "position_size_pct": {"direction": "increase", "new_value_multiplier": 1.2, "reasoning": "Take advantage of favorable conditions"},
                 "trend_filter_lookback": {"direction": "shorter", "new_value_multiplier": 0.5, "reasoning": "Shorter lookback for quick trend detection in uptrend"},
                 "ohlcv_limit": {"direction": "shorter", "new_value_multiplier": 0.75, "reasoning": "Less history for faster signal in uptrend"},
-                "ohlcv_timeframe": {"direction": "maintain_current", "new_value_multiplier": 1.0, "reasoning": "Keep 1m for responsive signals in uptrend"}
+                "ohlcv_timeframe": {"direction": "maintain_current", "new_value_multiplier": 1.0, "reasoning": "Keep 1m for responsive signals in uptrend"},
+                "rsi_period": {"direction": "maintain_current", "new_value_multiplier": 1.0, "reasoning": "Default 14-period in uptrend"},
+                "sl_cooldown_seconds": {"direction": "shorter", "new_value_multiplier": 0.8, "reasoning": "Tighter cooldown for faster re-entry in uptrend"}
             },
             "BEAR": {
                 "indicator_threshold": {"direction": "higher", "new_value_multiplier": 1.05, "reasoning": "Wait for better confirmation in weak downtrend"},
@@ -802,9 +804,10 @@ class OnlineTrader:
                 "stop_loss_pct": {"direction": "wider", "new_value_multiplier": 1.2, "reasoning": "Prevent premature exits during normal bear volatility"},
                 "position_size_pct": {"direction": "decrease", "new_value_multiplier": 0.8, "reasoning": "Reduce exposure in unfavorable regime"},
                 "rsi_period": {"direction": "longer", "new_value_multiplier": 1.33, "reasoning": "Smoother RSI in choppy bear market"},
+                "sl_cooldown_seconds": {"direction": "longer", "new_value_multiplier": 1.5, "reasoning": "Extended cooldown to avoid bear market re-triggers"},
                 "trend_filter_lookback": {"direction": "longer", "new_value_multiplier": 2.0, "reasoning": "Longer lookback for trend confirmation in bear market"},
                 "ohlcv_limit": {"direction": "longer", "new_value_multiplier": 1.5, "reasoning": "More history for stability signal in bear market"},
-                "ohlcv_timeframe": {"direction": "longer_tf", "reasoning": "Use 5m for more stable signals in bear market"}
+                "ohlcv_timeframe": {"direction": "longer_tf", "new_value_multiplier": 1.0, "reasoning": "Use 5m for more stable signals in bear market"}
             },
             "SIDEWAYS": {
                 "indicator_threshold": {"direction": "stricter", "new_value_multiplier": 0.95, "reasoning": "Require stronger signals to cut through noise"},
@@ -815,7 +818,7 @@ class OnlineTrader:
                 "sl_cooldown_seconds": {"direction": "longer", "new_value_multiplier": 1.5, "reasoning": "Extended cooldown to avoid chop re-triggers"},
                 "trend_filter_lookback": {"direction": "longer", "new_value_multiplier": 1.5, "reasoning": "Longer lookback for trend confirmation in choppy sideways"},
                 "ohlcv_limit": {"direction": "longer", "new_value_multiplier": 1.5, "reasoning": "More history for better regime detection in chop"},
-                "ohlcv_timeframe": {"direction": "longer_tf", "reasoning": "Use 5m for smoother signals in choppy market"}
+                "ohlcv_timeframe": {"direction": "longer_tf", "new_value_multiplier": 1.0, "reasoning": "Use 5m for smoother signals in choppy market"}
             },
             "NEUTRAL": {
                 "indicator_threshold": {"direction": "adjust_toward_optimal", "new_value_multiplier": None, "reasoning": "Fine-tune based on signal frequency"},
@@ -825,7 +828,8 @@ class OnlineTrader:
                 "rsi_period": {"direction": "maintain_current", "new_value_multiplier": 1.0, "reasoning": "14-period standard; extend in choppy BEAR, shorten in trending BULL"},
                 "sl_cooldown_seconds": {"direction": "maintain_current", "new_value_multiplier": 1.2, "reasoning": "Slight extension in neutral conditions"},
                 "trend_filter_lookback": {"direction": "maintain_current", "new_value_multiplier": 1.0, "reasoning": "Standard 20-period lookback"},
-                "ohlcv_limit": {"direction": "maintain_current", "new_value_multiplier": 1.0, "reasoning": "Standard 50-period OHLCV"}
+                "ohlcv_timeframe": {"direction": "maintain_current", "new_value_multiplier": 1.0, "reasoning": "Standard 1m timeframe"},
+                "ohlcv_limit": {"direction": "maintain_current", "new_value_multiplier": 1.0, "reasoning": "Standard 50-period OHLCV"},
             },
         }
         
@@ -855,12 +859,12 @@ class OnlineTrader:
             elif key == "ohlcv_limit":
                 new_val = int(max(20, min(100, round(old_val * new_val_multiplier))))
             elif key == "ohlcv_timeframe":
-                if new_val_multiplier == 1.0 or "longer_tf" not in regime_recs[key]["direction"]:
-                    new_val = old_val
-                elif old_val == "1m":
-                    new_val = "5m"
+                if "longer_tf" in regime_recs[key].get("direction", ""):
+                    new_val = "5m" if old_val == "1m" else "1m"
                 else:
-                    new_val = "1m"
+                    new_val = old_val
+            else:
+                continue
             
             expected_direction = "improve" if avg_ret < 0 or max_dd > 0.01 else "stabilize"
             
