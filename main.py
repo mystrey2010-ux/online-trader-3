@@ -673,19 +673,20 @@ class OnlineTrader:
         return np.mean(returns) / np.std(returns)
     
     def _calculate_daily_pnl(self):
-        """Calculate net P&L for today's trades (last 24 hours)."""
+        """Calculate net P&L percentage for today's trades (last 24h)."""
         trades = self.config.get("trade_history", [])
         now = datetime.now()
-        daily_net_pnl = 0.0
+        daily_net_pnl_usd = 0.0
+        daily_start_balance = 100.0  # Paper trading starting balance
         for t in trades:
             ts = t.get("timestamp", "")
             try:
                 trade_time = datetime.fromisoformat(ts.replace("Z", "+00:00").replace("+00:00", ""))
                 if (now - trade_time).total_seconds() < 86400:  # 24 hours
-                    daily_net_pnl += t.get("net_pnl_usd", 0)
+                    daily_net_pnl_usd += t.get("net_pnl_usd", 0)
             except Exception:
                 continue
-        return daily_net_pnl
+        return daily_net_pnl_usd / daily_start_balance
 
     def _run_local_backtest(self, ohlcv_data, strategy_dict):
         """Simulate strategy performance on historical OHLCV data (look-before-you-leap safety gate)."""
