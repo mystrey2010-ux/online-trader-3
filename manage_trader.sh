@@ -2,7 +2,6 @@
 
 # Configuration
 TRADER_DIR="$HOME/online-trader-3"
-PYTHON_ENV="/mnt/data/venvs/online-trader-3"
 LOG_FILE="$TRADER_DIR/trader.log"
 PID_FILE="$TRADER_DIR/trader.pid"
 
@@ -25,7 +24,7 @@ case "$1" in
 
         echo "🚀 Starting Online Trader-3 in the background..."
 
-        nohup "$PYTHON_ENV/bin/python" main.py >> "$LOG_FILE" 2>&1 &
+        nohup python main.py >> "$LOG_FILE" 2>&1 &
 
         NEW_PID=$!
         echo $NEW_PID > "$PID_FILE"
@@ -68,7 +67,7 @@ restart)
 
         echo "🔄 Starting trader fresh..."
         
-        nohup "$PYTHON_ENV/bin/python" main.py >> "$LOG_FILE" 2>&1 &
+        nohup python main.py >> "$LOG_FILE" 2>&1 &
         
         NEW_PID=$!
         echo $NEW_PID > "$PID_FILE"
@@ -155,9 +154,9 @@ restart)
 
         # Reset config: trade_history, hypothesis_ledger, open_position (direct exchange balance pattern)
         if [ -f "$TRADER_DIR/config.json" ]; then
-            "$PYTHON_ENV/bin/python" -c "import json; p='$TRADER_DIR/config.json'; d=json.load(open(p)); d['trade_history']=[]; d['hypothesis_ledger']=[]; d.pop('open_position', None); json.dump(d, open(p, 'w'), indent=2)" && \
+            python -c "import json; p='$TRADER_DIR/config.json'; d=json.load(open(p)); d['trade_history']=[]; d['hypothesis_ledger']=[]; d.pop('open_position', None); json.dump(d, open(p, 'w'), indent=2)" && \
             echo "✅ Config reset: trade_history, hypothesis_ledger, open_position cleared." || \
-            (echo "❌ Failed to reset config.json" && "$PYTHON_ENV/bin/python" -c "import json; p='$TRADER_DIR/config.json'; d=json.load(open(p)); d['trade_history']=[]; d['hypothesis_ledger']=[]; d.pop('open_position', None); json.dump(d, open(p, 'w'), indent=2)")
+            (echo "❌ Failed to reset config.json" && python -c "import json; p='$TRADER_DIR/config.json'; d=json.load(open(p)); d['trade_history']=[]; d['hypothesis_ledger']=[]; d.pop('open_position', None); json.dump(d, open(p, 'w'), indent=2)")
         else
             echo "⚠️  config.json not found. Skipping reset."
         fi
@@ -231,7 +230,7 @@ restart)
         # Show config summary
         echo ""
         echo "📊 Configuration Summary:"
-        "$PYTHON_ENV/bin/python" -c "
+        python -c "
 import json
 with open('$TRADER_DIR/config.json') as f:
     cfg = json.load(f)
