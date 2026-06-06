@@ -881,7 +881,7 @@ class OnlineTrader:
             
             hypothesis_entry = {
                 "timestamp": datetime.now().isoformat(),
-                "description": f"Adjusting {key} from {old_val} to {new_val:.4f}",
+                "description": f"Adjusting {key} from {old_val} to {new_val:.4f}" if isinstance(new_val, (int, float)) else f"Adjusting {key} from {old_val} to {new_val}",
                 "metrics_at_failure": {"return": avg_ret, "drawdown": max_dd, "sharpe": sharpe},
                 "regime_tag": current_regime,
                 "expected_score_direction": expected_direction,
@@ -914,13 +914,17 @@ class OnlineTrader:
         new_val_text = param_match.group(3)
         
         old_val = strat[param_name]
-        strat[param_name] = float(new_val_text)
+        try:
+            strat[param_name] = float(new_val_text)
+        except ValueError:
+            strat[param_name] = new_val_text
         
         if strat[param_name] == old_val:
             logging.error(f"⚠️ Hypothesis application FAILED: {param_name} didn't change ({old_val} → {strat[param_name]})")
             return False
         
-        logging.info(f"✅ Applied hypothesis: {param_name} changed from {old_val:.4f} to {strat[param_name]:.4f} (backtest: {best_hyp['simulated_backtest_return']:.4%} > baseline: {baseline_return:.4%})")
+        val_fmt = (lambda v: f"{v:.4f}" if isinstance(v, (int, float)) else str(v))
+        logging.info(f"✅ Applied hypothesis: {param_name} changed from {val_fmt(old_val)} to {val_fmt(strat[param_name])} (backtest: {best_hyp['simulated_backtest_return']:.4%} > baseline: {baseline_return:.4%})")
         
         # Log and record hypothesis in ledger (PRIMARY GOAL: append-only history)
         hypothesis_record = {

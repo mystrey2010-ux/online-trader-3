@@ -4,6 +4,8 @@
 - B-025: Fixed manage_trader.sh to use trader.pid file instead of pgrep -f "main.py"
   - stop/restart/status/clean now only check/stop the specific trader process
   - Prevents accidentally killing unrelated main.py processes (e.g., ibus-typing-booster)
+- S-001: Fixed hypothesis format string error for ohlcv_timeframe string values
+  - Hypothesis descriptions now handle string values (like "5m"/"1m") without crashing
 
 ## v2.19
 - D-077/D-078: Fixed daily loss limit - uses exchange balance, tracked per day

@@ -25,4 +25,4 @@
 | Q-004 | Native stop-loss orders | Currently price-check based |
 
 ---
-**Last Updated:** 2026-06-05 | Full architecture: ARCHITECTURE.md
+**Last Updated:** 2026-06-06 | Full architecture: ARCHITECTURE.md
