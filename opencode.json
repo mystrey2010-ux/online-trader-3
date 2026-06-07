@@ -1,0 +1,20 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "formatter": {
+    "ruff": {
+      "disabled": false
+    },
+    "uv": {
+      "disabled": false
+    },
+    "shfmt": {
+      "disabled": false
+    },
+    "autopep8": {
+      "disabled": false
+    },
+    "prettier": {
+      "disabled": false
+    }
+  }
+}
