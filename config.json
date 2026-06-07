@@ -1,89 +1,15 @@
 {
-  "target_asset": "BTC/USDT",
-  "target_daily_return": 0.002,
-  "max_daily_drawdown": 0.01,
-  "max_daily_loss_pct": 0.05,
-  "min_sharpe_ratio": 2.0,
-  "reflection_cadence": 3,
-  "kraken_fee_pct": 0.0026,
-  "exchange": {
-    "type": "kraken"
-  },
-  "current_strategy": {
-    "indicator_threshold": 69.46,
-    "sell_threshold_base": 12.0,
-    "stop_loss_pct": 0.016,
-    "position_size_pct": 0.1,
-    "rsi_period": 14,
-    "sl_cooldown_seconds": 300,
-    "trend_filter_lookback": 20,
-    "ohlcv_limit": 50,
-    "ohlcv_timeframe": "1m"
-  },
-  "trade_history": [
-    {
-      "timestamp": "2026-06-07T03:50:16.195117",
-      "entry": 60625.2,
-      "exit": 61517.5,
-      "pnl_pct": 0.014718301960241004,
-      "symbol": "BTC/USDT",
-      "pnl_usd": 0.13243460702822563,
-      "gross_pnl_usd": 0.132435,
-      "fee_usd": 0.046789,
-      "net_pnl_usd": 0.085646
-    },
-    {
-      "timestamp": "2026-06-07T05:41:52.095239",
-      "entry": 61428.5,
-      "exit": 61764.6,
-      "pnl_pct": 0.005471401710932198,
-      "symbol": "BTC/USDT",
-      "pnl_usd": 0.05481274817212812,
-      "gross_pnl_usd": 0.054813,
-      "fee_usd": 0.052094,
-      "net_pnl_usd": 0.002719
-    },
-    {
-      "timestamp": "2026-06-07T07:31:19.293815",
-      "entry": 61698.7,
-      "exit": 62044.0,
-      "pnl_pct": 0.005596552277438632,
-      "symbol": "BTC/USDT",
-      "pnl_usd": 0.0560633515410178,
-      "gross_pnl_usd": 0.056063,
-      "fee_usd": 0.052091,
-      "net_pnl_usd": 0.003972
-    }
-  ],
-  "hypothesis_ledger": [
-    {
-      "timestamp": "2026-06-07T07:31:36.556174",
-      "description": "Adjusting sell_threshold_base from 10 to 12.0000",
-      "metrics_at_failure": {
-        "return": 0.25571868097836953,
-        "drawdown": 0,
-        "sharpe": 0.9244969172828987
-      },
-      "regime_tag": "BEAR",
-      "regime": "BEAR",
-      "parameter": "sell_threshold_base",
-      "old_value": 10,
-      "new_value": 12.0,
-      "expected_score_direction": "stabilize",
-      "direction": "stabilize",
-      "confidence_reasoning": "BEAR market + optimization mode \u2192 125% increase to Wider sell buffer to avoid premature exits in choppy bear market",
-      "simulated_backtest_return": 0.006287533254698936,
-      "baseline_backtest_return": 0.0036381920692025774
-    }
-  ],
-  "version": 4,
-  "previous_strategies": [
-    {
-      "timestamp": "2026-06-07T07:31:27.497942",
-      "version": 3,
-      "strategy": {
+    "target_asset": "BTC/USDT",
+    "target_daily_return": 0.002,
+    "max_daily_drawdown": 0.01,
+    "max_daily_loss_pct": 0.05,
+    "min_sharpe_ratio": 2.0,
+    "reflection_cadence": 3,
+    "kraken_fee_pct": 0.0026,
+    "exchange": {"type": "kraken"},
+    "current_strategy": {
         "indicator_threshold": 69.46,
-        "sell_threshold_base": 10,
+        "sell_threshold_base": 15.0,
         "stop_loss_pct": 0.016,
         "position_size_pct": 0.1,
         "rsi_period": 14,
@@ -91,27 +17,144 @@
         "trend_filter_lookback": 20,
         "ohlcv_limit": 50,
         "ohlcv_timeframe": "1m"
-      }
+    },
+    "trade_history": [
+        {
+            "timestamp": "2026-06-07T03:50:16.195117",
+            "entry": 60625.2,
+            "exit": 61517.5,
+            "pnl_pct": 0.014718301960241004,
+            "symbol": "BTC/USDT",
+            "pnl_usd": 0.13243460702822563,
+            "gross_pnl_usd": 0.132435,
+            "fee_usd": 0.046789,
+            "net_pnl_usd": 0.085646
+        },
+        {
+            "timestamp": "2026-06-07T05:41:52.095239",
+            "entry": 61428.5,
+            "exit": 61764.6,
+            "pnl_pct": 0.005471401710932198,
+            "symbol": "BTC/USDT",
+            "pnl_usd": 0.05481274817212812,
+            "gross_pnl_usd": 0.054813,
+            "fee_usd": 0.052094,
+            "net_pnl_usd": 0.002719
+        },
+        {
+            "timestamp": "2026-06-07T07:31:19.293815",
+            "entry": 61698.7,
+            "exit": 62044.0,
+            "pnl_pct": 0.005596552277438632,
+            "symbol": "BTC/USDT",
+            "pnl_usd": 0.0560633515410178,
+            "gross_pnl_usd": 0.056063,
+            "fee_usd": 0.052091,
+            "net_pnl_usd": 0.003972
+        },
+        {
+            "timestamp": "2026-06-07T12:33:10.257452",
+            "entry": 62102.2,
+            "exit": 62549.9,
+            "pnl_pct": 0.007209084380263572,
+            "symbol": "BTC/USDT",
+            "pnl_usd": 0.07221328772594546,
+            "gross_pnl_usd": 0.072213,
+            "fee_usd": 0.052088,
+            "net_pnl_usd": 0.020125
+        }
+    ],
+    "hypothesis_ledger": [
+        {
+            "timestamp": "2026-06-07T07:31:36.556174",
+            "description": "Adjusting sell_threshold_base from 10 to 12.0000",
+            "metrics_at_failure": {
+                "return": 0.25571868097836953,
+                "drawdown": 0,
+                "sharpe": 0.9244969172828987
+            },
+            "regime_tag": "BEAR",
+            "regime": "BEAR",
+            "parameter": "sell_threshold_base",
+            "old_value": 10,
+            "new_value": 12.0,
+            "expected_score_direction": "stabilize",
+            "direction": "stabilize",
+            "confidence_reasoning": "BEAR market + optimization mode \u2192 125% increase to Wider sell buffer to avoid premature exits in choppy bear market",
+            "simulated_backtest_return": 0.006287533254698936,
+            "baseline_backtest_return": 0.0036381920692025774
+        },
+        {
+            "timestamp": "2026-06-07T12:33:23.953643",
+            "description": "Adjusting sell_threshold_base from 12.0 to 15.0000",
+            "metrics_at_failure": {
+                "return": 0.26146136889643484,
+                "drawdown": 0,
+                "sharpe": 1.0905506411329222
+            },
+            "regime_tag": "BEAR",
+            "regime": "BEAR",
+            "parameter": "sell_threshold_base",
+            "old_value": 12.0,
+            "new_value": 15.0,
+            "expected_score_direction": "stabilize",
+            "direction": "stabilize",
+            "confidence_reasoning": "BEAR market + optimization mode \u2192 125% increase to Wider sell buffer to avoid premature exits in choppy bear market",
+            "simulated_backtest_return": 0.00042787357340176124,
+            "baseline_backtest_return": 0.0
+        }
+    ],
+    "version": 5,
+    "strategy_history": [
+        {
+            "timestamp": "2026-06-07T07:31:27.497942",
+            "version": 3,
+            "strategy": {
+                "indicator_threshold": 69.46,
+                "sell_threshold_base": 10,
+                "stop_loss_pct": 0.016,
+                "position_size_pct": 0.1,
+                "rsi_period": 14,
+                "sl_cooldown_seconds": 300,
+                "trend_filter_lookback": 20,
+                "ohlcv_limit": 50,
+                "ohlcv_timeframe": "1m"
+            }
+        },
+        {
+            "timestamp": "2026-06-07T12:33:14.048884",
+            "version": 4,
+            "strategy": {
+                "indicator_threshold": 69.46,
+                "sell_threshold_base": 12.0,
+                "stop_loss_pct": 0.016,
+                "position_size_pct": 0.1,
+                "rsi_period": 14,
+                "sl_cooldown_seconds": 300,
+                "trend_filter_lookback": 20,
+                "ohlcv_limit": 50,
+                "ohlcv_timeframe": "1m"
+            }
+        }
+    ],
+    "needs_rollback": false,
+    "news_sentiment": {
+        "sentiment": "neutral",
+        "confidence": 0.5,
+        "count": 20,
+        "negative": 6,
+        "positive": 4,
+        "feeds_queried": 4,
+        "feeds_succeeded": 6
+    },
+    "system_status": null,
+    "daily_start_balance_usd": 80.96774647094588,
+    "daily_start_date": "2026-06-07",
+    "open_position": {
+        "timestamp": "2026-06-07T12:35:32.822486",
+        "symbol": "BTC/USDT",
+        "entry_price": 62530.6,
+        "entry_rsi": 59.78882534095896,
+        "amount_btc": 0.0001602276802321302
     }
-  ],
-  "needs_rollback": false,
-  "news_sentiment": {
-    "sentiment": "neutral",
-    "confidence": 0.5,
-    "count": 20,
-    "negative": 5,
-    "positive": 2,
-    "feeds_queried": 4,
-    "feeds_succeeded": 4
-  },
-  "system_status": null,
-  "daily_start_balance_usd": 80.96774647094588,
-  "daily_start_date": "2026-06-07",
-  "open_position": {
-    "timestamp": "2026-06-07T07:39:07.676827",
-    "symbol": "BTC/USDT",
-    "entry_price": 62102.2,
-    "entry_rsi": 69.00812457684451,
-    "amount_btc": 0.00016129838670079239
-  }
 }
