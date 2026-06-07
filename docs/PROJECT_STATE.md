@@ -11,6 +11,10 @@
 - Max daily loss pct: 0.05 (5%)
 - Daily start balance: $80.9677
 
+## Formatter Status
+- Ruff formatter configured and working in .opencode/opencode.json
+- config.json formatted and verified
+
 ## Active Issues
 | ID | Description | Severity | Mitigation |
 |----|-------------|----------|------------|
