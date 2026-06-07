@@ -19,5 +19,11 @@
 | D-074 | Daily loss limit: EMERGENCY_STOP if daily_net_pnl_usd < -(start_balance × max_daily_loss_pct) | main.py run_cycle() | v2.18 |
 | D-077/D-078 | daily_start_balance_usd stored per day, _calculate_daily_pnl() returns USD | main.py _calculate_daily_pnl() | v2.19 |
 
+## Verification Status
+| ID | Status | Notes |
+|----|--------|---------|
+| D-074 | ✅ Confirmed working | Daily loss limit implemented in run_cycle() method |
+| D-077/D-078 | ✅ Confirmed working | daily_start_balance_usd stored per day, _calculate_daily_pnl() returns USD |
+
 ---
 **Last Updated:** 2026-06-05 | See ARCHITECTURE.md for full trading loop diagram
